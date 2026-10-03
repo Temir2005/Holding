@@ -1,0 +1,62 @@
+@import './tokens.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    /* framer-motion's useScroll measures offsets against a positioned root. */
+    position: relative;
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+  }
+  body {
+    @apply bg-surface font-body text-fg antialiased;
+  }
+  h1,
+  h2,
+  h3 {
+    @apply font-display font-extrabold;
+    text-wrap: balance;
+  }
+  :focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 3px;
+  }
+  [id] {
+    scroll-margin-top: calc(var(--header-h) + 1rem);
+  }
+}
+
+@layer components {
+  .tone-dark,
+  .tone-light,
+  .tone-accent {
+    @apply bg-surface text-fg;
+  }
+  .eyebrow {
+    @apply font-mono text-xs uppercase tracking-[0.08em];
+    color: rgb(var(--accent-ink));
+  }
+  .tabular {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@layer utilities {
+  .text-accent-ink {
+    color: rgb(var(--accent-ink));
+  }
+}
+
+@keyframes marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}

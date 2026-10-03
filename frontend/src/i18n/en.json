@@ -1,0 +1,42 @@
+{
+  "nav": { "menu": "Menu", "close": "Close", "home": "Home", "skip": "Skip to content", "language": "Language" },
+  "common": { "more": "Learn more", "back": "Back", "all": "All", "visitSite": "Visit website", "close": "Close" },
+  "status": { "completed": "Completed", "in_progress": "Under construction", "planned": "Planned" },
+  "project": {
+    "tokenized": "Tokenized",
+    "area": "Area",
+    "year": "Year",
+    "location": "Location",
+    "status": "Status",
+    "division": "Division",
+    "gallery": "Gallery",
+    "backToProjects": "All projects",
+    "sqm": "m²"
+  },
+  "team": { "bio": "Biography", "allDivisions": "All divisions" },
+  "vacancy": { "apply": "Apply", "full_time": "Full-time", "part_time": "Part-time", "contract": "Contract", "internship": "Internship" },
+  "form": {
+    "type": "Topic",
+    "types": { "investor": "Investment", "partner": "Partnership", "candidate": "Join the team", "client": "Order products" },
+    "name": "Name",
+    "phone": "Phone",
+    "email": "Email",
+    "message": "Message",
+    "optional": "optional",
+    "submit": "Send request",
+    "sending": "Sending…",
+    "contactRequired": "Enter a phone number or email so we can reply",
+    "nameRequired": "Enter your name",
+    "error": "The request was not sent. Check your connection and try again.",
+    "again": "Send another"
+  },
+  "contacts": { "address": "Address", "phone": "Phone", "email": "Email", "whatsapp": "WhatsApp", "hours": "Office hours" },
+  "states": {
+    "errorTitle": "The page did not load",
+    "errorText": "The server did not respond. Check your connection and try again.",
+    "retry": "Try again",
+    "notFoundTitle": "Page not found",
+    "notFoundText": "The link may be outdated or the address may contain a typo."
+  },
+  "a11y": { "playVideo": "Play video", "prev": "Previous", "next": "Next" }
+}

@@ -1,0 +1,60 @@
+/*
+ * Design tokens, direction "Фактура" (docs/design.md).
+ * Raw palette first, then semantic tokens per section tone. Components use only
+ * the semantic ones (surface, tile, fg, fg-mute, line, accent...).
+ * To switch the accent (copper → olive), change --copper and --accent-ink-light.
+ */
+:root {
+  --graphite: 29 30 31; /* #1D1E1F */
+  --panel: 38 40 42; /* #26282A */
+  --ink: 237 234 228; /* #EDEAE4 */
+  --mute: 162 158 150; /* #A29E96 */
+  --line-dark: 58 60 62; /* #3A3C3E */
+
+  --stone: 231 226 217; /* #E7E2D9 */
+  --stone-tile: 240 236 229; /* #F0ECE5 */
+  --stone-ink: 29 30 31;
+  --stone-mute: 91 86 78; /* #5B564E */
+  --stone-line: 207 200 188; /* #CFC8BC */
+
+  --copper: 199 123 78; /* #C77B4E, alt accent: olive 126 140 90 */
+  --accent-ink-light: 142 76 42; /* #8E4C2A, copper darkened for AA text on stone */
+
+  --header-h: 4.5rem;
+  --gutter: clamp(1rem, 4vw, 3rem);
+  --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+.tone-dark {
+  --surface: var(--graphite);
+  --tile: var(--panel);
+  --fg: var(--ink);
+  --fg-mute: var(--mute);
+  --line: var(--line-dark);
+  --accent: var(--copper);
+  --accent-ink: var(--copper);
+  --on-accent: var(--graphite);
+}
+
+.tone-light {
+  --surface: var(--stone);
+  --tile: var(--stone-tile);
+  --fg: var(--stone-ink);
+  --fg-mute: var(--stone-mute);
+  --line: var(--stone-line);
+  --accent: var(--copper);
+  --accent-ink: var(--accent-ink-light);
+  --on-accent: var(--graphite);
+}
+
+/* Copper section: the accent role moves to graphite so buttons stay visible. */
+.tone-accent {
+  --surface: var(--copper);
+  --tile: 186 110 66;
+  --fg: var(--graphite);
+  --fg-mute: 62 40 26;
+  --line: 168 98 58;
+  --accent: var(--graphite);
+  --accent-ink: var(--graphite);
+  --on-accent: var(--ink);
+}
