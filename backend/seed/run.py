@@ -13,8 +13,10 @@ log = logging.getLogger("seed")
 
 async def main() -> None:
     logging.basicConfig(level=logging.INFO, format="%(message)s")
+    storage = get_storage()
+    await storage.ensure_public_bucket()
     async with SessionFactory() as session:
-        await seed_all(Seeder(session, get_storage()))
+        await seed_all(Seeder(session, storage))
         await session.commit()
     await engine.dispose()
     log.info("seed complete")

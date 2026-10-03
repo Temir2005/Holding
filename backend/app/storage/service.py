@@ -1,5 +1,6 @@
 """S3-compatible object storage (MinIO locally; AWS / Yandex / PS Cloud in production)."""
 
+import json
 from functools import lru_cache
 from typing import Any
 
@@ -47,6 +48,26 @@ class StorageService:
                 ExpiresIn=expires,
             )
             return url
+
+    async def ensure_public_bucket(self) -> None:
+        """Create the bucket if needed and allow anonymous reads (images are public)."""
+        policy = {
+            "Version": "2012-10-17",
+            "Statement": [
+                {
+                    "Effect": "Allow",
+                    "Principal": {"AWS": ["*"]},
+                    "Action": ["s3:GetObject"],
+                    "Resource": [f"arn:aws:s3:::{self.bucket}/*"],
+                }
+            ],
+        }
+        async with self._client() as s3:
+            try:
+                await s3.head_bucket(Bucket=self.bucket)
+            except Exception:
+                await s3.create_bucket(Bucket=self.bucket)
+            await s3.put_bucket_policy(Bucket=self.bucket, Policy=json.dumps(policy))
 
     async def ping(self) -> bool:
         try:
