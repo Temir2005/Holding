@@ -10,7 +10,7 @@ export function Tag({ children, tone = 'default', className }: Props) {
         'inline-flex items-center gap-1.5 rounded-full px-3 py-1 font-mono text-[0.7rem] uppercase tracking-[0.06em]',
         tone === 'default' && 'border border-line text-fg-mute',
         tone === 'accent' && 'bg-accent text-on-accent',
-        tone === 'overlay' && 'bg-graphite/75 text-[rgb(var(--ink))] backdrop-blur',
+        tone === 'overlay' && 'bg-deep/75 text-[rgb(var(--ink))] backdrop-blur',
         className,
       )}
     >

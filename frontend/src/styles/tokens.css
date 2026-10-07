@@ -1,24 +1,24 @@
 /*
- * Design tokens, direction "Фактура" (docs/design.md).
+ * Design tokens, palette "Небо и золото" (docs/design.md).
  * Raw palette first, then semantic tokens per section tone. Components use only
  * the semantic ones (surface, tile, fg, fg-mute, line, accent...).
- * To switch the accent (copper → olive), change --copper and --accent-ink-light.
+ * Raw names describe roles, not hues, so a new palette only changes the values here.
  */
 :root {
-  --graphite: 29 30 31; /* #1D1E1F */
-  --panel: 38 40 42; /* #26282A */
-  --ink: 237 234 228; /* #EDEAE4 */
-  --mute: 162 158 150; /* #A29E96 */
-  --line-dark: 58 60 62; /* #3A3C3E */
+  --deep: 12 28 39; /* #0C1C27, dark lapis: dark sections, header */
+  --deep-tile: 19 41 58; /* #13293A */
+  --ink: 238 242 243; /* #EEF2F3 */
+  --mute: 157 177 189; /* #9DB1BD */
+  --line-dark: 35 57 75; /* #23394B */
 
-  --stone: 231 226 217; /* #E7E2D9 */
-  --stone-tile: 240 236 229; /* #F0ECE5 */
-  --stone-ink: 29 30 31;
-  --stone-mute: 91 86 78; /* #5B564E */
-  --stone-line: 207 200 188; /* #CFC8BC */
+  --light: 229 237 240; /* #E5EDF0, sky-tinted light sections */
+  --light-tile: 241 246 247; /* #F1F6F7 */
+  --light-ink: 12 28 39;
+  --light-mute: 76 96 109; /* #4C606D */
+  --light-line: 198 213 219; /* #C6D5DB */
 
-  --copper: 199 123 78; /* #C77B4E, alt accent: olive 126 140 90 */
-  --accent-ink-light: 142 76 42; /* #8E4C2A, copper darkened for AA text on stone */
+  --brand: 232 181 48; /* #E8B530, gold */
+  --brand-ink-light: 138 99 0; /* #8A6300, gold darkened for AA text on light sections */
 
   --header-h: 4.5rem;
   --gutter: clamp(1rem, 4vw, 3rem);
@@ -26,35 +26,35 @@
 }
 
 .tone-dark {
-  --surface: var(--graphite);
-  --tile: var(--panel);
+  --surface: var(--deep);
+  --tile: var(--deep-tile);
   --fg: var(--ink);
   --fg-mute: var(--mute);
   --line: var(--line-dark);
-  --accent: var(--copper);
-  --accent-ink: var(--copper);
-  --on-accent: var(--graphite);
+  --accent: var(--brand);
+  --accent-ink: var(--brand);
+  --on-accent: var(--deep);
 }
 
 .tone-light {
-  --surface: var(--stone);
-  --tile: var(--stone-tile);
-  --fg: var(--stone-ink);
-  --fg-mute: var(--stone-mute);
-  --line: var(--stone-line);
-  --accent: var(--copper);
-  --accent-ink: var(--accent-ink-light);
-  --on-accent: var(--graphite);
+  --surface: var(--light);
+  --tile: var(--light-tile);
+  --fg: var(--light-ink);
+  --fg-mute: var(--light-mute);
+  --line: var(--light-line);
+  --accent: var(--brand);
+  --accent-ink: var(--brand-ink-light);
+  --on-accent: var(--deep);
 }
 
-/* Copper section: the accent role moves to graphite so buttons stay visible. */
+/* Gold section: the accent role moves to the deep color so buttons stay visible. */
 .tone-accent {
-  --surface: var(--copper);
-  --tile: 186 110 66;
-  --fg: var(--graphite);
-  --fg-mute: 62 40 26;
-  --line: 168 98 58;
-  --accent: var(--graphite);
-  --accent-ink: var(--graphite);
+  --surface: var(--brand);
+  --tile: 217 166 35; /* #D9A623 */
+  --fg: var(--deep);
+  --fg-mute: 39 57 74; /* #27394A */
+  --line: 201 154 31; /* #C99A1F */
+  --accent: var(--deep);
+  --accent-ink: var(--deep);
   --on-accent: var(--ink);
 }
