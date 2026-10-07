@@ -1,6 +1,14 @@
-"""Tests run against a separate Postgres database (TEST_DATABASE_URL), recreated per session."""
+"""Tests run against a separate Postgres database (TEST_DATABASE_URL), recreated per session.
 
+The schema is built by running the Alembic migrations, not by `create_all`, so the
+tests exercise the same schema production gets.
+"""
+
+import os
+import subprocess
+import sys
 from collections.abc import AsyncIterator
+from pathlib import Path
 
 import pytest
 from httpx import ASGITransport, AsyncClient
@@ -12,6 +20,20 @@ from app.core.config import get_settings
 from app.core.db import get_session
 from app.main import app
 from app.models import Base
+
+BACKEND_DIR = Path(__file__).resolve().parents[1]
+
+
+def run_alembic(*args: str, database_url: str) -> subprocess.CompletedProcess[str]:
+    """Run Alembic in a subprocess against `database_url` (env.py reads DATABASE_URL)."""
+    return subprocess.run(
+        [sys.executable, "-m", "alembic", *args],
+        cwd=BACKEND_DIR,
+        env={**os.environ, "DATABASE_URL": database_url},
+        capture_output=True,
+        text=True,
+        check=False,
+    )
 
 
 @pytest.fixture(scope="session")
@@ -27,9 +49,10 @@ async def engine() -> AsyncIterator[object]:
         await conn.execute(text(f'CREATE DATABASE "{db_name}"'))
     await admin.dispose()
 
+    migrated = run_alembic("upgrade", "head", database_url=url)
+    assert migrated.returncode == 0, migrated.stderr
+
     eng = create_async_engine(url)
-    async with eng.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
     yield eng
     await eng.dispose()
 

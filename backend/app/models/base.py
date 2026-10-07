@@ -42,3 +42,9 @@ class TimestampMixin:
 class PublishableMixin:
     is_published: Mapped[bool] = mapped_column(default=True, index=True)
     sort_order: Mapped[int] = mapped_column(default=0)
+
+
+class VersionMixin:
+    """Optimistic locking: every admin write bumps `version`, a stale one gets 409."""
+
+    version: Mapped[int] = mapped_column(default=1, server_default="1")

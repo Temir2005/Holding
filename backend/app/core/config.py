@@ -1,7 +1,12 @@
 from functools import lru_cache
+from typing import Self
 
-from pydantic import field_validator
+from pydantic import field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+# Values that must never reach production.
+WEAK_SECRETS = {"", "change-me", "changeme", "secret"}
+MIN_SECRET_LENGTH = 32
 
 
 class Settings(BaseSettings):
@@ -33,6 +38,23 @@ class Settings(BaseSettings):
             if value.startswith(prefix):
                 return "postgresql+asyncpg://" + value[len(prefix) :]
         return value
+
+    @model_validator(mode="after")
+    def require_strong_secrets(self) -> Self:
+        """Outside dev, refuse to start with placeholder or short secrets."""
+        if self.is_dev:
+            return self
+        weak = [
+            name
+            for name in ("jwt_secret", "lead_ip_salt")
+            if getattr(self, name) in WEAK_SECRETS or len(getattr(self, name)) < MIN_SECRET_LENGTH
+        ]
+        if weak:
+            raise ValueError(
+                f"APP_ENV={self.app_env}: set strong values (>= {MIN_SECRET_LENGTH} chars) "
+                f"for {', '.join(n.upper() for n in weak)}"
+            )
+        return self
 
     @property
     def cors_origin_list(self) -> list[str]:

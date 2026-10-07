@@ -4,8 +4,9 @@ from fastapi import APIRouter, Depends, HTTPException, Request, status
 
 from app.api.deps import SessionDep
 from app.core.config import Settings, get_settings
+from app.core.rate_limit import RateLimiter
 from app.schemas.leads import LeadCreate, LeadCreated
-from app.services.leads import LeadService, RateLimiter
+from app.services.leads import LeadService
 
 router = APIRouter(tags=["leads"])
 _limiter = RateLimiter(get_settings().lead_rate_limit_per_minute)
