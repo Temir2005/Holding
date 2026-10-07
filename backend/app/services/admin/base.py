@@ -65,6 +65,14 @@ class CrudService[M: DeclarativeBase, C: BaseModel, U: VersionedUpdate, R: BaseM
     def to_read(self, obj: M) -> R:
         """ORM row → AdminRead schema."""
 
+    async def present(self, obj: M) -> R:
+        """Read model for one row. Override to load related data first (cards, galleries)."""
+        return (await self.present_many([obj]))[0]
+
+    async def present_many(self, rows: Sequence[M]) -> list[R]:
+        """Read models for several rows; override to prefetch related data in one go."""
+        return [self.to_read(r) for r in rows]
+
     def apply(self, obj: M, changes: dict[str, Any]) -> None:
         """Copy changed fields onto the row. Override when names or shapes differ."""
         for field, value in changes.items():
@@ -98,12 +106,12 @@ class CrudService[M: DeclarativeBase, C: BaseModel, U: VersionedUpdate, R: BaseM
         return obj
 
     async def read(self, id: uuid.UUID) -> R:
-        return self.to_read(await self.get_or_404(id))
+        return await self.present(await self.get_or_404(id))
 
     async def list(self, params: ListParams, *where: Any) -> Paginated[R]:
         rows, total = await self.repo.list(params, *where)
         return Paginated[R](
-            items=[self.to_read(r) for r in rows],
+            items=await self.present_many(rows),
             total=total,
             page=params.page,
             page_size=params.page_size,
@@ -123,7 +131,7 @@ class CrudService[M: DeclarativeBase, C: BaseModel, U: VersionedUpdate, R: BaseM
             )
             await self.session.commit()
             await self.session.refresh(obj)
-            return self.to_read(obj)
+            return await self.present(obj)
 
     async def update(self, id: uuid.UUID, data: U) -> R:
         async with self.transaction():
@@ -144,7 +152,7 @@ class CrudService[M: DeclarativeBase, C: BaseModel, U: VersionedUpdate, R: BaseM
             )
             await self.session.commit()
             await self.session.refresh(obj)
-            return self.to_read(obj)
+            return await self.present(obj)
 
     async def delete(self, id: uuid.UUID, version: int) -> None:
         async with self.transaction():

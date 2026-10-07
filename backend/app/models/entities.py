@@ -7,7 +7,7 @@ from sqlalchemy import ARRAY, ForeignKey, Numeric, String
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.models.base import Base, IdMixin, LText, PublishableMixin, TimestampMixin
+from app.models.base import Base, IdMixin, LText, PublishableMixin, TimestampMixin, VersionMixin
 from app.models.media import Media
 
 
@@ -28,7 +28,7 @@ class EmploymentType(StrEnum):
     internship = "internship"
 
 
-class Division(IdMixin, TimestampMixin, PublishableMixin, Base):
+class Division(IdMixin, TimestampMixin, VersionMixin, PublishableMixin, Base):
     __tablename__ = "division"
 
     slug: Mapped[str] = mapped_column(String(128), unique=True)
@@ -46,7 +46,7 @@ class Division(IdMixin, TimestampMixin, PublishableMixin, Base):
     cover: Mapped[Media | None] = relationship(foreign_keys=[cover_id], lazy="selectin")
 
 
-class Project(IdMixin, TimestampMixin, PublishableMixin, Base):
+class Project(IdMixin, TimestampMixin, VersionMixin, PublishableMixin, Base):
     __tablename__ = "project"
 
     slug: Mapped[str] = mapped_column(String(128), unique=True)
@@ -86,7 +86,7 @@ class ProjectMedia(Base):
     media: Mapped[Media] = relationship(lazy="selectin")
 
 
-class Person(IdMixin, TimestampMixin, PublishableMixin, Base):
+class Person(IdMixin, TimestampMixin, VersionMixin, PublishableMixin, Base):
     __tablename__ = "person"
 
     full_name: Mapped[LText]
@@ -104,7 +104,7 @@ class Person(IdMixin, TimestampMixin, PublishableMixin, Base):
     division: Mapped[Division | None] = relationship(lazy="selectin")
 
 
-class Client(IdMixin, TimestampMixin, PublishableMixin, Base):
+class Client(IdMixin, TimestampMixin, VersionMixin, PublishableMixin, Base):
     __tablename__ = "client"
 
     name: Mapped[LText]
@@ -120,7 +120,7 @@ class Client(IdMixin, TimestampMixin, PublishableMixin, Base):
     logo: Mapped[Media | None] = relationship(lazy="selectin")
 
 
-class TimelineEvent(IdMixin, TimestampMixin, PublishableMixin, Base):
+class TimelineEvent(IdMixin, TimestampMixin, VersionMixin, PublishableMixin, Base):
     __tablename__ = "timeline_event"
 
     year: Mapped[int]
@@ -131,7 +131,7 @@ class TimelineEvent(IdMixin, TimestampMixin, PublishableMixin, Base):
     image: Mapped[Media | None] = relationship(lazy="selectin")
 
 
-class Stat(IdMixin, TimestampMixin, PublishableMixin, Base):
+class Stat(IdMixin, TimestampMixin, VersionMixin, PublishableMixin, Base):
     __tablename__ = "stat"
 
     value: Mapped[Decimal] = mapped_column(Numeric(14, 2))
@@ -142,7 +142,7 @@ class Stat(IdMixin, TimestampMixin, PublishableMixin, Base):
     context: Mapped[str] = mapped_column(String(64), index=True)
 
 
-class Vacancy(IdMixin, TimestampMixin, PublishableMixin, Base):
+class Vacancy(IdMixin, TimestampMixin, VersionMixin, PublishableMixin, Base):
     __tablename__ = "vacancy"
 
     title: Mapped[LText]

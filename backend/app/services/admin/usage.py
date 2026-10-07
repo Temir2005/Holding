@@ -25,6 +25,7 @@ from app.models import (
     Section,
     SiteSettings,
     TimelineEvent,
+    Vacancy,
 )
 from app.schemas.admin.common import Usage
 from app.schemas.admin.media import MediaUsage
@@ -88,6 +89,69 @@ class UsageFinder:
                                 f"Кнопка «{cta.label.ru}» на странице «{page_slug}» "
                                 f"({section_type})"
                             ),
+                        )
+                    )
+        return found
+
+    async def entity(self, kind: RefKind, entity_id: uuid.UUID) -> list[Usage]:
+        """Sections that reference this entity by id (project_ids, person_id, ...)."""
+        found = []
+        for section_id, stored, slug, section_type in await self._parsed_sections():
+            if entity_id in collect_refs(stored).get(kind, set()):
+                found.append(
+                    Usage(
+                        entity_type="section",
+                        entity_id=section_id,
+                        field="data",
+                        label=f"Страница «{slug}», блок {section_type}",
+                    )
+                )
+        return found
+
+    async def division(self, division_id: uuid.UUID, slug: str) -> list[Usage]:
+        """Projects, people and vacancies of the division, and blocks filtered by it."""
+        found = await self.entity(RefKind.division, division_id)
+        for model, entity_type, title in (
+            (Project, "project", Project.title),
+            (Person, "person", Person.full_name),
+            (Vacancy, "vacancy", Vacancy.title),
+        ):
+            for row_id, name in await self.session.execute(
+                select(model.id, title).where(model.division_id == division_id)
+            ):
+                found.append(
+                    Usage(
+                        entity_type=entity_type,
+                        entity_id=row_id,
+                        field="division_id",
+                        label=f"{_label(name)}",
+                    )
+                )
+        for section_id, stored, page_slug, section_type in await self._parsed_sections():
+            if getattr(stored, "division_slug", None) == slug:
+                found.append(
+                    Usage(
+                        entity_type="section",
+                        entity_id=section_id,
+                        field="data.division_slug",
+                        label=f"Страница «{page_slug}», блок {section_type}",
+                    )
+                )
+        return found
+
+    async def project(self, project_id: uuid.UUID, slug: str) -> list[Usage]:
+        """Blocks listing the project and buttons linking to projects/<slug>."""
+        found = await self.entity(RefKind.project, project_id)
+        target = f"projects/{slug}"
+        for section_id, stored, page_slug, _section_type in await self._parsed_sections():
+            for path, cta in iter_instances(stored, Cta):
+                if links_to_page(cta.href, target):
+                    found.append(
+                        Usage(
+                            entity_type="section",
+                            entity_id=section_id,
+                            field=".".join(map(str, ("data", *path, "href"))),
+                            label=f"Кнопка «{cta.label.ru}» на странице «{page_slug}»",
                         )
                     )
         return found

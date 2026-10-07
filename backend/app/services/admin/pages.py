@@ -36,6 +36,7 @@ class PageAdminService(CrudService[Page, PageCreate, PageUpdate, PageAdminRead])
         self._counts: dict[uuid.UUID, int] = {}
         self._og_cards: dict[uuid.UUID, RefCard] = {}
         self._original_slug: str | None = None
+        self._was_published: bool | None = None
 
     # --- CrudService hooks ---------------------------------------------------------
 
@@ -53,6 +54,7 @@ class PageAdminService(CrudService[Page, PageCreate, PageUpdate, PageAdminRead])
 
     def apply(self, obj: Page, changes: dict[str, Any]) -> None:
         self._original_slug = obj.slug
+        self._was_published = obj.is_published
         for key in ("title", "seo_title", "seo_description"):
             if key in changes:
                 # Only languages that have text are stored; the API falls back to Russian.
@@ -81,6 +83,11 @@ class PageAdminService(CrudService[Page, PageCreate, PageUpdate, PageAdminRead])
             raise AlreadyExists(
                 f"Страница с адресом «{obj.slug}» уже есть",
                 details=[{"loc": ["body", "slug"], "msg": "already exists"}],
+            )
+        if obj.slug == HOME_SLUG and self._was_published and not obj.is_published:
+            raise Conflict(
+                "Главную страницу нельзя снять с публикации: сайт останется без главной",
+                code="PROTECTED_PAGE",
             )
         renamed_from = self._original_slug
         if renamed_from and renamed_from != obj.slug:
