@@ -184,6 +184,14 @@ class RefService:
             out[kind] = {row.id: self.card(kind, row) for row in rows}
         return out
 
+    async def cards_for(self, kind: RefKind, ids: Iterable[uuid.UUID]) -> dict[uuid.UUID, RefCard]:
+        ids = set(ids)
+        if not ids:
+            return {}
+        model = ENTITY_MODELS[kind]
+        rows = await self.session.scalars(select(model).where(model.id.in_(ids)))
+        return {r.id: self.card(kind, r) for r in rows}
+
     def media_thumb(self, media: Media | None) -> str | None:
         if media is None or not media.mime_type.startswith("image/"):
             return None

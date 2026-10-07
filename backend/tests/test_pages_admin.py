@@ -90,6 +90,40 @@ async def test_home_page_is_protected(client: AsyncClient, editor: AdminUser) ->
     assert rename.json()["error"]["code"] == delete.json()["error"]["code"] == "PROTECTED_PAGE"
 
 
+async def test_home_page_cannot_be_unpublished(client: AsyncClient, editor: AdminUser) -> None:
+    h = auth_header(editor)
+    # A new site may start with an unpublished home page...
+    home = await make_page(client, h, "home")
+    assert home["is_published"] is False
+    published = await client.patch(
+        f"{PAGES}/{home['id']}", headers=h, json={"version": 1, "is_published": True}
+    )
+    assert published.json()["is_published"] is True
+    # ...but once it is live, taking it down would leave the site without "/".
+    res = await client.patch(
+        f"{PAGES}/{home['id']}", headers=h, json={"version": 2, "is_published": False}
+    )
+    assert (res.status_code, res.json()["error"]["code"]) == (409, "PROTECTED_PAGE")
+    assert (await client.get("/api/v1/pages/home")).status_code == 200
+    # Other edits of the home page still work.
+    renamed = await client.patch(
+        f"{PAGES}/{home['id']}", headers=h, json={"version": 2, "title": {"ru": "Холдинг"}}
+    )
+    assert renamed.status_code == 200
+
+
+async def test_other_pages_can_be_unpublished(client: AsyncClient, editor: AdminUser) -> None:
+    h = auth_header(editor)
+    page = await make_page(client, h, "team")
+    await client.patch(
+        f"{PAGES}/{page['id']}", headers=h, json={"version": 1, "is_published": True}
+    )
+    res = await client.patch(
+        f"{PAGES}/{page['id']}", headers=h, json={"version": 2, "is_published": False}
+    )
+    assert res.json()["is_published"] is False
+
+
 async def test_page_linked_from_menu_and_buttons_cannot_disappear(
     client: AsyncClient, editor: AdminUser, session: AsyncSession
 ) -> None:
