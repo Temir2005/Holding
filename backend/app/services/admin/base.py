@@ -78,8 +78,10 @@ class CrudService[M: DeclarativeBase, C: BaseModel, U: VersionedUpdate, R: BaseM
 
     # --- shared flow ----------------------------------------------------------
 
-    async def get_or_404(self, id: uuid.UUID) -> M:
-        obj = await self.repo.get(id)
+    async def get_or_404(self, id: uuid.UUID, *, lock: bool = False) -> M:
+        """Load a row or raise 404. Writers pass `lock=True` so the version check that
+        follows cannot race with another transaction."""
+        obj = await (self.repo.get_for_update(id) if lock else self.repo.get(id))
         if obj is None:
             raise NotFound(f"{self.entity_label}: запись не найдена", details={"id": str(id)})
         return obj
@@ -112,7 +114,7 @@ class CrudService[M: DeclarativeBase, C: BaseModel, U: VersionedUpdate, R: BaseM
         return self.to_read(obj)
 
     async def update(self, id: uuid.UUID, data: U) -> R:
-        obj = await self.get_or_404(id)
+        obj = await self.get_or_404(id, lock=True)
         ensure_version(row(obj), data.version)
         before = snapshot(obj)
         self.apply(obj, data.model_dump(exclude_unset=True, exclude={"version"}))
@@ -120,6 +122,7 @@ class CrudService[M: DeclarativeBase, C: BaseModel, U: VersionedUpdate, R: BaseM
         row(obj).version += 1
         await self.session.flush()
         changes = diff(before, snapshot(obj))
+        await self.on_updated(obj, changes)
         await self.audit.record(
             action="update", entity_type=self.entity_type, entity_id=row(obj).id, changes=changes
         )
@@ -128,7 +131,7 @@ class CrudService[M: DeclarativeBase, C: BaseModel, U: VersionedUpdate, R: BaseM
         return self.to_read(obj)
 
     async def delete(self, id: uuid.UUID, version: int) -> None:
-        obj = await self.get_or_404(id)
+        obj = await self.get_or_404(id, lock=True)
         ensure_version(row(obj), version)
         await self.before_delete(obj)
         before = snapshot(obj)
@@ -138,6 +141,13 @@ class CrudService[M: DeclarativeBase, C: BaseModel, U: VersionedUpdate, R: BaseM
             action="delete", entity_type=self.entity_type, entity_id=id, changes=before
         )
         await self.session.commit()
+
+    async def on_updated(self, obj: M, changes: dict[str, Any]) -> None:
+        """Side effects of an update that must commit with it (e.g. revoke sessions).
+
+        Nothing by default.
+        """
+        return None
 
     async def before_delete(self, obj: M) -> None:
         """Refuse deletion of rows still in use (raise InUse with the places).

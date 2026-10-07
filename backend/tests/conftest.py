@@ -9,6 +9,7 @@ import subprocess
 import sys
 from collections.abc import AsyncIterator
 from pathlib import Path
+from typing import TYPE_CHECKING
 
 import pytest
 from httpx import ASGITransport, AsyncClient
@@ -77,3 +78,55 @@ async def client(session: AsyncSession) -> AsyncIterator[AsyncClient]:
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as c:
         yield c
     app.dependency_overrides.clear()
+
+
+# --- admin helpers ----------------------------------------------------------------
+
+PASSWORD = "correct-horse-battery"
+
+
+@pytest.fixture(autouse=True)
+def _reset_login_limiter() -> None:
+    from app.api.routers.admin.auth import login_limiter
+
+    login_limiter._hits.clear()
+
+
+async def make_user(session: AsyncSession, email: str, role: str, **extra: object) -> "AdminUser":
+    from datetime import UTC, datetime, timedelta
+
+    from app.core.security import hash_password
+    from app.models import AdminUser, UserRole
+
+    user = AdminUser(
+        email=email,
+        full_name=email.split("@")[0].title(),
+        role=UserRole(role),
+        password_hash=hash_password(PASSWORD),
+        # A little in the past, so tokens issued right now are newer than the password.
+        password_changed_at=datetime.now(UTC) - timedelta(seconds=5),
+        **extra,
+    )
+    session.add(user)
+    await session.commit()
+    return user
+
+
+def auth_header(user: "AdminUser") -> dict[str, str]:
+    from app.core.security import create_access_token
+
+    return {"Authorization": f"Bearer {create_access_token(get_settings(), user.id, user.role)}"}
+
+
+@pytest.fixture
+async def admin(session: AsyncSession) -> "AdminUser":
+    return await make_user(session, "admin@megasmart.kz", "admin")
+
+
+@pytest.fixture
+async def editor(session: AsyncSession) -> "AdminUser":
+    return await make_user(session, "editor@megasmart.kz", "editor")
+
+
+if TYPE_CHECKING:
+    from app.models import AdminUser

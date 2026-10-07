@@ -27,6 +27,9 @@ class Settings(BaseSettings):
     lead_ip_salt: str = "change-me"
     lead_rate_limit_per_minute: int = 5
     jwt_secret: str = "change-me"
+    access_token_ttl_minutes: int = 15
+    refresh_token_ttl_days: int = 30
+    login_rate_limit_per_minute: int = 10
 
     @field_validator("database_url", "test_database_url")
     @classmethod

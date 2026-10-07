@@ -37,6 +37,21 @@ class AdminRepository[M: DeclarativeBase]:
         obj: M | None = await self.session.get(self.model, id)
         return obj
 
+    async def get_for_update(self, id: uuid.UUID) -> M | None:
+        """Read the row and lock it until the transaction ends (SELECT ... FOR UPDATE).
+
+        A concurrent writer waits here until the first one commits, then sees the new
+        version. `populate_existing` refreshes an instance the session already holds.
+        """
+        stmt = (
+            select(self.model)
+            .where(self.model.id == id)
+            .with_for_update()
+            .execution_options(populate_existing=True)
+        )
+        obj: M | None = await self.session.scalar(stmt)
+        return obj
+
     async def list(self, params: ListParams, *where: Any) -> tuple[Sequence[M], int]:
         stmt = select(self.model).where(*where)
         if params.q and self.search_columns:

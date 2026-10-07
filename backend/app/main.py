@@ -20,8 +20,10 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.cors_origin_list,
-    allow_methods=["GET", "POST"],
+    allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE"],
     allow_headers=["*"],
+    # The admin's refresh token travels as a cookie.
+    allow_credentials=True,
 )
 register_error_handlers(app)
 app.include_router(api_router)

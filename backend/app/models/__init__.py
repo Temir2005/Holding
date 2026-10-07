@@ -1,5 +1,6 @@
 """All ORM models. Importing this package registers every table on Base.metadata."""
 
+from app.models.audit import AuditLog
 from app.models.base import Base
 from app.models.entities import (
     Client,
@@ -16,8 +17,11 @@ from app.models.entities import (
 from app.models.lead import Lead, LeadType
 from app.models.media import Media
 from app.models.site import Page, Section, SiteSettings
+from app.models.user import AdminUser, RefreshToken, UserRole
 
 __all__ = [
+    "AdminUser",
+    "AuditLog",
     "Base",
     "Client",
     "Division",
@@ -30,9 +34,11 @@ __all__ = [
     "Project",
     "ProjectMedia",
     "ProjectStatus",
+    "RefreshToken",
     "Section",
     "SiteSettings",
     "Stat",
     "TimelineEvent",
+    "UserRole",
     "Vacancy",
 ]
