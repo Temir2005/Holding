@@ -12,6 +12,7 @@ from app.schemas.entities import (
     DivisionStat,
     MediaPlaceholder,
     MediaRead,
+    MediaVariant,
     PersonRead,
     ProjectCard,
     ProjectRead,
@@ -20,11 +21,11 @@ from app.schemas.entities import (
     TimelineEventRead,
     VacancyRead,
 )
-from app.storage.service import StorageService
+from app.storage.service import Storage
 
 
 class Mapper:
-    def __init__(self, locale: Locale, storage: StorageService) -> None:
+    def __init__(self, locale: Locale, storage: Storage) -> None:
         self.locale = locale
         self.storage = storage
 
@@ -49,6 +50,14 @@ class Mapper:
             alt=self.t(m.alt),
             mime_type=m.mime_type,
             placeholder=MediaPlaceholder(dominant_color=m.dominant_color, blurhash=m.blurhash),
+            variants=[
+                MediaVariant(
+                    width=v["width"],
+                    height=v["height"],
+                    url=self.storage.public_url(v["key"], m.bucket),
+                )
+                for v in m.variants
+            ],
         )
 
     def division_ref(self, d: Division | None) -> DivisionRef | None:

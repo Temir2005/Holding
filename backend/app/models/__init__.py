@@ -15,7 +15,7 @@ from app.models.entities import (
     Vacancy,
 )
 from app.models.lead import Lead, LeadType
-from app.models.media import Media
+from app.models.media import Media, MediaStatus
 from app.models.site import Page, Section, SiteSettings
 from app.models.user import AdminUser, RefreshToken, UserRole
 
@@ -29,6 +29,7 @@ __all__ = [
     "Lead",
     "LeadType",
     "Media",
+    "MediaStatus",
     "Page",
     "Person",
     "Project",

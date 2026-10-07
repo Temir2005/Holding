@@ -30,6 +30,16 @@ class Settings(BaseSettings):
     access_token_ttl_minutes: int = 15
     refresh_token_ttl_days: int = 30
     login_rate_limit_per_minute: int = 10
+    # Refresh tokens revoked longer ago than this are deleted by `app.cli cleanup`.
+    # Kept a while so a replayed token is still recognized and its session revoked.
+    revoked_token_retention_days: int = 7
+
+    media_max_image_mb: int = 20  # images, SVG and PDF
+    media_max_video_mb: int = 200
+    media_upload_url_ttl_seconds: int = 900
+    # Uploads never completed are removed after this long.
+    media_pending_ttl_hours: int = 24
+    media_variant_widths: list[int] = [480, 960, 1600, 2400]
 
     @field_validator("database_url", "test_database_url")
     @classmethod

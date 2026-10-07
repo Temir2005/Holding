@@ -14,10 +14,10 @@ from app.repositories.content import ContentRepository
 from app.services.admin.audit import DbAuditWriter
 from app.services.admin.auth import ClientInfo
 from app.services.mappers import Mapper
-from app.storage.service import StorageService, get_storage
+from app.storage.service import Storage, get_storage
 
 SessionDep = Annotated[AsyncSession, Depends(get_session)]
-StorageDep = Annotated[StorageService, Depends(get_storage)]
+StorageDep = Annotated[Storage, Depends(get_storage)]
 LocaleDep = Annotated[Locale, Query(description="Content locale; falls back to ru")]
 
 

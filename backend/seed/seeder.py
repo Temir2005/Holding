@@ -12,7 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import Base, Media, Page, ProjectMedia, Section
 from app.schemas.sections import SECTION_SCHEMAS, SectionType
-from app.storage.service import StorageService
+from app.storage.service import Storage
 from seed.images import Rendered
 
 NAMESPACE = uuid.UUID("8f0b1c52-6a3e-4c1e-9b8e-6d5f2a1c0e77")
@@ -30,7 +30,7 @@ def L(ru: str) -> dict[str, str]:
 
 
 class Seeder:
-    def __init__(self, session: AsyncSession, storage: StorageService) -> None:
+    def __init__(self, session: AsyncSession, storage: Storage) -> None:
         self.session = session
         self.storage = storage
 
