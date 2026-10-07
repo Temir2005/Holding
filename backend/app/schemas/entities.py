@@ -12,6 +12,14 @@ class MediaPlaceholder(BaseModel):
     blurhash: str | None = None
 
 
+class MediaVariant(BaseModel):
+    """A downscaled WebP copy; use for srcset."""
+
+    width: int
+    height: int
+    url: str
+
+
 class MediaRead(BaseModel):
     id: uuid.UUID
     url: str
@@ -20,6 +28,8 @@ class MediaRead(BaseModel):
     alt: str
     mime_type: str
     placeholder: MediaPlaceholder
+    # Narrowest first. Empty for SVG, video, PDF and images uploaded before variants existed.
+    variants: list[MediaVariant] = []
 
 
 class StatRead(BaseModel):
@@ -130,6 +140,7 @@ __all__ = [
     "LeadType",
     "MediaPlaceholder",
     "MediaRead",
+    "MediaVariant",
     "PersonRead",
     "ProjectCard",
     "ProjectRead",

@@ -21,6 +21,8 @@ from app.core.config import get_settings
 from app.core.db import get_session
 from app.main import app
 from app.models import Base
+from app.storage.memory import InMemoryStorage
+from app.storage.service import get_storage
 
 BACKEND_DIR = Path(__file__).resolve().parents[1]
 
@@ -70,11 +72,17 @@ async def session(engine: object) -> AsyncIterator[AsyncSession]:
 
 
 @pytest.fixture
-async def client(session: AsyncSession) -> AsyncIterator[AsyncClient]:
+def storage() -> InMemoryStorage:
+    return InMemoryStorage()
+
+
+@pytest.fixture
+async def client(session: AsyncSession, storage: InMemoryStorage) -> AsyncIterator[AsyncClient]:
     async def override() -> AsyncIterator[AsyncSession]:
         yield session
 
     app.dependency_overrides[get_session] = override
+    app.dependency_overrides[get_storage] = lambda: storage
     async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as c:
         yield c
     app.dependency_overrides.clear()

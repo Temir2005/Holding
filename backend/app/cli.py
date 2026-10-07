@@ -1,6 +1,7 @@
 """Maintenance commands.
 
     python -m app.cli create-admin --email boss@megasmart.kz --name "Имя Фамилия"
+    python -m app.cli cleanup     # stale uploads, expired and long-revoked refresh tokens
 
 The password is asked interactively, or read from stdin with --password-stdin
 (for scripts: `echo "$PASS" | python -m app.cli create-admin ... --password-stdin`).
@@ -14,12 +15,15 @@ import sys
 from pydantic import ValidationError
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
+from app.core.config import get_settings
 from app.core.db import SessionFactory, engine
 from app.core.errors import AppError
 from app.models import UserRole
 from app.schemas.admin.auth import UserCreate, UserRead
 from app.services.admin.audit import DbAuditWriter
+from app.services.admin.cleanup import CleanupReport, run_cleanup
 from app.services.admin.users import UserService
+from app.storage.service import get_storage
 
 
 async def create_admin(
@@ -56,7 +60,16 @@ def main(argv: list[str] | None = None) -> None:
         "--password-stdin", action="store_true", help="Read the password from stdin"
     )
 
+    commands.add_parser("cleanup", help="Remove stale uploads and old refresh tokens")
+
     args = parser.parse_args(argv)
+    if args.command == "cleanup":
+        report = asyncio.run(_cleanup_once())
+        print(
+            f"Удалено незавершённых загрузок: {report.stale_uploads}, "
+            f"refresh-токенов: {report.refresh_tokens}"
+        )
+        return
     if args.command == "create-admin":
         password = read_password(args.password_stdin)
         try:
@@ -66,6 +79,14 @@ def main(argv: list[str] | None = None) -> None:
         except AppError as exc:
             sys.exit(exc.message)
         print(f"Администратор создан: {user.email} ({user.id})")
+
+
+async def _cleanup_once() -> CleanupReport:
+    try:
+        async with SessionFactory() as session:
+            return await run_cleanup(session, get_storage(), get_settings())
+    finally:
+        await engine.dispose()
 
 
 async def _create_admin_once(email: str, name: str, password: str) -> UserRead:
