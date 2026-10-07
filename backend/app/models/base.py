@@ -20,6 +20,10 @@ NAMING_CONVENTION = {
 
 class Base(DeclarativeBase):
     metadata = MetaData(naming_convention=NAMING_CONVENTION)
+    # Fetch server-generated values (created_at, updated_at) with RETURNING on INSERT and
+    # UPDATE. Otherwise reading them after a commit triggers a lazy load, which async
+    # sessions cannot do.
+    __mapper_args__ = {"eager_defaults": True}  # noqa: RUF012
     type_annotation_map = {  # noqa: RUF012
         LText: JSONB,
         dict[str, Any]: JSONB,

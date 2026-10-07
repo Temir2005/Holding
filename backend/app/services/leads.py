@@ -1,8 +1,7 @@
-import hashlib
-
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import Settings
+from app.core.security import hash_ip
 from app.models import Lead
 from app.schemas.leads import LeadCreate
 
@@ -13,9 +12,7 @@ class LeadService:
         self.settings = settings
 
     def hash_ip(self, ip: str | None) -> str | None:
-        if not ip:
-            return None
-        return hashlib.sha256(f"{self.settings.lead_ip_salt}:{ip}".encode()).hexdigest()
+        return hash_ip(ip, self.settings.lead_ip_salt)
 
     async def create(self, data: LeadCreate, *, ip: str | None, user_agent: str | None) -> Lead:
         lead = Lead(

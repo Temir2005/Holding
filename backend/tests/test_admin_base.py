@@ -3,6 +3,7 @@
 Real entities get `version` columns in later stages; the mechanism is tested here.
 """
 
+import asyncio
 import uuid
 from collections.abc import AsyncIterator
 from typing import Any, ClassVar
@@ -168,3 +169,61 @@ async def test_delete_audits_full_snapshot(widgets: tuple[WidgetService, Recordi
     assert audit.events[-1]["changes"]["title"] == "Удаляемый"
     with pytest.raises(NotFound):
         await service.read(created.id)
+
+
+async def test_concurrent_updates_from_same_version_one_wins(
+    engine: AsyncEngine, widgets: tuple[WidgetService, RecordingAudit]
+) -> None:
+    """Two editors save version 1 at the same moment: exactly one succeeds.
+
+    Without the row lock both would pass the version check before either commits.
+    The first transaction holds the lock while the second starts, so the race is
+    deterministic rather than timing-dependent.
+    """
+    service, _ = widgets
+    created = await service.create(WidgetCreate(title="Исходный"))
+
+    factory = async_sessionmaker(engine, expire_on_commit=False)
+    async with factory() as first, factory() as second:
+        first_service = WidgetService(first, WidgetRepository(first), RecordingAudit())
+        second_service = WidgetService(second, WidgetRepository(second), RecordingAudit())
+
+        # First editor locks the row and is "still typing".
+        locked = await first_service.get_or_404(created.id, lock=True)
+
+        second_save = asyncio.create_task(
+            second_service.update(created.id, WidgetUpdate(version=1, title="Второй"))
+        )
+        await asyncio.sleep(0.2)
+        assert not second_save.done(), "second writer must wait for the lock"
+
+        locked.title = "Первый"
+        locked.version += 1
+        await first.commit()
+
+        with pytest.raises(VersionConflict):
+            await second_save
+
+    assert (await service.read(created.id)).title == "Первый"
+
+
+async def test_parallel_saves_never_both_succeed(
+    engine: AsyncEngine, widgets: tuple[WidgetService, RecordingAudit]
+) -> None:
+    service, _ = widgets
+    created = await service.create(WidgetCreate(title="A"))
+    factory = async_sessionmaker(engine, expire_on_commit=False)
+
+    async def save(title: str) -> str:
+        async with factory() as s:
+            try:
+                await WidgetService(s, WidgetRepository(s), RecordingAudit()).update(
+                    created.id, WidgetUpdate(version=1, title=title)
+                )
+                return "ok"
+            except VersionConflict:
+                return "conflict"
+
+    results = await asyncio.gather(*(save(f"v{i}") for i in range(5)))
+    assert sorted(results) == ["conflict"] * 4 + ["ok"]
+    assert (await service.read(created.id)).version == 2

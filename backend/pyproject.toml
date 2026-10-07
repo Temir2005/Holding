@@ -12,6 +12,8 @@ dependencies = [
     "alembic>=1.14",
     "aioboto3>=13.2",
     "pillow>=11.0",
+    "pyjwt>=2.10",
+    "argon2-cffi>=23.1",
 ]
 
 [dependency-groups]
