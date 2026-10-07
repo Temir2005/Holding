@@ -15,8 +15,7 @@ export default {
         line: 'rgb(var(--line) / <alpha-value>)',
         accent: 'rgb(var(--accent) / <alpha-value>)',
         'on-accent': 'rgb(var(--on-accent) / <alpha-value>)',
-        graphite: 'rgb(var(--graphite) / <alpha-value>)',
-        stone: 'rgb(var(--stone) / <alpha-value>)',
+        deep: 'rgb(var(--deep) / <alpha-value>)',
       },
       fontFamily: {
         display: ['"Manrope Variable"', 'Manrope', 'system-ui', 'sans-serif'],

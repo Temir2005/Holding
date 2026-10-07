@@ -14,7 +14,7 @@ const ease = [0.2, 0.7, 0.2, 1] as const
 /**
  * Two layouts, picked by content:
  * - with swatches: text beside a grid of panel samples (the "Фактура" signature);
- * - without: full-bleed photo with the text over a graphite gradient.
+ * - without: full-bleed photo with the text over a gradient of the deep color.
  */
 export function HeroSection({ section }: SectionProps<'hero'>) {
   const { data } = section
@@ -140,7 +140,7 @@ function BleedHero({ section }: SectionProps<'hero'>) {
       </motion.div>
       <div
         aria-hidden="true"
-        className="absolute inset-0 -z-10 bg-[linear-gradient(90deg,rgb(var(--graphite))_15%,rgb(var(--graphite)/0.55)_60%,rgb(var(--graphite)/0.2)),linear-gradient(0deg,rgb(var(--graphite))_0%,transparent_45%)]"
+        className="absolute inset-0 -z-10 bg-[linear-gradient(90deg,rgb(var(--deep))_15%,rgb(var(--deep)/0.55)_60%,rgb(var(--deep)/0.2)),linear-gradient(0deg,rgb(var(--deep))_0%,transparent_45%)]"
       />
       <Container>
         <HeroText section={section} className="max-w-4xl" />
