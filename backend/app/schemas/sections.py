@@ -10,8 +10,9 @@ Each section type has two models:
 The read envelopes (`HeroSection`, ...) form a discriminated union on `type`, which
 the frontend receives as a typed union through the generated OpenAPI types.
 
-Adding a section type: add the enum value, the two data models, the envelope, an
-entry in SECTION_SCHEMAS and a React component in the frontend registry.
+Adding a section type: add the enum value, the two data models (stored fields get
+Russian titles and UI hints via `field()`), the envelope, an entry in SECTION_SCHEMAS
+(with label and description) and a React component in the frontend registry.
 """
 
 import uuid
@@ -33,9 +34,17 @@ from app.schemas.entities import (
     TimelineEventRead,
     VacancyRead,
 )
+from app.schemas.fields import HexColor, IconName, LinkHref, field
 from app.schemas.refs import Ref, RefKind
 
 L = LocalizedText
+
+LEAD_TYPE_LABELS = {
+    LeadType.investor: "Инвестиции",
+    LeadType.partner: "Партнёрство",
+    LeadType.candidate: "Работа в команде",
+    LeadType.client: "Заказ продукции",
+}
 
 
 def _media(target: str) -> Ref:
@@ -83,8 +92,8 @@ class Stored(BaseModel):
 
 
 class SectionData(Stored):
-    eyebrow: L | None = None
-    title: L | None = None
+    eyebrow: L | None = field("Надзаголовок", widget="localized-text", default=None)
+    title: L | None = field("Заголовок", widget="localized-text", default=None)
 
 
 class SectionDataRead(BaseModel):
@@ -93,9 +102,15 @@ class SectionDataRead(BaseModel):
 
 
 class Cta(Stored):
-    label: L
-    href: str
-    variant: Literal["primary", "secondary"] = "primary"
+    model_config = ConfigDict(title="Кнопка")
+
+    label: L = field("Текст кнопки", widget="localized-text")
+    href: LinkHref = field(
+        "Ссылка", description="https://…, #якорь на странице, slug страницы или projects/<slug>"
+    )
+    variant: Literal["primary", "secondary"] = field(
+        "Вид", labels={"primary": "Основная", "secondary": "Второстепенная"}, default="primary"
+    )
 
 
 class CtaRead(BaseModel):
@@ -105,10 +120,14 @@ class CtaRead(BaseModel):
 
 
 class IconItem(Stored):
-    icon: str
-    title: L
-    text: L
-    media_id: Annotated[uuid.UUID | None, _media("media")] = None
+    model_config = ConfigDict(title="Пункт с иконкой")
+
+    icon: IconName = field("Иконка")
+    title: L = field("Заголовок", widget="localized-text")
+    text: L = field("Текст", widget="localized-textarea")
+    media_id: Annotated[uuid.UUID | None, _media("media")] = field(
+        "Картинка вместо иконки", default=None
+    )
 
 
 class IconItemRead(BaseModel):
@@ -124,10 +143,16 @@ class IconItemRead(BaseModel):
 
 
 class Swatch(Stored):
-    code: str
-    label: L
-    color: str = Field(pattern=r"^#[0-9a-fA-F]{6}$")
-    finish: Literal["matte", "gloss", "texture"] = "matte"
+    model_config = ConfigDict(title="Образец панели")
+
+    code: str = field("Код (RAL, LAB…)", max_length=32)
+    label: L = field("Название", widget="localized-text")
+    color: HexColor = field("Цвет")
+    finish: Literal["matte", "gloss", "texture"] = field(
+        "Покрытие",
+        labels={"matte": "Матовое", "gloss": "Глянец", "texture": "Текстура"},
+        default="matte",
+    )
 
 
 class SwatchRead(BaseModel):
@@ -138,11 +163,19 @@ class SwatchRead(BaseModel):
 
 
 class HeroData(SectionData):
-    subtitle: L | None = None
-    background_media_id: Annotated[uuid.UUID | None, _media("background")] = None
-    video_media_id: Annotated[uuid.UUID | None, _media("video")] = None
-    ctas: list[Cta] = []
-    swatches: list[Swatch] = []
+    subtitle: L | None = field("Подзаголовок", widget="localized-textarea", default=None)
+    background_media_id: Annotated[uuid.UUID | None, _media("background")] = field(
+        "Фоновое изображение", default=None
+    )
+    video_media_id: Annotated[uuid.UUID | None, _media("video")] = field(
+        "Фоновое видео", default=None
+    )
+    ctas: list[Cta] = field("Кнопки", default_factory=list)
+    swatches: list[Swatch] = field(
+        "Образцы панелей",
+        description="Если заполнены, фото показывается в сетке с образцами",
+        default_factory=list,
+    )
 
 
 class HeroDataRead(SectionDataRead):
@@ -155,8 +188,14 @@ class HeroDataRead(SectionDataRead):
 
 class StatsData(SectionData):
     # Either explicit ids or a context ("home", "smart-panels"); explicit ids win.
-    context: str | None = None
-    stat_ids: Annotated[list[uuid.UUID], Ref(RefKind.stat, "stats")] = []
+    context: str | None = field(
+        "Набор цифр",
+        description="Например home или smart-panels; не нужен, если цифры выбраны",
+        default=None,
+    )
+    stat_ids: Annotated[list[uuid.UUID], Ref(RefKind.stat, "stats")] = field(
+        "Цифры", default_factory=list
+    )
 
 
 class StatsDataRead(SectionDataRead):
@@ -164,9 +203,17 @@ class StatsDataRead(SectionDataRead):
 
 
 class AboutTextData(SectionData):
-    body: L
-    media_id: Annotated[uuid.UUID | None, _media("media")] = None
-    layout: Literal["text_only", "media_left", "media_right"] = "text_only"
+    body: L = field("Текст", widget="markdown")
+    media_id: Annotated[uuid.UUID | None, _media("media")] = field("Изображение", default=None)
+    layout: Literal["text_only", "media_left", "media_right"] = field(
+        "Расположение",
+        labels={
+            "text_only": "Только текст",
+            "media_left": "Картинка слева",
+            "media_right": "Картинка справа",
+        },
+        default="text_only",
+    )
 
 
 class AboutTextDataRead(SectionDataRead):
@@ -177,7 +224,9 @@ class AboutTextDataRead(SectionDataRead):
 
 class TimelineData(SectionData):
     # Empty means every published event, ordered by year.
-    event_ids: Annotated[list[uuid.UUID], Ref(RefKind.timeline_event, "events")] = []
+    event_ids: Annotated[list[uuid.UUID], Ref(RefKind.timeline_event, "events")] = field(
+        "События", description="Пусто — все опубликованные события по годам", default_factory=list
+    )
 
 
 class TimelineDataRead(SectionDataRead):
@@ -185,7 +234,9 @@ class TimelineDataRead(SectionDataRead):
 
 
 class DivisionsGridData(SectionData):
-    division_ids: Annotated[list[uuid.UUID], Ref(RefKind.division, "divisions")] = []
+    division_ids: Annotated[list[uuid.UUID], Ref(RefKind.division, "divisions")] = field(
+        "Направления", default_factory=list
+    )
 
 
 class DivisionsGridDataRead(SectionDataRead):
@@ -194,9 +245,11 @@ class DivisionsGridDataRead(SectionDataRead):
 
 class ProjectsShowcaseData(SectionData):
     # With `featured`, the list is every featured project; otherwise `project_ids`.
-    featured: bool = False
-    project_ids: Annotated[list[uuid.UUID], Ref(RefKind.project, "projects")] = []
-    link: Cta | None = None
+    featured: bool = field("Показывать избранные проекты", default=False)
+    project_ids: Annotated[list[uuid.UUID], Ref(RefKind.project, "projects")] = field(
+        "Проекты", description="Используется, если не включены избранные", default_factory=list
+    )
+    link: Cta | None = field("Ссылка «Все проекты»", default=None)
 
 
 class ProjectsShowcaseDataRead(SectionDataRead):
@@ -206,9 +259,13 @@ class ProjectsShowcaseDataRead(SectionDataRead):
 
 class ProjectListData(SectionData):
     # Live query: every published project, optionally limited to one division.
-    division_slug: str | None = None
-    show_filter: bool = True
-    project_ids: Annotated[list[uuid.UUID], Ref(RefKind.project, "projects")] = []
+    division_slug: str | None = field(
+        "Только направление (slug)", description="Пусто — проекты всех направлений", default=None
+    )
+    show_filter: bool = field("Фильтр по статусу", default=True)
+    project_ids: Annotated[list[uuid.UUID], Ref(RefKind.project, "projects")] = field(
+        "Проекты", description="Пусто — все опубликованные", default_factory=list
+    )
 
 
 class ProjectListDataRead(SectionDataRead):
@@ -217,9 +274,11 @@ class ProjectListDataRead(SectionDataRead):
 
 
 class CapabilitiesData(SectionData):
-    intro: L | None = None
-    items: list[IconItem] = []
-    columns: Literal[2, 3, 4] = 3
+    intro: L | None = field("Вступление", widget="localized-textarea", default=None)
+    items: list[IconItem] = field("Пункты", default_factory=list)
+    columns: Literal[2, 3, 4] = field(
+        "Колонок", labels={2: "Две", 3: "Три", 4: "Четыре"}, default=3
+    )
 
 
 class CapabilitiesDataRead(SectionDataRead):
@@ -229,10 +288,14 @@ class CapabilitiesDataRead(SectionDataRead):
 
 
 class ProcessStep(Stored):
-    title: L
-    text: L
-    media_id: Annotated[uuid.UUID | None, _media("media")] = None
-    division_id: Annotated[uuid.UUID | None, Ref(RefKind.division, "division")] = None
+    model_config = ConfigDict(title="Этап")
+
+    title: L = field("Название этапа", widget="localized-text")
+    text: L = field("Описание", widget="localized-textarea")
+    media_id: Annotated[uuid.UUID | None, _media("media")] = field("Изображение", default=None)
+    division_id: Annotated[uuid.UUID | None, Ref(RefKind.division, "division")] = field(
+        "Ссылка на направление", default=None
+    )
 
 
 class ProcessStepRead(BaseModel):
@@ -243,8 +306,8 @@ class ProcessStepRead(BaseModel):
 
 
 class ProcessStepsData(SectionData):
-    intro: L | None = None
-    steps: list[ProcessStep] = []
+    intro: L | None = field("Вступление", widget="localized-textarea", default=None)
+    steps: list[ProcessStep] = field("Этапы", default_factory=list)
 
 
 class ProcessStepsDataRead(SectionDataRead):
@@ -253,8 +316,10 @@ class ProcessStepsDataRead(SectionDataRead):
 
 
 class Fact(Stored):
-    value: str
-    label: L
+    model_config = ConfigDict(title="Факт")
+
+    value: str = field("Значение", max_length=64)
+    label: L = field("Подпись", widget="localized-text")
 
 
 class FactRead(BaseModel):
@@ -263,9 +328,11 @@ class FactRead(BaseModel):
 
 
 class ProductionData(SectionData):
-    body: L
-    facts: list[Fact] = []
-    gallery_media_ids: Annotated[list[uuid.UUID], _media("gallery")] = []
+    body: L = field("Текст", widget="localized-textarea")
+    facts: list[Fact] = field("Факты", default_factory=list)
+    gallery_media_ids: Annotated[list[uuid.UUID], _media("gallery")] = field(
+        "Галерея", default_factory=list
+    )
 
 
 class ProductionDataRead(SectionDataRead):
@@ -275,12 +342,14 @@ class ProductionDataRead(SectionDataRead):
 
 
 class TokenizationData(SectionData):
-    intro: L
-    steps: list[IconItem] = []
-    benefits: list[L] = []
+    intro: L = field("Вступление", widget="localized-textarea")
+    steps: list[IconItem] = field("Как это работает", default_factory=list)
+    benefits: list[L] = field("Преимущества", widget="localized-text", default_factory=list)
     # Legal text is edited in the CMS; never hard-code yields or jurisdictions.
-    disclaimer: L
-    project_ids: Annotated[list[uuid.UUID], Ref(RefKind.project, "projects")] = []
+    disclaimer: L = field("Юридический дисклеймер", widget="localized-textarea")
+    project_ids: Annotated[list[uuid.UUID], Ref(RefKind.project, "projects")] = field(
+        "Токенизированные проекты", default_factory=list
+    )
 
 
 class TokenizationDataRead(SectionDataRead):
@@ -292,11 +361,22 @@ class TokenizationDataRead(SectionDataRead):
 
 
 class TeamGridData(SectionData):
-    intro: L | None = None
+    intro: L | None = field("Вступление", widget="localized-textarea", default=None)
     # founder / key / rest: live queries; explicit ids override.
-    mode: Literal["founder", "key", "rest", "all"] = "all"
-    show_division_filter: bool = False
-    person_ids: Annotated[list[uuid.UUID], Ref(RefKind.person, "people")] = []
+    mode: Literal["founder", "key", "rest", "all"] = field(
+        "Кого показывать",
+        labels={
+            "founder": "Основателя",
+            "key": "Руководство",
+            "rest": "Остальную команду",
+            "all": "Всех",
+        },
+        default="all",
+    )
+    show_division_filter: bool = field("Фильтр по направлению", default=False)
+    person_ids: Annotated[list[uuid.UUID], Ref(RefKind.person, "people")] = field(
+        "Люди", description="Если выбраны, заменяют выборку по режиму", default_factory=list
+    )
 
 
 class TeamGridDataRead(SectionDataRead):
@@ -308,7 +388,9 @@ class TeamGridDataRead(SectionDataRead):
 
 class ClientsMarqueeData(SectionData):
     # Empty means every published client.
-    client_ids: Annotated[list[uuid.UUID], Ref(RefKind.client, "clients")] = []
+    client_ids: Annotated[list[uuid.UUID], Ref(RefKind.client, "clients")] = field(
+        "Клиенты", description="Пусто — все опубликованные", default_factory=list
+    )
 
 
 class ClientsMarqueeDataRead(SectionDataRead):
@@ -316,8 +398,10 @@ class ClientsMarqueeDataRead(SectionDataRead):
 
 
 class ClientsGridData(SectionData):
-    show_industry_filter: bool = True
-    client_ids: Annotated[list[uuid.UUID], Ref(RefKind.client, "clients")] = []
+    show_industry_filter: bool = field("Фильтр по отрасли", default=True)
+    client_ids: Annotated[list[uuid.UUID], Ref(RefKind.client, "clients")] = field(
+        "Клиенты", description="Пусто — все опубликованные", default_factory=list
+    )
 
 
 class ClientsGridDataRead(SectionDataRead):
@@ -327,7 +411,9 @@ class ClientsGridDataRead(SectionDataRead):
 
 class TestimonialsData(SectionData):
     # Empty means every published client that has a testimonial.
-    client_ids: Annotated[list[uuid.UUID], Ref(RefKind.client, "clients")] = []
+    client_ids: Annotated[list[uuid.UUID], Ref(RefKind.client, "clients")] = field(
+        "Клиенты с отзывами", description="Пусто — все, у кого есть отзыв", default_factory=list
+    )
 
 
 class TestimonialsDataRead(SectionDataRead):
@@ -335,9 +421,13 @@ class TestimonialsDataRead(SectionDataRead):
 
 
 class QuoteData(SectionData):
-    text: L
-    person_id: Annotated[uuid.UUID | None, Ref(RefKind.person, "person")] = None
-    media_id: Annotated[uuid.UUID | None, _media("media")] = None
+    text: L = field("Цитата", widget="localized-textarea")
+    person_id: Annotated[uuid.UUID | None, Ref(RefKind.person, "person")] = field(
+        "Автор", default=None
+    )
+    media_id: Annotated[uuid.UUID | None, _media("media")] = field(
+        "Фото", description="Пусто — фото автора", default=None
+    )
 
 
 class QuoteDataRead(SectionDataRead):
@@ -347,9 +437,9 @@ class QuoteDataRead(SectionDataRead):
 
 
 class CtaData(SectionData):
-    text: L | None = None
-    ctas: list[Cta] = []
-    media_id: Annotated[uuid.UUID | None, _media("media")] = None
+    text: L | None = field("Текст", widget="localized-textarea", default=None)
+    ctas: list[Cta] = field("Кнопки", default_factory=list)
+    media_id: Annotated[uuid.UUID | None, _media("media")] = field("Изображение", default=None)
 
 
 class CtaDataRead(SectionDataRead):
@@ -359,11 +449,17 @@ class CtaDataRead(SectionDataRead):
 
 
 class ContactFormData(SectionData):
-    text: L | None = None
-    lead_types: list[LeadType] = [LeadType.partner]
-    default_type: LeadType = LeadType.partner
-    consent_text: L
-    success_text: L
+    text: L | None = field("Текст рядом с формой", widget="localized-textarea", default=None)
+    lead_types: list[LeadType] = field(
+        "Темы обращения",
+        labels=LEAD_TYPE_LABELS,
+        default_factory=lambda: [LeadType.partner],
+    )
+    default_type: LeadType = field(
+        "Тема по умолчанию", labels=LEAD_TYPE_LABELS, default=LeadType.partner
+    )
+    consent_text: L = field("Согласие на обработку данных", widget="localized-textarea")
+    success_text: L = field("Сообщение после отправки", widget="localized-textarea")
 
 
 class ContactFormDataRead(SectionDataRead):
@@ -375,8 +471,12 @@ class ContactFormDataRead(SectionDataRead):
 
 
 class MediaGalleryData(SectionData):
-    media_ids: Annotated[list[uuid.UUID], _media("items")] = []
-    layout: Literal["grid", "strip"] = "grid"
+    media_ids: Annotated[list[uuid.UUID], _media("items")] = field(
+        "Изображения", default_factory=list
+    )
+    layout: Literal["grid", "strip"] = field(
+        "Раскладка", labels={"grid": "Сетка", "strip": "Лента"}, default="grid"
+    )
 
 
 class MediaGalleryDataRead(SectionDataRead):
@@ -385,9 +485,14 @@ class MediaGalleryDataRead(SectionDataRead):
 
 
 class VideoData(SectionData):
-    embed_url: str | None = None
-    video_media_id: Annotated[uuid.UUID | None, _media("video")] = None
-    poster_media_id: Annotated[uuid.UUID | None, _media("poster")] = None
+    embed_url: str | None = field(
+        "Ссылка для встраивания",
+        description="YouTube/Vimeo embed; или загруженное видео",
+        max_length=500,
+        default=None,
+    )
+    video_media_id: Annotated[uuid.UUID | None, _media("video")] = field("Видеофайл", default=None)
+    poster_media_id: Annotated[uuid.UUID | None, _media("poster")] = field("Обложка", default=None)
 
 
 class VideoDataRead(SectionDataRead):
@@ -397,11 +502,17 @@ class VideoDataRead(SectionDataRead):
 
 
 class VacanciesData(SectionData):
-    intro: L | None = None
+    intro: L | None = field("Вступление", widget="localized-textarea", default=None)
     # Live query: every open vacancy, optionally limited to one division.
-    division_slug: str | None = None
-    vacancy_ids: Annotated[list[uuid.UUID], Ref(RefKind.vacancy, "vacancies")] = []
-    empty_text: L | None = None
+    division_slug: str | None = field(
+        "Только направление (slug)", description="Пусто — все направления", default=None
+    )
+    vacancy_ids: Annotated[list[uuid.UUID], Ref(RefKind.vacancy, "vacancies")] = field(
+        "Вакансии", description="Пусто — все открытые", default_factory=list
+    )
+    empty_text: L | None = field(
+        "Текст, когда вакансий нет", widget="localized-textarea", default=None
+    )
 
 
 class VacanciesDataRead(SectionDataRead):
@@ -411,9 +522,11 @@ class VacanciesDataRead(SectionDataRead):
 
 
 class Country(Stored):
-    code: str = Field(min_length=2, max_length=2)
-    name: L
-    note: L | None = None
+    model_config = ConfigDict(title="Страна")
+
+    code: str = field("Код страны (2 буквы)", min_length=2, max_length=2)
+    name: L = field("Название", widget="localized-text")
+    note: L | None = field("Пояснение", widget="localized-text", default=None)
 
 
 class CountryRead(BaseModel):
@@ -423,8 +536,8 @@ class CountryRead(BaseModel):
 
 
 class GeographyData(SectionData):
-    intro: L | None = None
-    countries: list[Country] = []
+    intro: L | None = field("Вступление", widget="localized-textarea", default=None)
+    countries: list[Country] = field("Страны", default_factory=list)
 
 
 class GeographyDataRead(SectionDataRead):
@@ -584,35 +697,142 @@ SectionRead = Annotated[
 class SectionSchema:
     stored: type[SectionData]
     read: type[SectionBase]
+    # Shown in the admin when choosing and editing blocks.
+    label: str
+    description: str
 
 
 SECTION_SCHEMAS: dict[SectionType, SectionSchema] = {
-    SectionType.hero: SectionSchema(stored=HeroData, read=HeroSection),
-    SectionType.stats: SectionSchema(stored=StatsData, read=StatsSection),
-    SectionType.about_text: SectionSchema(stored=AboutTextData, read=AboutTextSection),
-    SectionType.timeline: SectionSchema(stored=TimelineData, read=TimelineSection),
-    SectionType.divisions_grid: SectionSchema(stored=DivisionsGridData, read=DivisionsGridSection),
+    SectionType.hero: SectionSchema(
+        stored=HeroData,
+        read=HeroSection,
+        label="Главный экран",
+        description="Крупный заголовок, кнопки и фото; с образцами панелей — сетка образцов",
+    ),
+    SectionType.stats: SectionSchema(
+        stored=StatsData,
+        read=StatsSection,
+        label="Цифры",
+        description="Полоса ключевых показателей со счётчиками",
+    ),
+    SectionType.about_text: SectionSchema(
+        stored=AboutTextData,
+        read=AboutTextSection,
+        label="Текст",
+        description="Текст с форматированием и картинкой сбоку",
+    ),
+    SectionType.timeline: SectionSchema(
+        stored=TimelineData,
+        read=TimelineSection,
+        label="История",
+        description="Хронология событий по годам",
+    ),
+    SectionType.divisions_grid: SectionSchema(
+        stored=DivisionsGridData,
+        read=DivisionsGridSection,
+        label="Направления",
+        description="Карточки подразделений холдинга",
+    ),
     SectionType.projects_showcase: SectionSchema(
-        stored=ProjectsShowcaseData, read=ProjectsShowcaseSection
+        stored=ProjectsShowcaseData,
+        read=ProjectsShowcaseSection,
+        label="Избранные проекты",
+        description="Крупный проект и список рядом",
     ),
-    SectionType.project_list: SectionSchema(stored=ProjectListData, read=ProjectListSection),
-    SectionType.capabilities: SectionSchema(stored=CapabilitiesData, read=CapabilitiesSection),
-    SectionType.process_steps: SectionSchema(stored=ProcessStepsData, read=ProcessStepsSection),
-    SectionType.production: SectionSchema(stored=ProductionData, read=ProductionSection),
+    SectionType.project_list: SectionSchema(
+        stored=ProjectListData,
+        read=ProjectListSection,
+        label="Список проектов",
+        description="Все проекты с фильтром по статусу",
+    ),
+    SectionType.capabilities: SectionSchema(
+        stored=CapabilitiesData,
+        read=CapabilitiesSection,
+        label="Преимущества",
+        description="Сетка пунктов с иконками или картинками",
+    ),
+    SectionType.process_steps: SectionSchema(
+        stored=ProcessStepsData,
+        read=ProcessStepsSection,
+        label="Этапы",
+        description="Нумерованные этапы процесса",
+    ),
+    SectionType.production: SectionSchema(
+        stored=ProductionData,
+        read=ProductionSection,
+        label="Производство",
+        description="Текст, факты и галерея производства",
+    ),
     SectionType.tokenization_explainer: SectionSchema(
-        stored=TokenizationData, read=TokenizationSection
+        stored=TokenizationData,
+        read=TokenizationSection,
+        label="Токенизация",
+        description="Как работает токенизация, преимущества и дисклеймер",
     ),
-    SectionType.team_grid: SectionSchema(stored=TeamGridData, read=TeamGridSection),
+    SectionType.team_grid: SectionSchema(
+        stored=TeamGridData,
+        read=TeamGridSection,
+        label="Команда",
+        description="Основатель, руководство или вся команда",
+    ),
     SectionType.clients_marquee: SectionSchema(
-        stored=ClientsMarqueeData, read=ClientsMarqueeSection
+        stored=ClientsMarqueeData,
+        read=ClientsMarqueeSection,
+        label="Бегущая строка клиентов",
+        description="Логотипы клиентов в движущейся ленте",
     ),
-    SectionType.clients_grid: SectionSchema(stored=ClientsGridData, read=ClientsGridSection),
-    SectionType.testimonials: SectionSchema(stored=TestimonialsData, read=TestimonialsSection),
-    SectionType.quote: SectionSchema(stored=QuoteData, read=QuoteSection),
-    SectionType.cta: SectionSchema(stored=CtaData, read=CtaSection),
-    SectionType.contact_form: SectionSchema(stored=ContactFormData, read=ContactFormSection),
-    SectionType.media_gallery: SectionSchema(stored=MediaGalleryData, read=MediaGallerySection),
-    SectionType.video: SectionSchema(stored=VideoData, read=VideoSection),
-    SectionType.vacancies: SectionSchema(stored=VacanciesData, read=VacanciesSection),
-    SectionType.geography: SectionSchema(stored=GeographyData, read=GeographySection),
+    SectionType.clients_grid: SectionSchema(
+        stored=ClientsGridData,
+        read=ClientsGridSection,
+        label="Сетка клиентов",
+        description="Логотипы клиентов с фильтром по отрасли",
+    ),
+    SectionType.testimonials: SectionSchema(
+        stored=TestimonialsData,
+        read=TestimonialsSection,
+        label="Отзывы",
+        description="Отзывы клиентов",
+    ),
+    SectionType.quote: SectionSchema(
+        stored=QuoteData,
+        read=QuoteSection,
+        label="Цитата",
+        description="Крупная цитата с фото автора",
+    ),
+    SectionType.cta: SectionSchema(
+        stored=CtaData,
+        read=CtaSection,
+        label="Призыв к действию",
+        description="Заголовок и кнопки, обычно на акцентном фоне",
+    ),
+    SectionType.contact_form: SectionSchema(
+        stored=ContactFormData,
+        read=ContactFormSection,
+        label="Форма заявки",
+        description="Форма с контактами компании",
+    ),
+    SectionType.media_gallery: SectionSchema(
+        stored=MediaGalleryData,
+        read=MediaGallerySection,
+        label="Галерея",
+        description="Сетка или лента изображений",
+    ),
+    SectionType.video: SectionSchema(
+        stored=VideoData,
+        read=VideoSection,
+        label="Видео",
+        description="Встроенное видео или видеофайл",
+    ),
+    SectionType.vacancies: SectionSchema(
+        stored=VacanciesData,
+        read=VacanciesSection,
+        label="Вакансии",
+        description="Список открытых вакансий",
+    ),
+    SectionType.geography: SectionSchema(
+        stored=GeographyData,
+        read=GeographySection,
+        label="География",
+        description="Страны поставок",
+    ),
 }

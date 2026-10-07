@@ -65,3 +65,12 @@ class ReorderRequest(BaseModel):
     ids: list[uuid.UUID] = Field(
         min_length=1, description="All ids of the collection in the new order"
     )
+
+
+class Usage(BaseModel):
+    """One place that references something (a file, a page...), for 409 IN_USE and usage lists."""
+
+    entity_type: str = Field(examples=["project", "section", "site_settings"])
+    entity_id: uuid.UUID
+    field: str = Field(examples=["cover_id", "data", "navigation"])
+    label: str = Field(description="Human-readable name of the place")

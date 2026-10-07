@@ -4,7 +4,7 @@ from typing import Any
 from sqlalchemy import ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
-from app.models.base import Base, IdMixin, LText, PublishableMixin, TimestampMixin
+from app.models.base import Base, IdMixin, LText, PublishableMixin, TimestampMixin, VersionMixin
 from app.models.media import Media
 
 
@@ -24,7 +24,7 @@ class SiteSettings(IdMixin, TimestampMixin, Base):
     logo: Mapped[Media | None] = relationship(lazy="selectin")
 
 
-class Page(IdMixin, TimestampMixin, PublishableMixin, Base):
+class Page(IdMixin, TimestampMixin, VersionMixin, PublishableMixin, Base):
     __tablename__ = "page"
 
     slug: Mapped[str] = mapped_column(String(128), unique=True)
@@ -44,7 +44,7 @@ class Page(IdMixin, TimestampMixin, PublishableMixin, Base):
     )
 
 
-class Section(IdMixin, TimestampMixin, Base):
+class Section(IdMixin, TimestampMixin, VersionMixin, Base):
     __tablename__ = "section"
 
     page_id: Mapped[uuid.UUID] = mapped_column(

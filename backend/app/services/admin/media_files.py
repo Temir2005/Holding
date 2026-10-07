@@ -81,19 +81,78 @@ def open_raster(data: bytes) -> Image.Image:
     return image
 
 
-def probe_raster(data: bytes, declared: MediaType) -> Probe:
-    image = open_raster(data)
+# Re-encoding settings when metadata is stripped. JPEG keeps its own quality when
+# no rotation was needed (no generational loss).
+SAVE_OPTIONS: dict[str, dict[str, object]] = {
+    "JPEG": {"quality": 92, "optimize": True, "progressive": True},
+    "PNG": {"optimize": True},
+    "WEBP": {"quality": 90, "method": 4},
+    "AVIF": {"quality": 85},
+}
+
+
+def check_raster_type(image: Image.Image, declared: MediaType) -> str:
     actual = PILLOW_TO_MIME.get(image.format or "")
     if actual is None:
         raise ProbeError(f"Формат {image.format} не поддерживается")
     if actual != declared.mime:
         raise ProbeError(f"Заявлен {declared.mime}, а файл на самом деле {actual}")
+    return actual
+
+
+def strip_metadata(image: Image.Image) -> tuple[Image.Image, bytes]:
+    """Re-encode without EXIF, XMP, comments and text chunks (camera, GPS, author...).
+
+    Orientation is applied to the pixels first, so the photo stays upright without the
+    EXIF tag. The ICC color profile is kept: dropping it would shift colors.
+    Returns the upright image and the cleaned file.
+    """
+    fmt = image.format or ""
+    options = dict(SAVE_OPTIONS[fmt])
+    if icc := image.info.get("icc_profile"):
+        options["icc_profile"] = icc
+    buf = io.BytesIO()
+    if getattr(image, "is_animated", False):
+        # Rotating every frame is not worth it for animations; frames are kept as is.
+        image.save(buf, fmt, save_all=True, **options)
+        return image, buf.getvalue()
     upright = ImageOps.exif_transpose(image)
-    return Probe(
-        mime=actual,
-        width=upright.width,
-        height=upright.height,
-        dominant_color=dominant_color(upright),
+    if fmt == "JPEG" and upright is image:
+        options.update(quality="keep", subsampling="keep")
+    upright.save(buf, fmt, **options)
+    return upright, buf.getvalue()
+
+
+@dataclass(frozen=True)
+class Variant:
+    width: int
+    height: int
+    body: bytes
+
+
+@dataclass
+class ProcessedRaster:
+    probe: Probe
+    variants: list[Variant]
+
+
+def process_raster(data: bytes, declared: MediaType, widths: list[int]) -> ProcessedRaster:
+    """Check the real type, strip metadata, measure, make WebP variants.
+
+    CPU-heavy (seconds for a large photo): call it in a worker thread.
+    """
+    image = open_raster(data)
+    mime = check_raster_type(image, declared)
+    upright, cleaned = strip_metadata(image)
+    return ProcessedRaster(
+        probe=Probe(
+            mime=mime,
+            width=upright.width,
+            height=upright.height,
+            dominant_color=dominant_color(upright),
+            cleaned=cleaned,
+        ),
+        variants=make_variants(upright, widths),
     )
 
 
@@ -105,16 +164,8 @@ def dominant_color(image: Image.Image) -> str:
     return f"#{r:02x}{g:02x}{b:02x}"
 
 
-@dataclass(frozen=True)
-class Variant:
-    width: int
-    height: int
-    body: bytes
-
-
-def make_variants(data: bytes, widths: list[int], quality: int = 80) -> list[Variant]:
-    """WebP copies at each width narrower than the original; never upscales."""
-    image = ImageOps.exif_transpose(open_raster(data))
+def make_variants(image: Image.Image, widths: list[int], quality: int = 80) -> list[Variant]:
+    """WebP copies at each width narrower than the image; never upscales."""
     if image.mode not in ("RGB", "RGBA"):
         image = image.convert("RGBA" if "A" in image.getbands() else "RGB")
     variants: list[Variant] = []
@@ -287,7 +338,3 @@ def probe_pdf(head: bytes) -> Probe:
     if b"%PDF-" not in head[:1024]:
         raise ProbeError("Файл не является PDF")
     return Probe(mime="application/pdf")
-
-
-def needs_full_read(kind: MediaKind) -> bool:
-    return kind in (MediaKind.image, MediaKind.svg)

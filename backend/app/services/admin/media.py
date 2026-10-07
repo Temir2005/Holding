@@ -11,6 +11,7 @@ Upload in three steps:
 Pending rows never show in the library and are purged after a while.
 """
 
+import asyncio
 import logging
 import uuid
 from datetime import UTC, datetime, timedelta
@@ -197,12 +198,17 @@ class MediaService(CrudService[Media, UploadRequest, MediaUpdate, MediaAdminRead
         )
 
     async def complete(self, media_id: uuid.UUID) -> CompletedUpload:
-        media = await self.get_or_404(media_id, lock=True)
+        # 1. Read the row without a lock and end the transaction: the slow part below
+        #    (S3 transfers, image processing) must not hold a row lock or a connection.
+        media = await self.get_or_404(media_id)
         if media.status != MediaStatus.pending:
             raise Conflict("Загрузка этого файла уже завершена", code="UPLOAD_ALREADY_COMPLETED")
+        key = media.s3_key
         media_type = files.MEDIA_TYPES[media.mime_type]
+        await self.session.commit()
 
-        info = await self.storage.head(media.s3_key)
+        # 2. Check and process the file. CPU work runs in a worker thread.
+        info = await self.storage.head(key)
         if info is None:
             raise Conflict(
                 "Файл ещё не загружен в хранилище. Отправьте его по выданной ссылке и повторите.",
@@ -210,43 +216,44 @@ class MediaService(CrudService[Media, UploadRequest, MediaUpdate, MediaAdminRead
             )
         limit = self.max_bytes(media_type)
         if info.size > limit:
-            await self._discard(media)
+            await self._discard(media_id, key)
             raise ValidationFailed(
                 f"Файл больше допустимых {limit // MB} МБ", code="MEDIA_TOO_LARGE"
             )
-
-        # Images and SVG are read whole (needed for dimensions and variants anyway);
-        # video and PDF only from their first bytes.
-        whole = (
-            await self.storage.read(media.s3_key)
-            if files.needs_full_read(media_type.kind)
-            else None
-        )
         try:
-            probe = await self._probe(media.s3_key, media_type, info.size, whole)
+            probe, variants = await self._process(key, media_type, info.size)
         except files.ProbeError as exc:
-            await self._discard(media)
+            await self._discard(media_id, key)
             raise ValidationFailed(str(exc), code="MEDIA_TYPE_MISMATCH") from exc
 
         size = info.size
         if probe.cleaned is not None:
-            await self.storage.upload(media.s3_key, probe.cleaned, probe.mime)
+            # Sanitized SVG or a raster image without metadata replaces the upload.
+            await self.storage.upload(key, probe.cleaned, probe.mime)
             size = len(probe.cleaned)
+        stored_variants: list[dict[str, Any]] = []
+        for v in variants:
+            variant_key = key.rsplit(".", 1)[0] + f"_w{v.width}.webp"
+            await self.storage.upload(variant_key, v.body, "image/webp")
+            stored_variants.append(
+                {
+                    "width": v.width,
+                    "height": v.height,
+                    "key": variant_key,
+                    "size_bytes": len(v.body),
+                }
+            )
 
-        variants: list[dict[str, Any]] = []
-        if media_type.kind == files.MediaKind.image and whole is not None:
-            for v in files.make_variants(whole, self.settings.media_variant_widths):
-                key = media.s3_key.rsplit(".", 1)[0] + f"_w{v.width}.webp"
-                await self.storage.upload(key, v.body, "image/webp")
-                variants.append(
-                    {"width": v.width, "height": v.height, "key": key, "size_bytes": len(v.body)}
-                )
-
+        # 3. Short transaction: lock, make sure nobody completed it meanwhile, write.
+        media = await self.get_or_404(media_id, lock=True)
+        if media.status != MediaStatus.pending:
+            # A parallel complete won; its objects have the same keys, nothing to undo.
+            raise Conflict("Загрузка этого файла уже завершена", code="UPLOAD_ALREADY_COMPLETED")
         media.mime_type = probe.mime
         media.size_bytes = size
         media.width, media.height = probe.width, probe.height
         media.dominant_color = probe.dominant_color
-        media.variants = variants
+        media.variants = stored_variants
         media.status = MediaStatus.ready
         media.version += 1
         await self.session.flush()
@@ -260,22 +267,30 @@ class MediaService(CrudService[Media, UploadRequest, MediaUpdate, MediaAdminRead
         await self.session.refresh(media)
         return CompletedUpload(media=self.to_read(media), warnings=probe.warnings)
 
-    async def _probe(
-        self, key: str, media_type: files.MediaType, size: int, whole: bytes | None
-    ) -> files.Probe:
-        if media_type.kind == files.MediaKind.image and whole is not None:
-            return files.probe_raster(whole, media_type)
-        if media_type.kind == files.MediaKind.svg and whole is not None:
-            return files.probe_svg(whole)
+    async def _process(
+        self, key: str, media_type: files.MediaType, size: int
+    ) -> tuple[files.Probe, list[files.Variant]]:
+        """Images and SVG are read whole; video and PDF only from their first bytes."""
+        if media_type.kind == files.MediaKind.image:
+            data = await self.storage.read(key)
+            raster = await asyncio.to_thread(
+                files.process_raster, data, media_type, self.settings.media_variant_widths
+            )
+            return raster.probe, raster.variants
+        if media_type.kind == files.MediaKind.svg:
+            data = await self.storage.read(key)
+            return await asyncio.to_thread(files.probe_svg, data), []
         head = await self.storage.read_range(key, 0, min(size, files.HEAD_BYTES) - 1)
         if media_type.kind == files.MediaKind.video:
-            return files.probe_mp4(head)
-        return files.probe_pdf(head)
+            return files.probe_mp4(head), []
+        return files.probe_pdf(head), []
 
-    async def _discard(self, media: Media) -> None:
-        """Drop a failed upload: the object and its pending row."""
-        await self.storage.delete(media.s3_key)
-        await self.media.delete(media)
+    async def _discard(self, media_id: uuid.UUID, key: str) -> None:
+        """Drop a failed upload: its object and its row, if the row is still pending."""
+        await self.storage.delete(key)
+        media = await self.media.get_for_update(media_id)
+        if media is not None and media.status == MediaStatus.pending:
+            await self.media.delete(media)
         await self.session.commit()
 
     # --- delete ----------------------------------------------------------------------

@@ -7,7 +7,7 @@ The public API resolves them to a single string with a fallback to Russian.
 from enum import StrEnum
 from typing import Any
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class Locale(StrEnum):
@@ -22,9 +22,11 @@ DEFAULT_LOCALE = Locale.ru
 class LocalizedText(BaseModel):
     """A localized string inside section data and other JSONB documents."""
 
-    ru: str
-    kk: str | None = None
-    en: str | None = None
+    model_config = ConfigDict(title="Текст на трёх языках")
+
+    ru: str = Field(title="Русский")
+    kk: str | None = Field(default=None, title="Қазақша")
+    en: str | None = Field(default=None, title="English")
 
     def resolve(self, locale: Locale) -> str:
         return resolve_text(self.model_dump(), locale) or ""

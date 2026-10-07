@@ -5,6 +5,14 @@
 {
 	admin off
 	auto_https off
+	servers {
+		# Railway's edge proxy connects from a private or CGNAT address and puts the
+		# real client into X-Forwarded-For. Trust only those hops and read the client
+		# from the right, so an address a client typed into the header is ignored.
+		trusted_proxies static private_ranges 100.64.0.0/10
+		trusted_proxies_strict
+		client_ip_headers X-Forwarded-For
+	}
 }
 
 :{$PORT:8080} {
@@ -14,6 +22,9 @@
 	handle /api/* {
 		reverse_proxy {$API_UPSTREAM} {
 			header_up Host {upstream_hostport}
+			# Give the backend exactly one address: the client as resolved above.
+			header_up X-Forwarded-For {client_ip}
+			header_up X-Real-IP {client_ip}
 		}
 	}
 
