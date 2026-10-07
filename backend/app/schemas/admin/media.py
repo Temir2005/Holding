@@ -5,7 +5,7 @@ from pydantic import BaseModel, Field
 
 from app.core.i18n import LocalizedText
 from app.models import MediaStatus
-from app.schemas.admin.common import VersionedUpdate
+from app.schemas.admin.common import Usage, VersionedUpdate
 from app.schemas.entities import MediaVariant
 
 Folder = str
@@ -65,13 +65,8 @@ class MediaUpdate(VersionedUpdate):
     original_filename: str | None = Field(default=None, min_length=1, max_length=255)
 
 
-class MediaUsage(BaseModel):
-    """One place that references a media file."""
-
-    entity_type: str = Field(examples=["project", "section", "site_settings"])
-    entity_id: uuid.UUID
-    field: str = Field(examples=["cover_id", "data"])
-    label: str = Field(description="Human-readable name of the place")
+# Kept as a name for the media endpoints; the shape is shared.
+MediaUsage = Usage
 
 
 class FolderCount(BaseModel):

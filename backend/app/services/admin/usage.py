@@ -26,9 +26,10 @@ from app.models import (
     SiteSettings,
     TimelineEvent,
 )
+from app.schemas.admin.common import Usage
 from app.schemas.admin.media import MediaUsage
-from app.schemas.refs import RefKind, collect_refs
-from app.schemas.sections import SECTION_SCHEMAS, SectionType
+from app.schemas.refs import RefKind, collect_refs, iter_instances
+from app.schemas.sections import SECTION_SCHEMAS, Cta, SectionType
 from app.schemas.site import SiteSettingsDoc
 
 log = logging.getLogger(__name__)
@@ -41,9 +42,71 @@ def _label(value: Any) -> str:
     return str(value or "")
 
 
+def links_to_page(href: str, slug: str) -> bool:
+    return href.strip("/") == slug
+
+
 class UsageFinder:
     def __init__(self, session: AsyncSession) -> None:
         self.session = session
+
+    async def page(self, slug: str) -> list[Usage]:
+        """Menu items, buttons and divisions that link to the page with this slug."""
+        found: list[Usage] = []
+        settings = await self.session.scalar(select(SiteSettings).limit(1))
+        if settings is not None:
+            for i, item in enumerate(settings.navigation or []):
+                if isinstance(item, dict) and item.get("page_slug") == slug:
+                    found.append(
+                        Usage(
+                            entity_type="site_settings",
+                            entity_id=settings.id,
+                            field=f"navigation.{i}",
+                            label=f"Меню: «{_label(item.get('label'))}»",
+                        )
+                    )
+        for division_id, name in await self.session.execute(
+            select(Division.id, Division.name).where(Division.page_slug == slug)
+        ):
+            found.append(
+                Usage(
+                    entity_type="division",
+                    entity_id=division_id,
+                    field="page_slug",
+                    label=f"Направление «{_label(name)}»",
+                )
+            )
+        for section_id, stored, page_slug, section_type in await self._parsed_sections():
+            for path, cta in iter_instances(stored, Cta):
+                if links_to_page(cta.href, slug):
+                    found.append(
+                        Usage(
+                            entity_type="section",
+                            entity_id=section_id,
+                            field=".".join(map(str, ("data", *path, "href"))),
+                            label=(
+                                f"Кнопка «{cta.label.ru}» на странице «{page_slug}» "
+                                f"({section_type})"
+                            ),
+                        )
+                    )
+        return found
+
+    async def _parsed_sections(self) -> list[tuple[uuid.UUID, Any, str, str]]:
+        rows = await self.session.execute(
+            select(Section.id, Section.type, Section.data, Page.slug).join(
+                Page, Page.id == Section.page_id
+            )
+        )
+        parsed = []
+        for section_id, section_type, data, slug in rows:
+            try:
+                stored = SECTION_SCHEMAS[SectionType(section_type)].stored.model_validate(data)
+            except (ValueError, ValidationError):
+                log.warning("usage scan: section %s has invalid data, skipped", section_id)
+                continue
+            parsed.append((section_id, stored, slug, section_type))
+        return parsed
 
     async def media(self, media_id: uuid.UUID) -> list[MediaUsage]:
         found: list[MediaUsage] = []
@@ -89,18 +152,8 @@ class UsageFinder:
         return found
 
     async def _in_sections(self, kind: RefKind, target: uuid.UUID) -> list[MediaUsage]:
-        rows = await self.session.execute(
-            select(Section.id, Section.type, Section.data, Page.slug).join(
-                Page, Page.id == Section.page_id
-            )
-        )
         found = []
-        for section_id, section_type, data, slug in rows:
-            try:
-                stored = SECTION_SCHEMAS[SectionType(section_type)].stored.model_validate(data)
-            except (ValueError, ValidationError):
-                log.warning("usage scan: section %s has invalid data, skipped", section_id)
-                continue
+        for section_id, stored, slug, section_type in await self._parsed_sections():
             if target in collect_refs(stored).get(kind, set()):
                 found.append(
                     MediaUsage(

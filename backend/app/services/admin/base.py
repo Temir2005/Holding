@@ -8,7 +8,8 @@ read model (`to_read`) and what must hold before saving (`validate`).
 
 import uuid
 from abc import ABC, abstractmethod
-from collections.abc import Sequence
+from collections.abc import AsyncIterator, Sequence
+from contextlib import asynccontextmanager
 from typing import Any, ClassVar, Protocol, cast
 
 from pydantic import BaseModel
@@ -78,6 +79,16 @@ class CrudService[M: DeclarativeBase, C: BaseModel, U: VersionedUpdate, R: BaseM
 
     # --- shared flow ----------------------------------------------------------
 
+    @asynccontextmanager
+    async def transaction(self) -> AsyncIterator[None]:
+        """Roll back on any error, so a failed write leaves nothing half-applied in the
+        session (a changed attribute would otherwise be flushed by the next query)."""
+        try:
+            yield
+        except BaseException:
+            await self.session.rollback()
+            raise
+
     async def get_or_404(self, id: uuid.UUID, *, lock: bool = False) -> M:
         """Load a row or raise 404. Writers pass `lock=True` so the version check that
         follows cannot race with another transaction."""
@@ -99,48 +110,54 @@ class CrudService[M: DeclarativeBase, C: BaseModel, U: VersionedUpdate, R: BaseM
         )
 
     async def create(self, data: C) -> R:
-        obj = self.build(data)
-        await self.validate(obj)
-        self.repo.add(obj)
-        await self.session.flush()
-        await self.audit.record(
-            action="create",
-            entity_type=self.entity_type,
-            entity_id=row(obj).id,
-            changes=snapshot(obj),
-        )
-        await self.session.commit()
-        await self.session.refresh(obj)
-        return self.to_read(obj)
+        async with self.transaction():
+            obj = self.build(data)
+            await self.validate(obj)
+            self.repo.add(obj)
+            await self.session.flush()
+            await self.audit.record(
+                action="create",
+                entity_type=self.entity_type,
+                entity_id=row(obj).id,
+                changes=snapshot(obj),
+            )
+            await self.session.commit()
+            await self.session.refresh(obj)
+            return self.to_read(obj)
 
     async def update(self, id: uuid.UUID, data: U) -> R:
-        obj = await self.get_or_404(id, lock=True)
-        ensure_version(row(obj), data.version)
-        before = snapshot(obj)
-        self.apply(obj, data.model_dump(exclude_unset=True, exclude={"version"}))
-        await self.validate(obj)
-        row(obj).version += 1
-        await self.session.flush()
-        changes = diff(before, snapshot(obj))
-        await self.on_updated(obj, changes)
-        await self.audit.record(
-            action="update", entity_type=self.entity_type, entity_id=row(obj).id, changes=changes
-        )
-        await self.session.commit()
-        await self.session.refresh(obj)
-        return self.to_read(obj)
+        async with self.transaction():
+            obj = await self.get_or_404(id, lock=True)
+            ensure_version(row(obj), data.version)
+            before = snapshot(obj)
+            self.apply(obj, data.model_dump(exclude_unset=True, exclude={"version"}))
+            await self.validate(obj)
+            row(obj).version += 1
+            await self.session.flush()
+            changes = diff(before, snapshot(obj))
+            await self.on_updated(obj, changes)
+            await self.audit.record(
+                action="update",
+                entity_type=self.entity_type,
+                entity_id=row(obj).id,
+                changes=changes,
+            )
+            await self.session.commit()
+            await self.session.refresh(obj)
+            return self.to_read(obj)
 
     async def delete(self, id: uuid.UUID, version: int) -> None:
-        obj = await self.get_or_404(id, lock=True)
-        ensure_version(row(obj), version)
-        await self.before_delete(obj)
-        before = snapshot(obj)
-        await self.repo.delete(obj)
-        await self.session.flush()
-        await self.audit.record(
-            action="delete", entity_type=self.entity_type, entity_id=id, changes=before
-        )
-        await self.session.commit()
+        async with self.transaction():
+            obj = await self.get_or_404(id, lock=True)
+            ensure_version(row(obj), version)
+            await self.before_delete(obj)
+            before = snapshot(obj)
+            await self.repo.delete(obj)
+            await self.session.flush()
+            await self.audit.record(
+                action="delete", entity_type=self.entity_type, entity_id=id, changes=before
+            )
+            await self.session.commit()
 
     async def on_updated(self, obj: M, changes: dict[str, Any]) -> None:
         """Side effects of an update that must commit with it (e.g. revoke sessions).
@@ -157,11 +174,12 @@ class CrudService[M: DeclarativeBase, C: BaseModel, U: VersionedUpdate, R: BaseM
         return None
 
     async def reorder(self, ids: Sequence[uuid.UUID], *scope: Any) -> None:
-        await self.repo.reorder(ids, *scope)
-        await self.audit.record(
-            action="reorder",
-            entity_type=self.entity_type,
-            entity_id=None,
-            changes={"order": [str(i) for i in ids]},
-        )
-        await self.session.commit()
+        async with self.transaction():
+            await self.repo.reorder(ids, *scope)
+            await self.audit.record(
+                action="reorder",
+                entity_type=self.entity_type,
+                entity_id=None,
+                changes={"order": [str(i) for i in ids]},
+            )
+            await self.session.commit()

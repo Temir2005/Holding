@@ -380,3 +380,100 @@ async def test_cleanup_removes_stale_uploads_and_old_tokens(
     assert storage.objects == {}
     kept = {h.rstrip("0") for h in await session.scalars(select(RefreshToken.token_hash))}
     assert kept == {"revoked-recently", "active"}
+
+
+def jpeg_with_exif(width: int, height: int, orientation: int) -> bytes:
+    """A camera-like JPEG: rotation tag, camera model and GPS position in EXIF."""
+    image = Image.new("RGB", (width, height), (120, 60, 30))
+    exif = Image.Exif()
+    exif[0x0112] = orientation  # Orientation
+    exif[0x0110] = "Secret Camera 3000"  # Model
+    exif[0x8825] = {1: "N", 2: (43.0, 17.0, 0.0)}  # GPS IFD
+    buf = io.BytesIO()
+    image.save(buf, "JPEG", exif=exif, quality=90)
+    return buf.getvalue()
+
+
+async def test_photo_metadata_is_stripped_and_rotation_applied(
+    client: AsyncClient, editor: AdminUser, storage: InMemoryStorage
+) -> None:
+    h = auth_header(editor)
+    original = jpeg_with_exif(1000, 600, orientation=6)  # "rotate 90° when showing"
+    assert Image.open(io.BytesIO(original)).getexif()
+
+    ticket = await upload(client, storage, h, original, "image/jpeg")
+    res = await client.post(f"{MEDIA}/{ticket['media']['id']}/complete", headers=h)
+    media = res.json()["media"]
+    # Stored upright: width and height swapped by the rotation.
+    assert (media["width"], media["height"]) == (600, 1000)
+
+    key = ticket["media"]["url"].split(f"/{storage.bucket}/", 1)[1]
+    stored = Image.open(io.BytesIO(storage.objects[key][0]))
+    assert stored.size == (600, 1000)
+    assert not stored.getexif(), "EXIF must be gone (camera, GPS, orientation)"
+    assert b"Secret Camera" not in storage.objects[key][0]
+    assert media["size_bytes"] == len(storage.objects[key][0])
+
+
+async def test_png_text_chunks_are_stripped(
+    client: AsyncClient, editor: AdminUser, storage: InMemoryStorage
+) -> None:
+    from PIL.PngImagePlugin import PngInfo
+
+    info = PngInfo()
+    info.add_text("Author", "Иван с флешки")
+    buf = io.BytesIO()
+    Image.new("RGB", (32, 32), (0, 128, 0)).save(buf, "PNG", pnginfo=info)
+    h = auth_header(editor)
+    ticket = await upload(client, storage, h, buf.getvalue(), "image/png")
+    await client.post(f"{MEDIA}/{ticket['media']['id']}/complete", headers=h)
+    key = ticket["media"]["url"].split(f"/{storage.bucket}/", 1)[1]
+    assert "Author" not in Image.open(io.BytesIO(storage.objects[key][0])).info
+
+
+async def test_processing_runs_off_the_event_loop_and_without_row_lock(
+    client: AsyncClient,
+    editor: AdminUser,
+    storage: InMemoryStorage,
+    engine: Any,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """While a big photo is processed, other requests are served and the row is free."""
+    import asyncio
+    import threading
+
+    from sqlalchemy import text
+    from sqlalchemy.ext.asyncio import async_sessionmaker
+
+    from app.services.admin import media_files
+
+    started, release = threading.Event(), threading.Event()
+    real = media_files.process_raster
+
+    def slow_process(*args: Any, **kwargs: Any) -> Any:
+        started.set()
+        release.wait(timeout=5)
+        return real(*args, **kwargs)
+
+    monkeypatch.setattr(media_files, "process_raster", slow_process)
+    h = auth_header(editor)
+    ticket = await upload(client, storage, h, jpeg(), "image/jpeg")
+    media_id = ticket["media"]["id"]
+
+    completing = asyncio.create_task(client.post(f"{MEDIA}/{media_id}/complete", headers=h))
+    await asyncio.to_thread(started.wait, 5)
+
+    # The event loop is free: another request is answered meanwhile.
+    me = await client.get("/api/v1/admin/auth/me", headers=h)
+    assert me.status_code == 200
+    # The row is not locked: NOWAIT would fail at once if it were.
+    async with async_sessionmaker(engine)() as other:
+        await other.execute(
+            text("SELECT id FROM media WHERE id = :id FOR UPDATE NOWAIT"), {"id": media_id}
+        )
+        await other.rollback()
+
+    release.set()
+    res = await completing
+    assert res.status_code == 200, res.text
+    assert res.json()["media"]["status"] == "ready"
