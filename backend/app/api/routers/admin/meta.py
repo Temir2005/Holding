@@ -16,9 +16,11 @@ LookupKind = Literal[
 ]
 
 
-@router.get("/meta", response_model=Meta, summary="Languages, enums, icons, limits")
-async def get_meta(settings: SettingsDep) -> Meta:
-    return build_meta(settings)
+@router.get(
+    "/meta", response_model=Meta, summary="Languages, enums, icons, limits, dropdown choices"
+)
+async def get_meta(settings: SettingsDep, session: SessionDep, storage: StorageDep) -> Meta:
+    return build_meta(settings, await RefService(session, storage).key_options())
 
 
 @router.get(

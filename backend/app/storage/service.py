@@ -10,6 +10,7 @@ from functools import lru_cache
 from typing import Any, Protocol
 
 import aioboto3
+from botocore.config import Config
 from botocore.exceptions import ClientError
 
 from app.core.config import Settings, get_settings
@@ -41,13 +42,17 @@ class StorageService:
         self._session = aioboto3.Session()
         self.bucket = settings.s3_bucket
 
-    def _client(self) -> Any:
+    def _client(self, endpoint_url: str | None = None) -> Any:
+        """S3 client for the backend's own calls; `endpoint_url` overrides the address."""
         return self._session.client(
             "s3",
-            endpoint_url=self._settings.s3_endpoint_url,
+            endpoint_url=endpoint_url or self._settings.s3_endpoint_url,
             aws_access_key_id=self._settings.s3_access_key,
             aws_secret_access_key=self._settings.s3_secret_key,
             region_name=self._settings.s3_region,
+            # SigV4 everywhere: boto would sign presigned URLs with legacy SigV2, which
+            # many S3 providers reject. SigV4 covers the host, hence a public endpoint.
+            config=Config(signature_version="s3v4"),
         )
 
     def public_url(self, key: str, bucket: str | None = None) -> str:
@@ -70,8 +75,10 @@ class StorageService:
 
         Content-Type is part of the signature, so the browser must send the same value.
         Size cannot be limited in a PUT signature; it is checked when the upload completes.
+        Signed for the public address: the host is part of the signature, and the browser
+        cannot reach the docker-internal endpoint. Signing is local, nothing is sent.
         """
-        async with self._client() as s3:
+        async with self._client(self._settings.presign_endpoint_url) as s3:
             url: str = await s3.generate_presigned_url(
                 "put_object",
                 Params={"Bucket": self.bucket, "Key": key, "ContentType": content_type},

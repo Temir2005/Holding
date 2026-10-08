@@ -1,7 +1,10 @@
 """References from stored documents (section data, settings) to entities.
 
-- `check`: every id in a `Ref` field must exist (media must be fully uploaded),
-  and every internal link in a button must lead to an existing page or project.
+- `check`: what a stored document must satisfy beyond its schema. Required texts
+  must have Russian text; every id in a `Ref` field must exist (media must be fully uploaded),
+  every key in a `KeyOf` field must match something (a division slug, a stats
+  context with at least one stat), and every internal link in a button must lead
+  to an existing page or project.
   The public API silently skips broken references; the admin refuses to save them.
 - `cards`: short cards of referenced objects, so the admin can show what is picked.
 - `lookup`: search for the entity picker.
@@ -19,6 +22,7 @@ from sqlalchemy import String, cast, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.errors import ValidationFailed
+from app.core.i18n import empty_required_texts
 from app.models import (
     Client,
     Division,
@@ -32,8 +36,9 @@ from app.models import (
     Vacancy,
 )
 from app.repositories.admin.base import like_pattern
+from app.schemas.admin.meta import Option
 from app.schemas.admin.pages import RefCard, RefCards
-from app.schemas.refs import Loc, RefKind, iter_instances, iter_refs
+from app.schemas.refs import KeyKind, Loc, RefKind, iter_instances, iter_keys, iter_refs
 from app.schemas.sections import Cta
 from app.storage.service import Storage
 
@@ -60,6 +65,16 @@ KIND_LABELS = {
 }
 
 EXTERNAL_LINK = re.compile(r"^(https?://|mailto:|tel:)")
+
+# Where a key must be found; a stats context exists while at least one stat has it.
+KEY_COLUMNS: dict[KeyKind, Any] = {
+    KeyKind.division: Division.slug,
+    KeyKind.stat_context: Stat.context,
+}
+KEY_MISSING = {
+    KeyKind.division: "нет направления «{key}»",
+    KeyKind.stat_context: "нет ни одной цифры с набором «{key}»",
+}
 
 
 def ru(value: Any) -> str:
@@ -104,11 +119,26 @@ class RefService:
 
     # --- validation ------------------------------------------------------------------
 
-    async def check(self, doc: BaseModel, loc: Loc) -> None:
-        """Raise ValidationFailed listing every broken reference and link, with field paths."""
-        errors = await self.ref_errors(doc, loc) + await self.link_errors(doc, loc)
-        if errors:
-            raise ValidationFailed("Есть ссылки на несуществующие объекты", details=errors)
+    async def check(
+        self, doc: BaseModel, loc: Loc, *, extra: Sequence[dict[str, Any]] = ()
+    ) -> None:
+        """Raise ValidationFailed listing every empty required text, broken reference and
+        link, with field paths. `extra`: errors the caller found itself, reported together."""
+        texts = [
+            {"loc": [*loc, *path], "msg": "заполните текст на русском"}
+            for path in empty_required_texts(doc)
+        ]
+        refs = (
+            await self.ref_errors(doc, loc)
+            + await self.key_errors(doc, loc)
+            + await self.link_errors(doc, loc)
+        )
+        errors = [*texts, *extra, *refs]
+        if not errors:
+            return
+        if texts or extra:
+            raise ValidationFailed("Проверьте заполнение", details=errors)
+        raise ValidationFailed("Есть ссылки на несуществующие объекты", details=errors)
 
     async def ref_errors(self, doc: BaseModel, loc: Loc) -> list[dict[str, Any]]:
         found = list(iter_refs(doc))
@@ -136,6 +166,37 @@ class RefService:
         if kind == RefKind.media:
             stmt = stmt.where(Media.status == MediaStatus.ready)
         return set(await self.session.scalars(stmt))
+
+    async def key_errors(self, doc: BaseModel, loc: Loc) -> list[dict[str, Any]]:
+        found = list(iter_keys(doc))
+        if not found:
+            return []
+        known = {
+            kind: await self.existing_keys(kind, {k for _, kd, k in found if kd == kind})
+            for kind in {kind for _, kind, _ in found}
+        }
+        return [
+            {"loc": [*loc, *path], "msg": KEY_MISSING[kind].format(key=key)}
+            for path, kind, key in found
+            if key not in known[kind]
+        ]
+
+    async def existing_keys(self, kind: KeyKind, keys: Iterable[str]) -> set[str]:
+        column = KEY_COLUMNS[kind]
+        return set(await self.session.scalars(select(column).where(column.in_(set(keys)))))
+
+    async def key_options(self) -> dict[KeyKind, list[Option]]:
+        """Existing keys for the dropdowns: divisions by name, stats contexts."""
+        divisions = await self.session.execute(
+            select(Division.slug, Division.name).order_by(Division.sort_order, Division.slug)
+        )
+        contexts = await self.session.scalars(
+            select(Stat.context).distinct().order_by(Stat.context)
+        )
+        return {
+            KeyKind.division: [Option(value=slug, label=ru(name)) for slug, name in divisions],
+            KeyKind.stat_context: [Option(value=c, label=c) for c in contexts],
+        }
 
     async def link_errors(self, doc: BaseModel, loc: Loc) -> list[dict[str, Any]]:
         buttons = list(iter_instances(doc, Cta))

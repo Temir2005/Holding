@@ -19,6 +19,9 @@ class Settings(BaseSettings):
 
     s3_endpoint_url: str
     s3_public_url: str
+    # Host in presigned upload URLs: the browser sends the file there, so it must be an
+    # address the browser can reach (S3_ENDPOINT_URL is the docker-internal one).
+    s3_presign_endpoint_url: str | None = None
     s3_access_key: str
     s3_secret_key: str
     s3_bucket: str
@@ -72,6 +75,10 @@ class Settings(BaseSettings):
     @property
     def cors_origin_list(self) -> list[str]:
         return [o.strip() for o in self.cors_origins.split(",") if o.strip()]
+
+    @property
+    def presign_endpoint_url(self) -> str:
+        return self.s3_presign_endpoint_url or self.s3_public_url
 
     @property
     def is_dev(self) -> bool:

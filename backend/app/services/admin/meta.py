@@ -6,9 +6,9 @@ from typing import Any
 from app.core.config import Settings
 from app.core.i18n import DEFAULT_LOCALE, Locale
 from app.core.icons import ICON_NAMES
-from app.models import EmploymentType, ProjectStatus
+from app.models import EmploymentType, LeadStatus, ProjectStatus
 from app.schemas.admin.meta import LocaleInfo, MediaLimits, Meta, Option, SectionTypeInfo
-from app.schemas.refs import RefKind
+from app.schemas.refs import KeyKind, RefKind
 from app.schemas.sections import LEAD_TYPE_LABELS, SECTION_SCHEMAS, Tone
 from app.services.admin.media_files import MEDIA_TYPES
 
@@ -23,6 +23,12 @@ EMPLOYMENT_LABELS = {
     EmploymentType.part_time: "Частичная занятость",
     EmploymentType.contract: "Контракт",
     EmploymentType.internship: "Стажировка",
+}
+LEAD_STATUS_LABELS = {
+    LeadStatus.new: "Новая",
+    LeadStatus.in_progress: "В работе",
+    LeadStatus.done: "Обработана",
+    LeadStatus.spam: "Спам",
 }
 TONE_LABELS = {Tone.dark: "Тёмный", Tone.light: "Светлый", Tone.accent: "Акцентный"}
 # Social link types the site knows how to show (validated when settings are saved).
@@ -42,13 +48,15 @@ def options(labels: Mapping[Any, str]) -> list[Option]:
     return [Option(value=str(k), label=v) for k, v in labels.items()]
 
 
-def build_meta(settings: Settings) -> Meta:
+def build_meta(settings: Settings, keys: Mapping[KeyKind, list[Option]]) -> Meta:
+    """`keys`: current choices for key fields (RefService.key_options)."""
     return Meta(
         locales=[LocaleInfo(code=loc.value, label=LOCALE_LABELS[loc]) for loc in Locale],
         default_locale=DEFAULT_LOCALE.value,
         project_statuses=options(PROJECT_STATUS_LABELS),
         employment_types=options(EMPLOYMENT_LABELS),
         lead_types=options(LEAD_TYPE_LABELS),
+        lead_statuses=options(LEAD_STATUS_LABELS),
         tones=options(TONE_LABELS),
         social_types=options(SOCIAL_TYPES),
         icons=list(ICON_NAMES),
@@ -59,6 +67,8 @@ def build_meta(settings: Settings) -> Meta:
             video_mb=settings.media_max_video_mb,
             types=sorted(MEDIA_TYPES),
         ),
+        divisions=keys[KeyKind.division],
+        stat_contexts=keys[KeyKind.stat_context],
     )
 
 

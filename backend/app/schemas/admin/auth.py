@@ -60,6 +60,8 @@ class UserCreate(BaseModel):
 
 
 class UserUpdate(VersionedUpdate):
+    not_null = frozenset({"full_name", "role", "is_active"})
+
     full_name: str | None = Field(default=None, min_length=1, max_length=200)
     role: UserRole | None = None
     is_active: bool | None = None

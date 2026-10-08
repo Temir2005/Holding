@@ -8,7 +8,7 @@ from app.models.base import Base, IdMixin, LText, PublishableMixin, TimestampMix
 from app.models.media import Media
 
 
-class SiteSettings(IdMixin, TimestampMixin, Base):
+class SiteSettings(IdMixin, TimestampMixin, VersionMixin, Base):
     """Singleton row. JSONB fields are validated by schemas in app.schemas.site."""
 
     __tablename__ = "site_settings"

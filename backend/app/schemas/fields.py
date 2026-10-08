@@ -5,7 +5,10 @@ build an editing form for any section without knowing it in advance:
 
 - `x-widget`: localized-text | localized-textarea | markdown | icon | link | color | anchor
 - `x-ref`: {kind, many}, added by `Ref` itself (app.schemas.refs)
+- `x-widget: select` + `x-options`: a dropdown whose choices are the GET /admin/meta list
+  of that name, added by `KeyOf` (division slugs, stats contexts)
 - `x-enum-labels`: {value: label} for choice fields
+- `x-widget: page`: a page picker (GET /admin/lookup?kind=page); the value is the slug
 """
 
 from collections.abc import Mapping
@@ -21,13 +24,20 @@ def field(
     *,
     widget: str | None = None,
     labels: Mapping[Any, str] | None = None,
+    options: str | None = None,
     description: str | None = None,
     **kwargs: Any,
 ) -> Any:
-    """`Field` with a Russian title and optional UI hints. Other kwargs pass through."""
+    """`Field` with a Russian title and optional UI hints. Other kwargs pass through.
+
+    `options` names a list in GET /admin/meta to choose from (a dropdown).
+    """
     extra: dict[str, Any] = {}
     if widget:
         extra["x-widget"] = widget
+    if options:
+        extra["x-widget"] = "select"
+        extra["x-options"] = options
     if labels:
         extra["x-enum-labels"] = {str(k): v for k, v in labels.items()}
     if extra:

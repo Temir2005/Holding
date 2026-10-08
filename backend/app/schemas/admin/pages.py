@@ -4,26 +4,28 @@ from typing import Annotated, Any
 
 from pydantic import BaseModel, Field
 
-from app.core.i18n import LocalizedText
+from app.core.i18n import LocalizedText, RequiredText
 from app.schemas.admin.common import VersionedUpdate
 from app.schemas.refs import RefKind
 from app.schemas.sections import SectionType, Tone
 
+SLUG_PATTERN = r"^[a-z0-9]+(?:-[a-z0-9]+)*$"
 Slug = Annotated[
     str,
     Field(
         min_length=1,
         max_length=128,
-        pattern=r"^[a-z0-9]+(?:-[a-z0-9]+)*$",
+        pattern=SLUG_PATTERN,
         description="Latin lowercase letters, digits and single dashes",
         examples=["smart-panels"],
     ),
 ]
+ANCHOR_PATTERN = r"^[a-z][a-z0-9-]*$"
 Anchor = Annotated[
     str,
     Field(
         max_length=64,
-        pattern=r"^[a-z][a-z0-9-]*$",
+        pattern=ANCHOR_PATTERN,
         description="For links like #contacts; unique within the page",
     ),
 ]
@@ -48,7 +50,7 @@ RefCards = dict[RefKind, dict[uuid.UUID, RefCard]]
 
 class PageCreate(BaseModel):
     slug: Slug
-    title: LocalizedText
+    title: RequiredText
     seo_title: LocalizedText | None = None
     seo_description: LocalizedText | None = None
     og_image_id: uuid.UUID | None = None
@@ -56,8 +58,10 @@ class PageCreate(BaseModel):
 
 
 class PageUpdate(VersionedUpdate):
+    not_null = frozenset({"slug", "title", "is_published"})
+
     slug: Slug | None = None
-    title: LocalizedText | None = None
+    title: RequiredText | None = None
     seo_title: LocalizedText | None = None
     seo_description: LocalizedText | None = None
     og_image_id: uuid.UUID | None = None
@@ -97,6 +101,8 @@ class SectionCreate(BaseModel):
 
 
 class SectionUpdate(VersionedUpdate):
+    not_null = frozenset({"data", "tone", "is_visible"})
+
     data: dict[str, Any] | None = None
     anchor: Anchor | None = None
     tone: Tone | None = None

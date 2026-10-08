@@ -11,12 +11,14 @@ from typing import Annotated, Any
 
 from pydantic import BaseModel, Field, HttpUrl
 
-from app.core.i18n import LocalizedText
+from app.core.i18n import LocalizedText, RequiredText
 from app.models import EmploymentType, ProjectStatus
 from app.schemas.admin.common import VersionedUpdate
 from app.schemas.admin.pages import RefCard, Slug
 
 L = LocalizedText
+# Required localized text: Russian must not be empty.
+RL = RequiredText
 Url = Annotated[HttpUrl, Field(max_length=500)]
 Year = Annotated[int, Field(ge=1900, le=2100)]
 Tag = Annotated[str, Field(min_length=1, max_length=64)]
@@ -32,15 +34,15 @@ class Timestamps(BaseModel):
 
 
 class Testimonial(BaseModel):
-    quote: L
-    author: L
+    quote: RL
+    author: RL
     position: L | None = None
 
 
 class DivisionStatIn(BaseModel):
     value: float
     suffix: L | None = None
-    label: L
+    label: RL
 
 
 # --- divisions ---------------------------------------------------------------------
@@ -48,7 +50,7 @@ class DivisionStatIn(BaseModel):
 
 class DivisionCreate(BaseModel):
     slug: Slug
-    name: L
+    name: RL
     tagline: L | None = None
     description: L | None = None
     logo_id: uuid.UUID | None = None
@@ -60,8 +62,10 @@ class DivisionCreate(BaseModel):
 
 
 class DivisionUpdate(VersionedUpdate):
+    not_null = frozenset({"slug", "name", "stats", "is_published"})
+
     slug: Slug | None = None
-    name: L | None = None
+    name: RL | None = None
     tagline: L | None = None
     description: L | None = None
     logo_id: uuid.UUID | None = None
@@ -91,7 +95,7 @@ class DivisionAdminRead(Timestamps):
 
 class ProjectCreate(BaseModel):
     slug: Slug
-    title: L
+    title: RL
     division_id: uuid.UUID | None = None
     status: ProjectStatus = ProjectStatus.planned
     location: L | None = None
@@ -109,8 +113,12 @@ class ProjectCreate(BaseModel):
 
 
 class ProjectUpdate(VersionedUpdate):
+    not_null = frozenset(
+        {"slug", "title", "status", "tags", "is_featured", "is_tokenized", "is_published"}
+    )
+
     slug: Slug | None = None
-    title: L | None = None
+    title: RL | None = None
     division_id: uuid.UUID | None = None
     status: ProjectStatus | None = None
     location: L | None = None
@@ -159,7 +167,7 @@ class ProjectFilters(BaseModel):
 
 
 class PersonCreate(BaseModel):
-    full_name: L
+    full_name: RL
     position: L | None = None
     division_id: uuid.UUID | None = None
     bio: L | None = None
@@ -171,7 +179,9 @@ class PersonCreate(BaseModel):
 
 
 class PersonUpdate(VersionedUpdate):
-    full_name: L | None = None
+    not_null = frozenset({"full_name", "is_key", "is_founder", "is_published"})
+
+    full_name: RL | None = None
     position: L | None = None
     division_id: uuid.UUID | None = None
     bio: L | None = None
@@ -205,12 +215,12 @@ class PersonFilters(BaseModel):
 
 
 class ClientCreate(BaseModel):
-    name: L
+    name: RL
     logo_id: uuid.UUID | None = None
     industry: str = Field(
         min_length=1, max_length=64, pattern=r"^[a-z0-9_-]+$", description="Key for the filter"
     )
-    industry_label: L
+    industry_label: RL
     description: L | None = None
     testimonial: Testimonial | None = None
     website_url: Url | None = None
@@ -218,12 +228,14 @@ class ClientCreate(BaseModel):
 
 
 class ClientUpdate(VersionedUpdate):
-    name: L | None = None
+    not_null = frozenset({"name", "industry", "industry_label", "is_published"})
+
+    name: RL | None = None
     logo_id: uuid.UUID | None = None
     industry: str | None = Field(
         default=None, min_length=1, max_length=64, pattern=r"^[a-z0-9_-]+$"
     )
-    industry_label: L | None = None
+    industry_label: RL | None = None
     description: L | None = None
     testimonial: Testimonial | None = None
     website_url: Url | None = None
@@ -252,15 +264,17 @@ class ClientFilters(BaseModel):
 
 class TimelineEventCreate(BaseModel):
     year: Year
-    title: L
+    title: RL
     description: L | None = None
     image_id: uuid.UUID | None = None
     is_published: bool = False
 
 
 class TimelineEventUpdate(VersionedUpdate):
+    not_null = frozenset({"year", "title", "is_published"})
+
     year: Year | None = None
-    title: L | None = None
+    title: RL | None = None
     description: L | None = None
     image_id: uuid.UUID | None = None
     is_published: bool | None = None
@@ -281,7 +295,7 @@ class StatCreate(BaseModel):
     value: float
     prefix: str | None = Field(default=None, max_length=16)
     suffix: L | None = None
-    label: L
+    label: RL
     context: str = Field(
         min_length=1, max_length=64, pattern=r"^[a-z0-9_-]+$", examples=["home", "smart-panels"]
     )
@@ -289,10 +303,12 @@ class StatCreate(BaseModel):
 
 
 class StatUpdate(VersionedUpdate):
+    not_null = frozenset({"value", "label", "context", "is_published"})
+
     value: float | None = None
     prefix: str | None = Field(default=None, max_length=16)
     suffix: L | None = None
-    label: L | None = None
+    label: RL | None = None
     context: str | None = Field(default=None, min_length=1, max_length=64, pattern=r"^[a-z0-9_-]+$")
     is_published: bool | None = None
 
@@ -314,7 +330,7 @@ class StatFilters(BaseModel):
 
 
 class VacancyCreate(BaseModel):
-    title: L
+    title: RL
     division_id: uuid.UUID | None = None
     location: L | None = None
     employment_type: EmploymentType = EmploymentType.full_time
@@ -324,7 +340,9 @@ class VacancyCreate(BaseModel):
 
 
 class VacancyUpdate(VersionedUpdate):
-    title: L | None = None
+    not_null = frozenset({"title", "employment_type", "is_open", "is_published"})
+
+    title: RL | None = None
     division_id: uuid.UUID | None = None
     location: L | None = None
     employment_type: EmploymentType | None = None

@@ -85,6 +85,10 @@ class CrudService[M: DeclarativeBase, C: BaseModel, U: VersionedUpdate, R: BaseM
     async def present(self, obj: M) -> R:
         return (await self.present_many([obj]))[0]
 
+    def changes(self, data: U) -> dict[str, Any]:
+        """What an update writes: by default only the fields the client sent (PATCH)."""
+        return data.model_dump(exclude_unset=True, exclude={"version"})
+
     def apply(self, obj: M, changes: dict[str, Any]) -> None:
         """Copy changed fields onto the row. Override when names or shapes differ."""
         for field, value in changes.items():
@@ -153,7 +157,7 @@ class CrudService[M: DeclarativeBase, C: BaseModel, U: VersionedUpdate, R: BaseM
             obj = await self.get_or_404(id, lock=True)
             ensure_version(row(obj), data.version)
             before = snapshot(obj)
-            self.apply(obj, data.model_dump(exclude_unset=True, exclude={"version"}))
+            self.apply(obj, self.changes(data))
             await self.validate(obj, before)
             row(obj).version += 1
             await self.session.flush()

@@ -8,7 +8,7 @@ import uuid
 from collections.abc import Mapping, Sequence
 from typing import Any, ClassVar
 
-from sqlalchemy import String, cast, func, or_, select, update
+from sqlalchemy import Select, String, cast, func, or_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import DeclarativeBase, InstrumentedAttribute
 
@@ -52,17 +52,28 @@ class AdminRepository[M: DeclarativeBase]:
         obj: M | None = await self.session.scalar(stmt)
         return obj
 
-    async def list(self, params: ListParams, *where: Any) -> tuple[Sequence[M], int]:
+    def matching(self, q: str | None, *where: Any) -> Select[Any]:
+        """Rows matching the filters and the search text, not yet ordered or paged."""
         stmt = select(self.model).where(*where)
-        if params.q and self.search_columns:
-            pattern = like_pattern(params.q)
+        if q and self.search_columns:
+            pattern = like_pattern(q)
             stmt = stmt.where(or_(*(cast(c, String).ilike(pattern) for c in self.search_columns)))
+        return stmt
+
+    async def list(self, params: ListParams, *where: Any) -> tuple[Sequence[M], int]:
+        stmt = self.matching(params.q, *where)
         total = await self.session.scalar(select(func.count()).select_from(stmt.subquery())) or 0
         stmt = (
             stmt.order_by(*self.order_by(params.sort)).offset(params.offset).limit(params.page_size)
         )
         rows: Sequence[M] = (await self.session.scalars(stmt)).all()
         return rows, total
+
+    async def all(self, params: ListParams, *where: Any) -> Sequence[M]:
+        """Like `list`, without paging: every matching row (for exports)."""
+        stmt = self.matching(params.q, *where).order_by(*self.order_by(params.sort))
+        rows: Sequence[M] = (await self.session.scalars(stmt)).all()
+        return rows
 
     def order_by(self, sort: str | None) -> Sequence[Any]:
         if not sort:

@@ -1,9 +1,9 @@
 """Shapes shared by every admin endpoint: errors, paginated lists, list parameters."""
 
 import uuid
-from typing import Any
+from typing import Any, ClassVar
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ValidationInfo, field_validator
 
 MAX_PAGE_SIZE = 100
 
@@ -59,6 +59,16 @@ class VersionedUpdate(BaseModel):
     version: int = Field(
         ge=1, description="Version the client read; a stale one gets 409 VERSION_CONFLICT"
     )
+
+    # Required fields: a PATCH may leave them out, but not send null to clear them.
+    not_null: ClassVar[frozenset[str]] = frozenset()
+
+    @field_validator("*")
+    @classmethod
+    def keep_required(cls, value: Any, info: ValidationInfo) -> Any:
+        if value is None and info.field_name in cls.not_null:
+            raise ValueError("обязательное поле нельзя очистить")
+        return value
 
 
 class ReorderRequest(BaseModel):

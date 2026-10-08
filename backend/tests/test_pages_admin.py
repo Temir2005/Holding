@@ -14,6 +14,7 @@ from app.models import (
     ProjectStatus,
     Section,
     SiteSettings,
+    Stat,
 )
 from app.schemas.sections import SECTION_SCHEMAS
 from tests.conftest import auth_header
@@ -464,7 +465,8 @@ async def test_seeded_style_pages_round_trip(
     """A page created outside the admin (seed) opens in the admin and saves back unchanged."""
     page = Page(slug="home", title={"ru": "Главная"}, is_published=True)
     page.sections = [Section(type="stats", sort_order=0, data={"context": "home"})]
-    session.add(page)
+    # As in the seeds: the stats context of the block has stats.
+    session.add_all([page, Stat(value=20, label={"ru": "лет"}, context="home")])
     await session.commit()
     h = auth_header(editor)
     detail = (await client.get(f"{PAGES}/{page.id}", headers=h)).json()
