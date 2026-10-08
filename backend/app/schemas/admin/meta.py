@@ -27,12 +27,19 @@ class Meta(BaseModel):
     project_statuses: list[Option]
     employment_types: list[Option]
     lead_types: list[Option]
+    lead_statuses: list[Option]
     tones: list[Option]
     social_types: list[Option]
     icons: list[str]
     ref_kinds: list[str]
     section_types: list[Option]
     media: MediaLimits
+    divisions: list[Option] = Field(
+        description="Division slugs for fields with x-options: divisions (label: name)"
+    )
+    stat_contexts: list[Option] = Field(
+        description="Stats contexts in use, for fields with x-options: stat_contexts"
+    )
 
 
 class SectionTypeInfo(BaseModel):

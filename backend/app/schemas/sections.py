@@ -35,7 +35,7 @@ from app.schemas.entities import (
     VacancyRead,
 )
 from app.schemas.fields import HexColor, IconName, LinkHref, field
-from app.schemas.refs import Ref, RefKind
+from app.schemas.refs import KeyKind, KeyOf, Ref, RefKind
 
 L = LocalizedText
 
@@ -188,7 +188,7 @@ class HeroDataRead(SectionDataRead):
 
 class StatsData(SectionData):
     # Either explicit ids or a context ("home", "smart-panels"); explicit ids win.
-    context: str | None = field(
+    context: Annotated[str | None, KeyOf(KeyKind.stat_context)] = field(
         "Набор цифр",
         description="Например home или smart-panels; не нужен, если цифры выбраны",
         default=None,
@@ -259,8 +259,8 @@ class ProjectsShowcaseDataRead(SectionDataRead):
 
 class ProjectListData(SectionData):
     # Live query: every published project, optionally limited to one division.
-    division_slug: str | None = field(
-        "Только направление (slug)", description="Пусто — проекты всех направлений", default=None
+    division_slug: Annotated[str | None, KeyOf(KeyKind.division)] = field(
+        "Только направление", description="Пусто — проекты всех направлений", default=None
     )
     show_filter: bool = field("Фильтр по статусу", default=True)
     project_ids: Annotated[list[uuid.UUID], Ref(RefKind.project, "projects")] = field(
@@ -504,8 +504,8 @@ class VideoDataRead(SectionDataRead):
 class VacanciesData(SectionData):
     intro: L | None = field("Вступление", widget="localized-textarea", default=None)
     # Live query: every open vacancy, optionally limited to one division.
-    division_slug: str | None = field(
-        "Только направление (slug)", description="Пусто — все направления", default=None
+    division_slug: Annotated[str | None, KeyOf(KeyKind.division)] = field(
+        "Только направление", description="Пусто — все направления", default=None
     )
     vacancy_ids: Annotated[list[uuid.UUID], Ref(RefKind.vacancy, "vacancies")] = field(
         "Вакансии", description="Пусто — все открытые", default_factory=list

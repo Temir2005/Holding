@@ -20,7 +20,13 @@ from app.models import Page, Section
 from app.repositories.admin.pages import PageRepository, SectionRepository
 from app.schemas.admin.pages import SectionAdminRead, SectionCreate, SectionUpdate
 from app.schemas.refs import Loc
-from app.schemas.sections import SECTION_SCHEMAS, SectionData, SectionType, Tone
+from app.schemas.sections import (
+    SECTION_SCHEMAS,
+    ContactFormData,
+    SectionData,
+    SectionType,
+    Tone,
+)
 from app.services.admin.audit import AuditWriter, snapshot
 from app.services.admin.base import Before, CrudService
 from app.services.admin.refs import RefService
@@ -38,6 +44,25 @@ def parse_data(section_type: SectionType, data: dict[str, Any], loc: Loc = DATA_
             "Проверьте заполнение блока",
             details=[{"loc": [*loc, *err["loc"]], "msg": err["msg"]} for err in exc.errors()],
         ) from exc
+
+
+def consistency_errors(data: SectionData, loc: Loc = DATA_LOC) -> list[dict[str, Any]]:
+    """Rules across fields, checked when the admin saves a block.
+
+    Not in the stored models: those also read data already in the database, and the
+    public site must keep rendering it.
+    """
+    errors: list[dict[str, Any]] = []
+    if isinstance(data, ContactFormData):
+        if not data.lead_types:
+            errors.append({"loc": [*loc, "lead_types"], "msg": "выберите хотя бы одну тему"})
+        elif len(set(data.lead_types)) != len(data.lead_types):
+            errors.append({"loc": [*loc, "lead_types"], "msg": "тема указана дважды"})
+        elif data.default_type not in data.lead_types:
+            errors.append(
+                {"loc": [*loc, "default_type"], "msg": "тема по умолчанию должна быть в списке тем"}
+            )
+    return errors
 
 
 def stored_json(model: BaseModel) -> dict[str, Any]:
@@ -91,7 +116,7 @@ class SectionAdminService(CrudService[Section, SectionCreate, SectionUpdate, Sec
 
     async def validate(self, obj: Section, before: Before) -> None:
         stored = parse_data(SectionType(obj.type), obj.data)
-        await self.refs.check(stored, DATA_LOC)
+        await self.refs.check(stored, DATA_LOC, extra=consistency_errors(stored))
         if obj.anchor and await self.sections.exists(
             Section.page_id == obj.page_id, Section.anchor == obj.anchor, Section.id != obj.id
         ):

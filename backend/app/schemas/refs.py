@@ -47,6 +47,36 @@ class Ref:
         return schema
 
 
+class KeyKind(StrEnum):
+    """Keys of other content stored by value rather than by id."""
+
+    division = "division"  # a division's slug
+    stat_context = "stat_context"  # the context of a set of stats ("home", "smart-panels")
+
+
+# Name of the list in GET /admin/meta that offers the existing keys of each kind.
+KEY_OPTIONS = {KeyKind.division: "divisions", KeyKind.stat_context: "stat_contexts"}
+
+
+@dataclass(frozen=True)
+class KeyOf:
+    """A field holding a key of other content (a division slug, a stats context).
+
+    Live queries filter by these keys. The admin refuses keys that match nothing and
+    shows a dropdown: `x-options` names the list of choices in GET /admin/meta.
+    """
+
+    kind: KeyKind
+
+    def __get_pydantic_json_schema__(
+        self, core_schema: CoreSchema, handler: GetJsonSchemaHandler
+    ) -> JsonSchemaValue:
+        schema = handler(core_schema)
+        schema["x-widget"] = "select"
+        schema["x-options"] = KEY_OPTIONS[self.kind]
+        return schema
+
+
 RefIds = dict[RefKind, set[uuid.UUID]]
 Loaded = Mapping[RefKind, Mapping[uuid.UUID, BaseModel]]
 
@@ -106,24 +136,42 @@ def _convert(value: Any, locale: Locale, loaded: Loaded) -> Any:
 Loc = tuple[str | int, ...]
 
 
-def iter_refs(model: BaseModel, path: Loc = ()) -> Iterator[tuple[Loc, RefKind, uuid.UUID]]:
-    """Every referenced id with the path to its field, e.g. ("steps", 2, "media_id")."""
-    for name in type(model).model_fields:
+def iter_marked[K](
+    model: BaseModel, marker: type[K], path: Loc = ()
+) -> Iterator[tuple[Loc, K, Any]]:
+    """Every value of a field annotated with `marker` (Ref, KeyOf), with its path.
+
+    Lists yield one item per element; empty values (None) are skipped.
+    """
+    for name, info in type(model).model_fields.items():
         value = getattr(model, name)
-        ref = _ref_of(model, name)
-        if ref is not None:
+        mark = next((m for m in info.metadata if isinstance(m, marker)), None)
+        if mark is not None:
             if isinstance(value, list):
                 for i, item in enumerate(value):
-                    yield (*path, name, i), ref.kind, item
+                    yield (*path, name, i), mark, item
             elif value is not None:
-                yield (*path, name), ref.kind, value
+                yield (*path, name), mark, value
             continue
         if isinstance(value, list):
             for i, item in enumerate(value):
                 if isinstance(item, BaseModel):
-                    yield from iter_refs(item, (*path, name, i))
+                    yield from iter_marked(item, marker, (*path, name, i))
         elif isinstance(value, BaseModel):
-            yield from iter_refs(value, (*path, name))
+            yield from iter_marked(value, marker, (*path, name))
+
+
+def iter_refs(model: BaseModel, path: Loc = ()) -> Iterator[tuple[Loc, RefKind, uuid.UUID]]:
+    """Every referenced id with the path to its field, e.g. ("steps", 2, "media_id")."""
+    for loc, ref, ref_id in iter_marked(model, Ref, path):
+        yield loc, ref.kind, ref_id
+
+
+def iter_keys(model: BaseModel, path: Loc = ()) -> Iterator[tuple[Loc, KeyKind, str]]:
+    """Every non-empty key (division slug, stats context) with the path to its field."""
+    for loc, key, value in iter_marked(model, KeyOf, path):
+        if value:
+            yield loc, key.kind, value
 
 
 def iter_instances[T: BaseModel](

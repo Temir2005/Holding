@@ -4,10 +4,11 @@ Localized fields are stored as JSONB `{"ru": ..., "kk": ..., "en": ...}`.
 The public API resolves them to a single string with a fallback to Russian.
 """
 
+from collections.abc import Iterator
 from enum import StrEnum
 from typing import Any
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 class Locale(StrEnum):
@@ -31,6 +32,43 @@ class LocalizedText(BaseModel):
 
     def resolve(self, locale: Locale) -> str:
         return resolve_text(self.model_dump(), locale) or ""
+
+
+class RequiredText(LocalizedText):
+    """Localized text of a required field (a title, a name): Russian must have text.
+
+    `LocalizedText` itself accepts an empty string, because section data and settings
+    already stored with one must keep rendering on the public site.
+    """
+
+    ru: str = Field(title="Русский", min_length=1)
+
+    @field_validator("ru")
+    @classmethod
+    def has_text(cls, value: str) -> str:
+        if not value.strip():
+            raise ValueError("заполните текст на русском")
+        return value
+
+
+def empty_required_texts(
+    model: BaseModel, path: tuple[str | int, ...] = ()
+) -> Iterator[tuple[str | int, ...]]:
+    """Paths to required localized fields (no default) whose Russian text is blank.
+
+    For JSONB documents (section data, settings), whose models also read stored data
+    and so accept an empty string; the admin refuses to save one.
+    """
+    for name, info in type(model).model_fields.items():
+        value = getattr(model, name)
+        items = enumerate(value) if isinstance(value, list) else [(None, value)]
+        for i, item in items:
+            item_path = (*path, name) if i is None else (*path, name, i)
+            if isinstance(item, LocalizedText):
+                if (i is not None or info.is_required()) and not item.ru.strip():
+                    yield (*item_path, "ru")
+            elif isinstance(item, BaseModel):
+                yield from empty_required_texts(item, item_path)
 
 
 def resolve_text(value: dict[str, Any] | None, locale: Locale) -> str | None:
