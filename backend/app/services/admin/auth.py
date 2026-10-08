@@ -2,10 +2,11 @@
 
 import uuid
 from dataclasses import dataclass
-from datetime import UTC, datetime, timedelta
+from datetime import timedelta
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.clock import utcnow
 from app.core.config import Settings
 from app.core.errors import Forbidden, RateLimited, Unauthorized, ValidationFailed
 from app.core.rate_limit import RateLimiter
@@ -39,10 +40,6 @@ class Session:
 class ClientInfo:
     ip: str | None
     user_agent: str | None
-
-
-def utcnow() -> datetime:
-    return datetime.now(UTC)
 
 
 class AuthService:

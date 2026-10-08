@@ -14,13 +14,16 @@ Pending rows never show in the library and are purged after a while.
 import asyncio
 import logging
 import uuid
-from datetime import UTC, datetime, timedelta
+from collections.abc import Sequence
+from datetime import timedelta
 from typing import Any
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.clock import utcnow
 from app.core.config import Settings
 from app.core.errors import Conflict, InUse, ValidationFailed
+from app.core.i18n import drop_empty_languages
 from app.models import AdminUser, Media, MediaStatus
 from app.repositories.admin.media import MediaRepository
 from app.schemas.admin.common import ListParams, Paginated
@@ -71,7 +74,7 @@ class MediaService(CrudService[Media, UploadRequest, MediaUpdate, MediaAdminRead
 
     def build(self, data: UploadRequest) -> Media:
         media_type = files.MEDIA_TYPES[data.content_type]
-        now = datetime.now(UTC)
+        now = utcnow()
         file_id = uuid.uuid4()
         return Media(
             id=file_id,
@@ -82,7 +85,7 @@ class MediaService(CrudService[Media, UploadRequest, MediaUpdate, MediaAdminRead
             size_bytes=data.size_bytes,
             width=0,
             height=0,
-            alt=data.alt.model_dump(exclude_none=True) if data.alt else {},
+            alt=drop_empty_languages(data.alt.model_dump()) if data.alt else {},
             original_filename=data.filename,
             folder=data.folder,
             tags=[],
@@ -90,6 +93,9 @@ class MediaService(CrudService[Media, UploadRequest, MediaUpdate, MediaAdminRead
             uploaded_by=self.acting_user.id if self.acting_user else None,
             variants=[],
         )
+
+    async def present_many(self, rows: Sequence[Media]) -> list[MediaAdminRead]:
+        return [self.to_read(m) for m in rows]
 
     def to_read(self, obj: Media) -> MediaAdminRead:
         return MediaAdminRead(
@@ -122,7 +128,7 @@ class MediaService(CrudService[Media, UploadRequest, MediaUpdate, MediaAdminRead
     def apply(self, obj: Media, changes: dict[str, Any]) -> None:
         if "alt" in changes:
             alt = changes.pop("alt")
-            obj.alt = {k: v for k, v in (alt or {}).items() if v} if alt else {}
+            obj.alt = drop_empty_languages(alt or {})
         if "tags" in changes:
             obj.tags = sorted({t.strip() for t in changes.pop("tags") or [] if t.strip()})
         super().apply(obj, changes)
@@ -309,7 +315,7 @@ class MediaService(CrudService[Media, UploadRequest, MediaUpdate, MediaAdminRead
 
     async def purge_stale(self, *, limit: int) -> int:
         """Remove uploads that were never completed. Returns how many were removed."""
-        cutoff = datetime.now(UTC) - timedelta(hours=self.settings.media_pending_ttl_hours)
+        cutoff = utcnow() - timedelta(hours=self.settings.media_pending_ttl_hours)
         stale = await self.media.stale_pending(cutoff, limit)
         for media in stale:
             await self.media.delete(media)

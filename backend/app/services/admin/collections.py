@@ -3,24 +3,27 @@ vacancies.
 
 `CollectionService` adds what they all share on top of CrudService:
 - localized text is stored with only the languages that have text;
+- new rows go to the end of the list;
 - referenced files and divisions must exist (files fully uploaded);
-- read models carry cards of referenced objects, loaded in one query per kind;
+- read models carry cards of referenced objects, loaded in one query per kind
+  and passed to `to_read` explicitly;
 - deletion is refused while sections reference the row (409 with the places).
 
 Each entity below states its own columns, references and checks.
 """
 
 import uuid
+from abc import abstractmethod
 from collections.abc import Sequence
 from typing import Any, ClassVar
 
 from pydantic import AnyUrl, BaseModel
 from pydantic_core import Url
-from sqlalchemy import func, select
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.errors import AlreadyExists, InUse, ValidationFailed
-from app.core.i18n import Locale
+from app.core.i18n import drop_empty_languages
 from app.models import Client, Division, Page, Person, Project, Stat, TimelineEvent, Vacancy
 from app.repositories.admin.collections import (
     ClientRepository,
@@ -56,33 +59,25 @@ from app.schemas.admin.collections import (
     VacancyUpdate,
 )
 from app.schemas.admin.common import Usage, VersionedUpdate
-from app.schemas.admin.pages import RefCard
 from app.schemas.refs import RefKind
 from app.services.admin.audit import AuditWriter
-from app.services.admin.base import CrudService, ensure_version, row
-from app.services.admin.refs import KIND_LABELS, RefService
+from app.services.admin.base import Before, CrudService, ensure_version, row
+from app.services.admin.refs import KIND_LABELS, Cards, RefService
 from app.services.admin.usage import UsageFinder
 from app.storage.service import Storage
 
-LANGS = {loc.value for loc in Locale}
-
 
 def clean(value: Any) -> Any:
-    """Drop empty languages from localized dicts (also nested) and turn URLs into strings."""
+    """Column value from a schema value: URLs as strings, only languages that have text."""
     if isinstance(value, AnyUrl | Url):
         return str(value)
-    if isinstance(value, dict):
-        if value and set(value) <= LANGS:
-            return {k: v for k, v in value.items() if v is not None}
-        return {k: clean(v) for k, v in value.items()}
-    if isinstance(value, list):
-        return [clean(v) for v in value]
-    return value
+    return drop_empty_languages(value)
 
 
 class CollectionService[M: Any, C: BaseModel, U: VersionedUpdate, R: BaseModel](
     CrudService[M, C, U, R]
 ):
+    ordered = True
     model: ClassVar[type[Any]]
     # Localized columns: stored as {} when cleared.
     text_fields: ClassVar[tuple[str, ...]] = ()
@@ -96,8 +91,6 @@ class CollectionService[M: Any, C: BaseModel, U: VersionedUpdate, R: BaseModel](
     ) -> None:
         super().__init__(session, repo, audit)
         self.refs = RefService(session, storage)
-        self._cards: dict[RefKind, dict[uuid.UUID, RefCard]] = {}
-        self._next_sort_order = 0
 
     # --- column values -----------------------------------------------------------------
 
@@ -109,21 +102,15 @@ class CollectionService[M: Any, C: BaseModel, U: VersionedUpdate, R: BaseModel](
         return out
 
     def build(self, data: C) -> M:
-        obj: M = self.model(**self.values(data.model_dump()), sort_order=self._next_sort_order)
+        obj: M = self.model(**self.values(data.model_dump()))
         return obj
-
-    async def create(self, data: C) -> R:
-        # New rows go to the end of the list.
-        last = await self.session.scalar(select(func.max(self.model.sort_order)))
-        self._next_sort_order = (last or 0) + 10
-        return await super().create(data)
 
     def apply(self, obj: M, changes: dict[str, Any]) -> None:
         super().apply(obj, self.values(changes))
 
     # --- references ----------------------------------------------------------------------
 
-    async def validate(self, obj: M) -> None:
+    async def validate(self, obj: M, before: Before) -> None:
         errors = []
         for name, kind in self.ref_fields.items():
             ref_id = getattr(obj, name)
@@ -136,20 +123,22 @@ class CollectionService[M: Any, C: BaseModel, U: VersionedUpdate, R: BaseModel](
 
     async def load_cards(
         self, rows: Sequence[M], extra: dict[RefKind, set[uuid.UUID]] | None = None
-    ) -> None:
+    ) -> Cards:
+        """Cards of everything the rows reference through `ref_fields`, plus `extra`."""
         wanted: dict[RefKind, set[uuid.UUID]] = {k: set(v) for k, v in (extra or {}).items()}
         for name, kind in self.ref_fields.items():
             wanted.setdefault(kind, set()).update(
                 ref_id for r in rows if (ref_id := getattr(r, name)) is not None
             )
-        self._cards = {kind: await self.refs.cards_for(kind, ids) for kind, ids in wanted.items()}
+        return await self.refs.load_cards(wanted)
 
-    def card(self, kind: RefKind, ref_id: uuid.UUID | None) -> RefCard | None:
-        return self._cards.get(kind, {}).get(ref_id) if ref_id else None
+    @abstractmethod
+    def to_read(self, obj: M, cards: Cards) -> R:
+        """Row → read model; `cards` holds the cards of what the row references."""
 
     async def present_many(self, rows: Sequence[M]) -> list[R]:
-        await self.load_cards(rows)
-        return [self.to_read(r) for r in rows]
+        cards = await self.load_cards(rows)
+        return [self.to_read(r, cards) for r in rows]
 
     # --- deletion ------------------------------------------------------------------------
 
@@ -204,13 +193,8 @@ class DivisionService(
 
     def __init__(self, session: AsyncSession, audit: AuditWriter, storage: Storage) -> None:
         super().__init__(session, DivisionRepository(session), audit, storage)
-        self._old_slug: str | None = None
 
-    def apply(self, obj: Division, changes: dict[str, Any]) -> None:
-        self._old_slug = obj.slug
-        super().apply(obj, changes)
-
-    def to_read(self, obj: Division) -> DivisionAdminRead:
+    def to_read(self, obj: Division, cards: Cards) -> DivisionAdminRead:
         return DivisionAdminRead(
             **common(obj),
             slug=obj.slug,
@@ -218,16 +202,16 @@ class DivisionService(
             tagline=obj.tagline,
             description=obj.description,
             logo_id=obj.logo_id,
-            logo=self.card(RefKind.media, obj.logo_id),
+            logo=cards.get(RefKind.media, obj.logo_id),
             cover_id=obj.cover_id,
-            cover=self.card(RefKind.media, obj.cover_id),
+            cover=cards.get(RefKind.media, obj.cover_id),
             stats=list(obj.stats),
             website_url=obj.website_url,
             page_slug=obj.page_slug,
         )
 
-    async def validate(self, obj: Division) -> None:
-        await super().validate(obj)
+    async def validate(self, obj: Division, before: Before) -> None:
+        await super().validate(obj, before)
         await ensure_unique_slug(self.session, Division, obj)
         if obj.page_slug and not await self.session.scalar(
             select(Page.id).where(Page.slug == obj.page_slug)
@@ -236,8 +220,9 @@ class DivisionService(
                 "Нет такой страницы",
                 details=[{"loc": ["body", "page_slug"], "msg": f"нет страницы «{obj.page_slug}»"}],
             )
-        if self._old_slug and self._old_slug != obj.slug:
-            usages = await UsageFinder(self.session).division(obj.id, self._old_slug)
+        old_slug = before["slug"] if before else None
+        if old_slug and old_slug != obj.slug:
+            usages = await UsageFinder(self.session).division(obj.id, old_slug)
             filtered = [u for u in usages if u.field == "data.division_slug"]
             if filtered:
                 raise InUse(
@@ -263,27 +248,23 @@ class ProjectService(CollectionService[Project, ProjectCreate, ProjectUpdate, Pr
     def __init__(self, session: AsyncSession, audit: AuditWriter, storage: Storage) -> None:
         self.projects = ProjectRepository(session)
         super().__init__(session, self.projects, audit, storage)
-        self._old_slug: str | None = None
-        self._galleries: dict[uuid.UUID, list[uuid.UUID]] = {}
-
-    def apply(self, obj: Project, changes: dict[str, Any]) -> None:
-        self._old_slug = obj.slug
-        super().apply(obj, changes)
 
     async def present_many(self, rows: Sequence[Project]) -> list[ProjectAdminRead]:
-        self._galleries = await self.projects.galleries([r.id for r in rows])
-        media = {m for ids in self._galleries.values() for m in ids}
-        await self.load_cards(rows, extra={RefKind.media: media})
-        return [self.to_read(r) for r in rows]
+        galleries = await self.projects.galleries([r.id for r in rows])
+        media = {m for ids in galleries.values() for m in ids}
+        cards = await self.load_cards(rows, extra={RefKind.media: media})
+        return [self.to_read(r, cards, gallery=galleries[r.id]) for r in rows]
 
-    def to_read(self, obj: Project) -> ProjectAdminRead:
-        gallery = [self.card(RefKind.media, m) for m in self._galleries.get(obj.id, [])]
+    def to_read(
+        self, obj: Project, cards: Cards, gallery: Sequence[uuid.UUID] = ()
+    ) -> ProjectAdminRead:
+        """`gallery`: media ids in order, as loaded by present_many."""
         return ProjectAdminRead(
             **common(obj),
             slug=obj.slug,
             title=obj.title,
             division_id=obj.division_id,
-            division=self.card(RefKind.division, obj.division_id),
+            division=cards.get(RefKind.division, obj.division_id),
             status=obj.status,
             location=obj.location,
             year=obj.year,
@@ -291,20 +272,21 @@ class ProjectService(CollectionService[Project, ProjectCreate, ProjectUpdate, Pr
             short_description=obj.short_description,
             body=obj.body,
             cover_id=obj.cover_id,
-            cover=self.card(RefKind.media, obj.cover_id),
-            gallery=[c for c in gallery if c is not None],
+            cover=cards.get(RefKind.media, obj.cover_id),
+            gallery=cards.many(RefKind.media, gallery),
             tags=list(obj.tags),
             is_featured=obj.is_featured,
             is_tokenized=obj.is_tokenized,
         )
 
-    async def validate(self, obj: Project) -> None:
-        await super().validate(obj)
+    async def validate(self, obj: Project, before: Before) -> None:
+        await super().validate(obj, before)
         await ensure_unique_slug(self.session, Project, obj)
-        if self._old_slug and self._old_slug != obj.slug:
+        old_slug = before["slug"] if before else None
+        if old_slug and old_slug != obj.slug:
             links = [
                 u
-                for u in await UsageFinder(self.session).project(obj.id, self._old_slug)
+                for u in await UsageFinder(self.session).project(obj.id, old_slug)
                 if u.field.endswith("href")
             ]
             if links:
@@ -362,16 +344,16 @@ class PersonService(CollectionService[Person, PersonCreate, PersonUpdate, Person
     def __init__(self, session: AsyncSession, audit: AuditWriter, storage: Storage) -> None:
         super().__init__(session, PersonRepository(session), audit, storage)
 
-    def to_read(self, obj: Person) -> PersonAdminRead:
+    def to_read(self, obj: Person, cards: Cards) -> PersonAdminRead:
         return PersonAdminRead(
             **common(obj),
             full_name=obj.full_name,
             position=obj.position,
             division_id=obj.division_id,
-            division=self.card(RefKind.division, obj.division_id),
+            division=cards.get(RefKind.division, obj.division_id),
             bio=obj.bio,
             photo_id=obj.photo_id,
-            photo=self.card(RefKind.media, obj.photo_id),
+            photo=cards.get(RefKind.media, obj.photo_id),
             linkedin_url=obj.linkedin_url,
             is_key=obj.is_key,
             is_founder=obj.is_founder,
@@ -389,12 +371,12 @@ class ClientService(CollectionService[Client, ClientCreate, ClientUpdate, Client
     def __init__(self, session: AsyncSession, audit: AuditWriter, storage: Storage) -> None:
         super().__init__(session, ClientRepository(session), audit, storage)
 
-    def to_read(self, obj: Client) -> ClientAdminRead:
+    def to_read(self, obj: Client, cards: Cards) -> ClientAdminRead:
         return ClientAdminRead(
             **common(obj),
             name=obj.name,
             logo_id=obj.logo_id,
-            logo=self.card(RefKind.media, obj.logo_id),
+            logo=cards.get(RefKind.media, obj.logo_id),
             industry=obj.industry,
             industry_label=obj.industry_label,
             description=obj.description,
@@ -418,14 +400,14 @@ class TimelineEventService(
     def __init__(self, session: AsyncSession, audit: AuditWriter, storage: Storage) -> None:
         super().__init__(session, TimelineEventRepository(session), audit, storage)
 
-    def to_read(self, obj: TimelineEvent) -> TimelineEventAdminRead:
+    def to_read(self, obj: TimelineEvent, cards: Cards) -> TimelineEventAdminRead:
         return TimelineEventAdminRead(
             **common(obj),
             year=obj.year,
             title=obj.title,
             description=obj.description,
             image_id=obj.image_id,
-            image=self.card(RefKind.media, obj.image_id),
+            image=cards.get(RefKind.media, obj.image_id),
         )
 
 
@@ -439,7 +421,7 @@ class StatService(CollectionService[Stat, StatCreate, StatUpdate, StatAdminRead]
     def __init__(self, session: AsyncSession, audit: AuditWriter, storage: Storage) -> None:
         super().__init__(session, StatRepository(session), audit, storage)
 
-    def to_read(self, obj: Stat) -> StatAdminRead:
+    def to_read(self, obj: Stat, cards: Cards) -> StatAdminRead:
         return StatAdminRead(
             **common(obj),
             value=float(obj.value),
@@ -461,12 +443,12 @@ class VacancyService(CollectionService[Vacancy, VacancyCreate, VacancyUpdate, Va
     def __init__(self, session: AsyncSession, audit: AuditWriter, storage: Storage) -> None:
         super().__init__(session, VacancyRepository(session), audit, storage)
 
-    def to_read(self, obj: Vacancy) -> VacancyAdminRead:
+    def to_read(self, obj: Vacancy, cards: Cards) -> VacancyAdminRead:
         return VacancyAdminRead(
             **common(obj),
             title=obj.title,
             division_id=obj.division_id,
-            division=self.card(RefKind.division, obj.division_id),
+            division=cards.get(RefKind.division, obj.division_id),
             location=obj.location,
             employment_type=obj.employment_type,
             description=obj.description,

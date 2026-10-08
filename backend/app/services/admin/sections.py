@@ -9,6 +9,7 @@ inserting blocks at the same time cannot produce duplicate positions.
 """
 
 import uuid
+from collections.abc import Sequence
 from typing import Any
 
 from pydantic import BaseModel, ValidationError
@@ -21,7 +22,7 @@ from app.schemas.admin.pages import SectionAdminRead, SectionCreate, SectionUpda
 from app.schemas.refs import Loc
 from app.schemas.sections import SECTION_SCHEMAS, SectionData, SectionType, Tone
 from app.services.admin.audit import AuditWriter, snapshot
-from app.services.admin.base import CrudService
+from app.services.admin.base import Before, CrudService
 from app.services.admin.refs import RefService
 from app.storage.service import Storage
 
@@ -88,7 +89,7 @@ class SectionAdminService(CrudService[Section, SectionCreate, SectionUpdate, Sec
             changes["tone"] = Tone(changes["tone"]).value
         super().apply(obj, changes)
 
-    async def validate(self, obj: Section) -> None:
+    async def validate(self, obj: Section, before: Before) -> None:
         stored = parse_data(SectionType(obj.type), obj.data)
         await self.refs.check(stored, DATA_LOC)
         if obj.anchor and await self.sections.exists(
@@ -111,11 +112,11 @@ class SectionAdminService(CrudService[Section, SectionCreate, SectionUpdate, Sec
         read.refs = await self.refs.cards(stored)
         return read
 
-    async def read(self, id: uuid.UUID) -> SectionAdminRead:
-        return await self.full(await self.get_or_404(id))
+    async def present_many(self, rows: Sequence[Section]) -> list[SectionAdminRead]:
+        return [await self.full(s) for s in rows]
 
     async def list_for_page(self, page_id: uuid.UUID) -> list[SectionAdminRead]:
-        return [await self.full(s) for s in await self.sections.of_page(page_id)]
+        return await self.present_many(await self.sections.of_page(page_id))
 
     # --- writes ----------------------------------------------------------------------
 
@@ -146,7 +147,7 @@ class SectionAdminService(CrudService[Section, SectionCreate, SectionUpdate, Sec
                 tone=data.tone.value,
                 is_visible=data.is_visible,
             )
-            await self.validate(section)
+            await self.validate(section, None)
             self.sections.add(section)
             await self._place(page_id, section, data.position)
             await self.session.flush()
@@ -159,10 +160,6 @@ class SectionAdminService(CrudService[Section, SectionCreate, SectionUpdate, Sec
             await self.session.commit()
             await self.session.refresh(section)
             return await self.full(section)
-
-    async def update(self, id: uuid.UUID, data: SectionUpdate) -> SectionAdminRead:
-        await super().update(id, data)
-        return await self.read(id)
 
     async def duplicate(self, id: uuid.UUID) -> SectionAdminRead:
         async with self.transaction():

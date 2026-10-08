@@ -38,7 +38,7 @@ Sections = Annotated[SectionAdminService, Depends(section_service)]
 async def list_pages(
     svc: Pages, params: Annotated[ListParams, Depends()]
 ) -> Paginated[PageAdminRead]:
-    return await svc.list_pages(params)
+    return await svc.list(params)
 
 
 @router.post(
