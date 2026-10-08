@@ -1,16 +1,17 @@
 import uuid
-from datetime import UTC, datetime
+from collections.abc import Sequence
 from typing import Any
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.clock import utcnow
 from app.core.errors import AlreadyExists, Conflict
 from app.core.security import hash_password
 from app.models import AdminUser, UserRole
 from app.repositories.admin.users import RefreshTokenRepository, UserRepository
 from app.schemas.admin.auth import UserCreate, UserRead, UserUpdate
 from app.services.admin.audit import AuditWriter
-from app.services.admin.base import CrudService
+from app.services.admin.base import Before, CrudService
 
 
 def to_user_read(user: AdminUser) -> UserRead:
@@ -45,14 +46,14 @@ class UserService(CrudService[AdminUser, UserCreate, UserUpdate, UserRead]):
             full_name=data.full_name.strip(),
             role=data.role,
             password_hash=hash_password(data.password),
-            password_changed_at=datetime.now(UTC),
+            password_changed_at=utcnow(),
             is_active=True,
         )
 
-    def to_read(self, obj: AdminUser) -> UserRead:
-        return to_user_read(obj)
+    async def present_many(self, rows: Sequence[AdminUser]) -> list[UserRead]:
+        return [to_user_read(u) for u in rows]
 
-    async def validate(self, obj: AdminUser) -> None:
+    async def validate(self, obj: AdminUser, before: Before) -> None:
         if await self.users.exists(AdminUser.email == obj.email, AdminUser.id != obj.id):
             raise AlreadyExists(
                 f"Пользователь с email {obj.email} уже есть",
@@ -71,14 +72,12 @@ class UserService(CrudService[AdminUser, UserCreate, UserUpdate, UserRead]):
     async def on_updated(self, obj: AdminUser, changes: dict[str, Any]) -> None:
         if "is_active" in changes and not obj.is_active:
             # A deactivated account must not keep a working refresh token.
-            await RefreshTokenRepository(self.session).revoke_all_for_user(
-                obj.id, datetime.now(UTC)
-            )
+            await RefreshTokenRepository(self.session).revoke_all_for_user(obj.id, utcnow())
 
     async def set_password(self, user_id: uuid.UUID, new_password: str) -> UserRead:
         """Admin resets someone's password: their sessions and access tokens stop working."""
         user = await self.get_or_404(user_id, lock=True)
-        now = datetime.now(UTC)
+        now = utcnow()
         user.password_hash = hash_password(new_password)
         user.password_changed_at = now
         user.version += 1

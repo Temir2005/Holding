@@ -10,7 +10,8 @@
 import re
 import uuid
 from collections import defaultdict
-from collections.abc import Iterable, Sequence
+from collections.abc import Iterable, Mapping, Sequence
+from dataclasses import dataclass, field
 from typing import Any
 
 from pydantic import BaseModel
@@ -79,6 +80,21 @@ SEARCH_COLUMNS: dict[str, tuple[Any, ...]] = {
     RefKind.vacancy: (Vacancy.title,),
     "page": (Page.slug, Page.title),
 }
+
+
+@dataclass(frozen=True)
+class Cards:
+    """Cards of referenced objects loaded for a batch of rows, by kind and id."""
+
+    by_kind: RefCards = field(default_factory=dict)
+
+    def get(self, kind: RefKind, ref_id: uuid.UUID | None) -> RefCard | None:
+        return self.by_kind.get(kind, {}).get(ref_id) if ref_id else None
+
+    def many(self, kind: RefKind, ids: Iterable[uuid.UUID]) -> list[RefCard]:
+        """Cards in the given order; ids that no longer exist are skipped."""
+        found = self.by_kind.get(kind, {})
+        return [found[i] for i in ids if i in found]
 
 
 class RefService:
@@ -191,6 +207,10 @@ class RefService:
         model = ENTITY_MODELS[kind]
         rows = await self.session.scalars(select(model).where(model.id.in_(ids)))
         return {r.id: self.card(kind, r) for r in rows}
+
+    async def load_cards(self, wanted: Mapping[RefKind, Iterable[uuid.UUID]]) -> Cards:
+        """One query per kind."""
+        return Cards({kind: await self.cards_for(kind, ids) for kind, ids in wanted.items()})
 
     def media_thumb(self, media: Media | None) -> str | None:
         if media is None or not media.mime_type.startswith("image/"):

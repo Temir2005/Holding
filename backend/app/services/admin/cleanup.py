@@ -1,11 +1,12 @@
 """Housekeeping run by `python -m app.cli cleanup` (e.g. in Railway's pre-deploy step)."""
 
 from dataclasses import dataclass
-from datetime import UTC, datetime, timedelta
+from datetime import timedelta
 
 from sqlalchemy import delete, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.clock import utcnow
 from app.core.config import Settings
 from app.models import RefreshToken
 from app.services.admin.audit import NullAuditWriter
@@ -26,7 +27,7 @@ async def purge_refresh_tokens(session: AsyncSession, settings: Settings) -> int
     is recognized and its whole session is revoked. After deletion a replay is just
     an unknown token (still rejected, but without revoking the rest of the session).
     """
-    now = datetime.now(UTC)
+    now = utcnow()
     revoked_before = now - timedelta(days=settings.revoked_token_retention_days)
     result = await session.execute(
         delete(RefreshToken).where(

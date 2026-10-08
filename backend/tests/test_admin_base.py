@@ -5,7 +5,7 @@ Real entities get `version` columns in later stages; the mechanism is tested her
 
 import asyncio
 import uuid
-from collections.abc import AsyncIterator
+from collections.abc import AsyncIterator, Sequence
 from typing import Any, ClassVar
 
 import pytest
@@ -18,7 +18,7 @@ from app.core.errors import Conflict, NotFound, ValidationFailed, VersionConflic
 from app.models.base import IdMixin, PublishableMixin, VersionMixin
 from app.repositories.admin.base import AdminRepository
 from app.schemas.admin.common import ListParams, VersionedUpdate
-from app.services.admin.base import CrudService
+from app.services.admin.base import Before, CrudService
 
 
 class ScratchBase(DeclarativeBase):
@@ -67,10 +67,10 @@ class WidgetService(CrudService[Widget, WidgetCreate, WidgetUpdate, WidgetRead])
     def build(self, data: WidgetCreate) -> Widget:
         return Widget(title=data.title, sort_order=data.sort_order)
 
-    def to_read(self, obj: Widget) -> WidgetRead:
-        return WidgetRead(id=obj.id, title=obj.title, version=obj.version)
+    async def present_many(self, rows: Sequence[Widget]) -> list[WidgetRead]:
+        return [WidgetRead(id=w.id, title=w.title, version=w.version) for w in rows]
 
-    async def validate(self, obj: Widget) -> None:
+    async def validate(self, obj: Widget, before: Before) -> None:
         if not obj.title.strip():
             raise ValidationFailed("Пустое название", details=[{"loc": ["title"], "msg": "empty"}])
 

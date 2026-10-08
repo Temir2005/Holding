@@ -1,9 +1,13 @@
 """Base service for admin CRUD.
 
-Shared here: the version check (optimistic locking), the audit record, reordering
-and the transaction boundary. Everything specific to an entity is written in its
-own service: how a Create schema becomes a row (`build`), how a row becomes a
-read model (`to_read`) and what must hold before saving (`validate`).
+Shared here: the version check (optimistic locking), the audit record, reordering,
+placing new rows at the end of the list and the transaction boundary. Everything
+specific to an entity is written in its own service: how a Create schema becomes a
+row (`build`), how rows become read models (`present_many`) and what must hold
+before saving (`validate`).
+
+Services keep no per-request state on `self`: what a hook needs is passed to it
+(the row as it was before the update, the cards loaded for a batch of rows).
 """
 
 import uuid
@@ -21,6 +25,9 @@ from app.repositories.admin.base import AdminRepository
 from app.schemas.admin.common import ListParams, Paginated, VersionedUpdate
 from app.services.admin.audit import AuditWriter, diff, snapshot
 
+# Column values of a row before an update (see audit.snapshot); None when creating.
+Before = dict[str, Any] | None
+
 
 class Versioned(Protocol):
     """What the base service needs from a row: an id and a version counter.
@@ -32,6 +39,10 @@ class Versioned(Protocol):
 
     id: uuid.UUID
     version: int
+
+
+class Ordered(Protocol):
+    sort_order: int
 
 
 def row(obj: object) -> Versioned:
@@ -49,6 +60,8 @@ class CrudService[M: DeclarativeBase, C: BaseModel, U: VersionedUpdate, R: BaseM
     entity_type: ClassVar[str]
     # Human name for messages, e.g. "Проект".
     entity_label: ClassVar[str]
+    # Rows have `sort_order`, and a new row goes to the end of the list.
+    ordered: ClassVar[bool] = False
 
     def __init__(self, session: AsyncSession, repo: AdminRepository[M], audit: AuditWriter) -> None:
         self.session = session
@@ -62,26 +75,26 @@ class CrudService[M: DeclarativeBase, C: BaseModel, U: VersionedUpdate, R: BaseM
         """Create schema → new ORM row (not yet added to the session)."""
 
     @abstractmethod
-    def to_read(self, obj: M) -> R:
-        """ORM row → AdminRead schema."""
+    async def present_many(self, rows: Sequence[M]) -> list[R]:
+        """ORM rows → AdminRead schemas.
+
+        Related data (cards of referenced objects, counts) is loaded here once for the
+        whole batch and handed to the row mapper as an argument.
+        """
 
     async def present(self, obj: M) -> R:
-        """Read model for one row. Override to load related data first (cards, galleries)."""
         return (await self.present_many([obj]))[0]
-
-    async def present_many(self, rows: Sequence[M]) -> list[R]:
-        """Read models for several rows; override to prefetch related data in one go."""
-        return [self.to_read(r) for r in rows]
 
     def apply(self, obj: M, changes: dict[str, Any]) -> None:
         """Copy changed fields onto the row. Override when names or shapes differ."""
         for field, value in changes.items():
             setattr(obj, field, value)
 
-    async def validate(self, obj: M) -> None:
+    async def validate(self, obj: M, before: Before) -> None:
         """Checks before saving: unique slug, existing references... Raise AppError.
 
-        No checks by default; entities override this.
+        `before` holds the column values as they were before this update (None when
+        creating), e.g. to see that the slug changed. No checks by default.
         """
         return None
 
@@ -120,7 +133,9 @@ class CrudService[M: DeclarativeBase, C: BaseModel, U: VersionedUpdate, R: BaseM
     async def create(self, data: C) -> R:
         async with self.transaction():
             obj = self.build(data)
-            await self.validate(obj)
+            if self.ordered:
+                cast(Ordered, obj).sort_order = await self.repo.next_sort_order()
+            await self.validate(obj, None)
             self.repo.add(obj)
             await self.session.flush()
             await self.audit.record(
@@ -139,7 +154,7 @@ class CrudService[M: DeclarativeBase, C: BaseModel, U: VersionedUpdate, R: BaseM
             ensure_version(row(obj), data.version)
             before = snapshot(obj)
             self.apply(obj, data.model_dump(exclude_unset=True, exclude={"version"}))
-            await self.validate(obj)
+            await self.validate(obj, before)
             row(obj).version += 1
             await self.session.flush()
             changes = diff(before, snapshot(obj))

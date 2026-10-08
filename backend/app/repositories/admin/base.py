@@ -85,6 +85,11 @@ class AdminRepository[M: DeclarativeBase]:
     def add(self, obj: M) -> None:
         self.session.add(obj)
 
+    async def next_sort_order(self, *scope: Any) -> int:
+        """Position after the last row in `scope` (0 for an empty list)."""
+        last = await self.session.scalar(select(func.max(self.model.sort_order)).where(*scope))
+        return 0 if last is None else last + 10
+
     async def delete(self, obj: M) -> None:
         await self.session.delete(obj)
 

@@ -3,7 +3,7 @@
 import logging
 from collections import defaultdict
 from collections.abc import Awaitable, Callable
-from typing import Any
+from typing import Any, NamedTuple
 
 from pydantic import BaseModel, ValidationError
 
@@ -92,6 +92,22 @@ HOOKS: dict[SectionType, Hook] = {
 }
 
 
+# Read models of referenced entities, by kind and id (what `expand` consumes).
+Loaded = dict[RefKind, dict[Any, BaseModel]]
+
+# Collections that sections reference: the model and how a row becomes a read model.
+# Only published rows are shown; media has no publication flag and is loaded separately.
+PUBLISHED: dict[RefKind, tuple[type[Any], Callable[[Mapper, Any], BaseModel]]] = {
+    RefKind.project: (Project, Mapper.project_card),
+    RefKind.person: (Person, Mapper.person),
+    RefKind.client: (Client, Mapper.client),
+    RefKind.division: (Division, Mapper.division),
+    RefKind.timeline_event: (TimelineEvent, Mapper.timeline_event),
+    RefKind.stat: (Stat, Mapper.stat),
+    RefKind.vacancy: (Vacancy, Mapper.vacancy),
+}
+
+
 class RefLoader:
     """Loads referenced entities in one query per kind and maps them to read models."""
 
@@ -99,35 +115,24 @@ class RefLoader:
         self.repo = repo
         self.m = mapper
 
-    async def load(self, refs: RefIds) -> dict[RefKind, dict[Any, BaseModel]]:
-        out: dict[RefKind, dict[Any, BaseModel]] = {}
-        r, m = self.repo, self.m
-        for kind, ids in refs.items():
-            if not ids:
-                continue
-            match kind:
-                case RefKind.media:
-                    rows = await r.media_by_ids(ids)
-                    out[kind] = {k: v for k, v in ((k, m.media(v)) for k, v in rows.items()) if v}
-                case RefKind.project:
-                    out[kind] = _map(await r.published_by_ids(Project, ids), m.project_card)
-                case RefKind.person:
-                    out[kind] = _map(await r.published_by_ids(Person, ids), m.person)
-                case RefKind.client:
-                    out[kind] = _map(await r.published_by_ids(Client, ids), m.client)
-                case RefKind.division:
-                    out[kind] = _map(await r.published_by_ids(Division, ids), m.division)
-                case RefKind.timeline_event:
-                    out[kind] = _map(await r.published_by_ids(TimelineEvent, ids), m.timeline_event)
-                case RefKind.stat:
-                    out[kind] = _map(await r.published_by_ids(Stat, ids), m.stat)
-                case RefKind.vacancy:
-                    out[kind] = _map(await r.published_by_ids(Vacancy, ids), m.vacancy)
-        return out
+    async def load(self, refs: RefIds) -> Loaded:
+        return {kind: await self._load_kind(kind, ids) for kind, ids in refs.items() if ids}
+
+    async def _load_kind(self, kind: RefKind, ids: set[Any]) -> dict[Any, BaseModel]:
+        if kind == RefKind.media:
+            media = await self.repo.media_by_ids(ids)
+            return {k: read for k, row in media.items() if (read := self.m.media(row))}
+        model, to_read = PUBLISHED[kind]
+        rows = await self.repo.published_by_ids(model, ids)
+        return {k: to_read(self.m, row) for k, row in rows.items()}
 
 
-def _map(rows: dict[Any, Any], fn: Callable[[Any], BaseModel]) -> dict[Any, BaseModel]:
-    return {k: fn(v) for k, v in rows.items()}
+class Prepared(NamedTuple):
+    """A section ready to render: valid data with its live query resolved."""
+
+    section: Section
+    type: SectionType
+    data: SectionData
 
 
 class PageService:
@@ -139,38 +144,8 @@ class PageService:
         page = await self.repo.page_with_sections(slug)
         if page is None:
             return None
-
-        prepared: list[tuple[Section, SectionType, SectionData]] = []
-        for section in self.repo.visible_sections(page):
-            parsed = self._parse(section)
-            if parsed is None:
-                continue
-            stype, data = parsed
-            hook = HOOKS.get(stype)
-            if hook is not None:
-                data = await hook(data, self.repo)
-            prepared.append((section, stype, data))
-
-        refs: RefIds = defaultdict(set)
-        for _, _, data in prepared:
-            collect_refs(data, refs)
-        loaded = await RefLoader(self.repo, self.mapper).load(refs)
-
-        sections: list[SectionBase] = []
-        for section, stype, data in prepared:
-            envelope = SECTION_SCHEMAS[stype].read
-            sections.append(
-                envelope.model_validate(
-                    {
-                        "id": section.id,
-                        "type": stype.value,
-                        "anchor": section.anchor,
-                        "tone": section.tone,
-                        "data": expand(data, locale, loaded),
-                    }
-                )
-            )
-
+        prepared = await self._prepare(self.repo.visible_sections(page))
+        loaded = await self._load_refs(prepared)
         t = self.mapper.t
         return PageRead.model_validate(
             {
@@ -182,7 +157,40 @@ class PageService:
                     description=t(page.seo_description),
                     og_image=self.mapper.media(page.og_image),
                 ),
-                "sections": sections,
+                "sections": [self._render(p, loaded, locale) for p in prepared],
+            }
+        )
+
+    async def _prepare(self, sections: list[Section]) -> list[Prepared]:
+        """Parse each section and fill in its live query; invalid sections are dropped."""
+        prepared = []
+        for section in sections:
+            parsed = self._parse(section)
+            if parsed is None:
+                continue
+            stype, data = parsed
+            hook = HOOKS.get(stype)
+            if hook is not None:
+                data = await hook(data, self.repo)
+            prepared.append(Prepared(section, stype, data))
+        return prepared
+
+    async def _load_refs(self, prepared: list[Prepared]) -> Loaded:
+        """Everything the sections reference, in one query per kind for the whole page."""
+        refs: RefIds = defaultdict(set)
+        for item in prepared:
+            collect_refs(item.data, refs)
+        return await RefLoader(self.repo, self.mapper).load(refs)
+
+    @staticmethod
+    def _render(item: Prepared, loaded: Loaded, locale: Locale) -> SectionBase:
+        return SECTION_SCHEMAS[item.type].read.model_validate(
+            {
+                "id": item.section.id,
+                "type": item.type.value,
+                "anchor": item.section.anchor,
+                "tone": item.section.tone,
+                "data": expand(item.data, locale, loaded),
             }
         )
 
