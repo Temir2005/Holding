@@ -15,6 +15,8 @@ __pycache__/
 node_modules/
 dist/
 *.tsbuildinfo
+# Vite's dependency cache, rebuilt on every start
+.vite/
 
 # os / editors
 .DS_Store
