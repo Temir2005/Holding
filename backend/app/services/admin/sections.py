@@ -114,6 +114,19 @@ class SectionAdminService(CrudService[Section, SectionCreate, SectionUpdate, Sec
             changes["tone"] = Tone(changes["tone"]).value
         super().apply(obj, changes)
 
+    async def problems(self, section: Section, loc: Loc) -> list[dict[str, Any]]:
+        """Everything that would stop this section from being saved, without raising:
+        publishing and rollback report all sections of a page at once."""
+        try:
+            stored = parse_data(SectionType(section.type), section.data, (*loc, "data"))
+        except ValidationFailed as exc:
+            return list(exc.details or [])
+        except ValueError:
+            return [{"loc": [*loc, "type"], "msg": f"неизвестный тип блока «{section.type}»"}]
+        return await self.refs.problems(stored, (*loc, "data")) + consistency_errors(
+            stored, (*loc, "data")
+        )
+
     async def validate(self, obj: Section, before: Before) -> None:
         stored = parse_data(SectionType(obj.type), obj.data)
         await self.refs.check(stored, DATA_LOC, extra=consistency_errors(stored))

@@ -1,6 +1,7 @@
 """Page assembly: validate section data, resolve live queries, expand references."""
 
 import logging
+import uuid
 from collections import defaultdict
 from collections.abc import Awaitable, Callable
 from typing import Any, NamedTuple
@@ -8,10 +9,11 @@ from typing import Any, NamedTuple
 from pydantic import BaseModel, ValidationError
 
 from app.core.i18n import Locale, resolve_text
-from app.models import Client, Division, Person, Project, Section, Stat, TimelineEvent, Vacancy
+from app.models import Client, Division, Page, Person, Project, Stat, TimelineEvent, Vacancy
 from app.repositories.content import ContentRepository
 from app.schemas.pages import PageRead, PageSeo
 from app.schemas.refs import RefIds, RefKind, collect_refs, expand
+from app.schemas.revisions import PageSnapshot, SnapshotSection
 from app.schemas.sections import (
     SECTION_SCHEMAS,
     ClientsGridData,
@@ -28,6 +30,7 @@ from app.schemas.sections import (
     VacanciesData,
 )
 from app.services.mappers import Mapper
+from app.services.snapshots import build_snapshot
 
 log = logging.getLogger(__name__)
 
@@ -130,38 +133,57 @@ class RefLoader:
 class Prepared(NamedTuple):
     """A section ready to render: valid data with its live query resolved."""
 
-    section: Section
+    section: SnapshotSection
     type: SectionType
     data: SectionData
 
 
 class PageService:
+    """Renders a page for the site. Content always comes from a snapshot: the published
+    revision for the public API, or the draft frozen on the fly for preview, so preview
+    shows exactly what publishing would put on the site."""
+
     def __init__(self, repo: ContentRepository, mapper: Mapper) -> None:
         self.repo = repo
         self.mapper = mapper
 
     async def get(self, slug: str, locale: Locale) -> PageRead | None:
-        page = await self.repo.page_with_sections(slug)
+        found = await self.repo.published_page(slug)
+        if found is None:
+            return None
+        page, revision = found
+        return await self.render(page, PageSnapshot.model_validate(revision.snapshot), locale)
+
+    async def preview(self, page_id: uuid.UUID, locale: Locale) -> PageRead | None:
+        page = await self.repo.page_draft(page_id)
         if page is None:
             return None
-        prepared = await self._prepare(self.repo.visible_sections(page))
+        return await self.render(page, build_snapshot(page, page.sections), locale)
+
+    async def render(self, page: Page, snapshot: PageSnapshot, locale: Locale) -> PageRead:
+        prepared = await self._prepare(snapshot.visible_sections())
         loaded = await self._load_refs(prepared)
+        meta = snapshot.page
+        og_image = None
+        if meta.og_image_id is not None:
+            media = await self.repo.media_by_ids([meta.og_image_id])
+            og_image = self.mapper.media(media.get(meta.og_image_id))
         t = self.mapper.t
         return PageRead.model_validate(
             {
                 "id": page.id,
                 "slug": page.slug,
-                "title": t(page.title),
+                "title": t(meta.title),
                 "seo": PageSeo(
-                    title=resolve_text(page.seo_title, locale) or t(page.title),
-                    description=t(page.seo_description),
-                    og_image=self.mapper.media(page.og_image),
+                    title=resolve_text(meta.seo_title, locale) or t(meta.title),
+                    description=t(meta.seo_description),
+                    og_image=og_image,
                 ),
                 "sections": [self._render(p, loaded, locale) for p in prepared],
             }
         )
 
-    async def _prepare(self, sections: list[Section]) -> list[Prepared]:
+    async def _prepare(self, sections: list[SnapshotSection]) -> list[Prepared]:
         """Parse each section and fill in its live query; invalid sections are dropped."""
         prepared = []
         for section in sections:
@@ -195,7 +217,7 @@ class PageService:
         )
 
     @staticmethod
-    def _parse(section: Section) -> tuple[SectionType, SectionData] | None:
+    def _parse(section: SnapshotSection) -> tuple[SectionType, SectionData] | None:
         """Invalid sections are skipped and logged so one bad block never breaks a page."""
         try:
             stype = SectionType(section.type)

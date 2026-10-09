@@ -8,6 +8,8 @@ from typing import Any
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import get_settings
+from app.main import app
 from app.models import AdminUser, Lead, LeadStatus
 from tests.conftest import auth_header
 from tests.test_pages_admin import PAGES, make_page
@@ -167,3 +169,26 @@ async def test_contact_form_texts_and_topics_are_editable(
         )  # fmt: skip
         assert res.status_code == 422, bad
         assert any(e["loc"][:3] == ["body", "data", loc] for e in res.json()["error"]["details"])
+
+
+async def test_csv_times_use_the_configured_offset(
+    client: AsyncClient, editor: AdminUser, session: AsyncSession
+) -> None:
+    created = datetime(2026, 10, 8, 10, 9, tzinfo=UTC)
+    session.add(Lead(name="Дана", email="d@example.kz", type="client", created_at=created))
+    await session.commit()
+    h = auth_header(editor)
+
+    def first_date(res: Any) -> str:
+        rows = list(csv.reader(io.StringIO(res.content.decode().lstrip("﻿")), delimiter=";"))
+        return rows[1][0]
+
+    assert first_date(await client.get(f"{LEADS}/export", headers=h)) == "2026-10-08 15:09+05:00"
+
+    utc = get_settings().model_copy(update={"leads_export_utc_offset_hours": 0})
+    app.dependency_overrides[get_settings] = lambda: utc
+    try:
+        res = await client.get(f"{LEADS}/export", headers=h)
+    finally:
+        del app.dependency_overrides[get_settings]
+    assert first_date(res) == "2026-10-08 10:09+00:00"

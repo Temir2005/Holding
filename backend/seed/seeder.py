@@ -2,6 +2,10 @@
 
 Every row gets a deterministic UUID derived from a readable key ("project:aaag"),
 so running the seed again updates rows in place instead of creating duplicates.
+
+Pages are published through the same service the admin uses: the first run creates
+revision 1 of each page; a later run adds a revision only if the seeded content changed.
+The log records these as written by the system.
 """
 
 import uuid
@@ -10,8 +14,11 @@ from typing import Any, TypeVar
 from sqlalchemy import delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import get_settings
 from app.models import Base, Media, Page, ProjectMedia, Section
 from app.schemas.sections import SECTION_SCHEMAS, SectionType
+from app.services.admin.audit import DbAuditWriter
+from app.services.admin.publishing import PublishingService
 from app.storage.service import Storage
 from seed.images import Rendered
 
@@ -33,6 +40,13 @@ class Seeder:
     def __init__(self, session: AsyncSession, storage: Storage) -> None:
         self.session = session
         self.storage = storage
+        self.publisher = PublishingService(
+            session,
+            DbAuditWriter(session, user_id=None),
+            storage,
+            get_settings(),
+            acting_user=None,
+        )
 
     async def upsert(self, model: type[M], key: str, **fields: Any) -> uuid.UUID:
         row_id = uid(key)
@@ -110,4 +124,7 @@ class Seeder:
         await self.session.execute(
             delete(Section).where(Section.page_id == page_id, Section.id.not_in(keep))
         )
+        page = await self.session.get(Page, page_id, populate_existing=True)
+        assert page is not None
+        await self.publisher.publish_now(page, "Начальное наполнение")
         return page_id

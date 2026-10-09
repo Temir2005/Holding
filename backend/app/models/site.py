@@ -1,7 +1,8 @@
 import uuid
+from datetime import datetime
 from typing import Any
 
-from sqlalchemy import ForeignKey, String
+from sqlalchemy import DateTime, ForeignKey, String
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base, IdMixin, LText, PublishableMixin, TimestampMixin, VersionMixin
@@ -34,6 +35,12 @@ class Page(IdMixin, TimestampMixin, VersionMixin, PublishableMixin, Base):
     og_image_id: Mapped[uuid.UUID | None] = mapped_column(
         ForeignKey("media.id", ondelete="SET NULL")
     )
+    # What the public site shows: the current published revision. Title, SEO and
+    # sections above are the draft. `use_alter`: page and page_revision point at each other.
+    published_revision_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("page_revision.id", ondelete="SET NULL", use_alter=True)
+    )
+    published_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True))
 
     og_image: Mapped[Media | None] = relationship(lazy="selectin")
     sections: Mapped[list["Section"]] = relationship(

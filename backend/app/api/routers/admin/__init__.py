@@ -17,6 +17,7 @@ from app.api.routers.admin import (
     media,
     meta,
     pages,
+    publishing,
     sections,
     settings,
     users,
@@ -31,6 +32,7 @@ editor_routes = APIRouter(
 )
 editor_routes.include_router(media.router)
 editor_routes.include_router(pages.router)
+editor_routes.include_router(publishing.router)
 editor_routes.include_router(sections.router)
 editor_routes.include_router(meta.router)
 editor_routes.include_router(collections.router)

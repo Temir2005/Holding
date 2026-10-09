@@ -3,6 +3,7 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import Lead, Media, Page, Section, TimelineEvent
+from tests.conftest import publish
 
 
 async def _page_with_sections(session: AsyncSession) -> None:
@@ -41,6 +42,7 @@ async def _page_with_sections(session: AsyncSession) -> None:
     ]
     session.add(page)
     await session.commit()
+    await publish(session, page)
 
 
 async def test_page_expands_sections(client: AsyncClient, session: AsyncSession) -> None:

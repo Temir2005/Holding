@@ -49,23 +49,26 @@ RefCards = dict[RefKind, dict[uuid.UUID, RefCard]]
 
 
 class PageCreate(BaseModel):
+    """A new page starts as an unpublished draft; POST …/publish puts it on the site."""
+
     slug: Slug
     title: RequiredText
     seo_title: LocalizedText | None = None
     seo_description: LocalizedText | None = None
     og_image_id: uuid.UUID | None = None
-    is_published: bool = False
 
 
 class PageUpdate(VersionedUpdate):
-    not_null = frozenset({"slug", "title", "is_published"})
+    """Slug changes at once (it is the address). Title, SEO and og-image are draft:
+    the site shows them after publishing."""
+
+    not_null = frozenset({"slug", "title"})
 
     slug: Slug | None = None
     title: RequiredText | None = None
     seo_title: LocalizedText | None = None
     seo_description: LocalizedText | None = None
     og_image_id: uuid.UUID | None = None
-    is_published: bool | None = None
 
 
 class PageAdminRead(BaseModel):
@@ -76,7 +79,15 @@ class PageAdminRead(BaseModel):
     seo_description: dict[str, Any]
     og_image_id: uuid.UUID | None
     og_image: RefCard | None
-    is_published: bool
+    is_published: bool = Field(description="On the site; changed by publish / unpublish")
+    published_revision_number: int | None = Field(
+        description="The revision the site shows (kept when the page is taken down)"
+    )
+    published_at: datetime | None
+    has_unpublished_changes: bool = Field(
+        description="The draft differs from what the site shows (always true before the "
+        "first publication)"
+    )
     sort_order: int
     sections_count: int
     created_at: datetime
@@ -128,6 +139,7 @@ class SectionAdminRead(BaseModel):
 
 class PageDetail(PageAdminRead):
     sections: list[SectionAdminRead]
+    draft_hash: str = Field(description="Send it back to POST …/publish")
 
 
 class SectionOrder(BaseModel):

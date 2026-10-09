@@ -13,11 +13,11 @@ from app.models import (
     Division,
     Media,
     Page,
+    PageRevision,
     Person,
     Project,
     ProjectMedia,
     ProjectStatus,
-    Section,
     SiteSettings,
     Stat,
     TimelineEvent,
@@ -65,18 +65,22 @@ class ContentRepository:
         result: SiteSettings | None = await self.session.scalar(select(SiteSettings).limit(1))
         return result
 
-    async def page_with_sections(self, slug: str) -> Page | None:
-        stmt = (
-            select(Page)
-            .where(Page.slug == slug, Page.is_published.is_(True))
-            .options(selectinload(Page.sections))
-        )
+    async def published_page(self, slug: str) -> tuple[Page, PageRevision] | None:
+        """A page on the site, with the revision the site shows."""
+        row = (
+            await self.session.execute(
+                select(Page, PageRevision)
+                .join(PageRevision, PageRevision.id == Page.published_revision_id)
+                .where(Page.slug == slug, Page.is_published.is_(True))
+            )
+        ).first()
+        return (row[0], row[1]) if row else None
+
+    async def page_draft(self, page_id: uuid.UUID) -> Page | None:
+        """Any page with its draft sections (for preview), published or not."""
+        stmt = select(Page).where(Page.id == page_id).options(selectinload(Page.sections))
         page: Page | None = await self.session.scalar(stmt)
         return page
-
-    @staticmethod
-    def visible_sections(page: Page) -> list[Section]:
-        return [s for s in page.sections if s.is_visible]
 
     # --- live queries used by sections -----------------------------------------
 

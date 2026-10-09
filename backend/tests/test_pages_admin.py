@@ -56,6 +56,20 @@ async def add_section(
     return dict(res.json())
 
 
+async def publish_page(
+    client: AsyncClient, h: dict[str, str], page_id: str, comment: str | None = None
+) -> dict[str, Any]:
+    """Publish the draft as the editor sees it now (version and draft hash from GET)."""
+    detail = (await client.get(f"{PAGES}/{page_id}", headers=h)).json()
+    res = await client.post(
+        f"{PAGES}/{page_id}/publish",
+        headers=h,
+        json={"version": detail["version"], "draft_hash": detail["draft_hash"], "comment": comment},
+    )
+    assert res.status_code == 200, res.text
+    return dict(res.json())
+
+
 # --- pages -------------------------------------------------------------------------
 
 
@@ -72,7 +86,7 @@ async def test_page_crud_and_slug_rules(client: AsyncClient, editor: AdminUser) 
     edited = await client.patch(
         f"{PAGES}/{page['id']}",
         headers=h,
-        json={"version": 1, "seo_title": {"ru": "О компании", "en": "About"}, "is_published": True},
+        json={"version": 1, "seo_title": {"ru": "О компании", "en": "About"}},
     )
     assert edited.json()["seo_title"] == {"ru": "О компании", "en": "About"}
     assert edited.json()["version"] == 2
@@ -96,19 +110,19 @@ async def test_home_page_cannot_be_unpublished(client: AsyncClient, editor: Admi
     # A new site may start with an unpublished home page...
     home = await make_page(client, h, "home")
     assert home["is_published"] is False
-    published = await client.patch(
-        f"{PAGES}/{home['id']}", headers=h, json={"version": 1, "is_published": True}
-    )
-    assert published.json()["is_published"] is True
+    published = await publish_page(client, h, home["id"])
+    assert published["is_published"] is True
     # ...but once it is live, taking it down would leave the site without "/".
-    res = await client.patch(
-        f"{PAGES}/{home['id']}", headers=h, json={"version": 2, "is_published": False}
+    res = await client.post(
+        f"{PAGES}/{home['id']}/unpublish", headers=h, json={"version": published["version"]}
     )
     assert (res.status_code, res.json()["error"]["code"]) == (409, "PROTECTED_PAGE")
     assert (await client.get("/api/v1/pages/home")).status_code == 200
     # Other edits of the home page still work.
     renamed = await client.patch(
-        f"{PAGES}/{home['id']}", headers=h, json={"version": 2, "title": {"ru": "Холдинг"}}
+        f"{PAGES}/{home['id']}",
+        headers=h,
+        json={"version": published["version"], "title": {"ru": "Холдинг"}},
     )
     assert renamed.status_code == 200
 
@@ -116,13 +130,12 @@ async def test_home_page_cannot_be_unpublished(client: AsyncClient, editor: Admi
 async def test_other_pages_can_be_unpublished(client: AsyncClient, editor: AdminUser) -> None:
     h = auth_header(editor)
     page = await make_page(client, h, "team")
-    await client.patch(
-        f"{PAGES}/{page['id']}", headers=h, json={"version": 1, "is_published": True}
-    )
-    res = await client.patch(
-        f"{PAGES}/{page['id']}", headers=h, json={"version": 2, "is_published": False}
+    published = await publish_page(client, h, page["id"])
+    res = await client.post(
+        f"{PAGES}/{page['id']}/unpublish", headers=h, json={"version": published["version"]}
     )
     assert res.json()["is_published"] is False
+    assert (await client.get("/api/v1/pages/team")).status_code == 404
 
 
 async def test_page_linked_from_menu_and_buttons_cannot_disappear(
@@ -323,17 +336,17 @@ async def test_reorder_copy_hide_and_delete(client: AsyncClient, editor: AdminUs
 
 
 async def test_hidden_section_is_not_public(client: AsyncClient, editor: AdminUser) -> None:
-    """Until publishing arrives (stage 7), draft rows are what the public API reads."""
+    """The site shows the published version: edits and hiding take effect on publishing."""
     h = auth_header(editor)
     page = await make_page(client, h, "home")
-    await client.patch(
-        f"{PAGES}/{page['id']}", headers=h, json={"version": 1, "is_published": True}
-    )
     s = await add_section(
         client, h, page["id"], {"type": "cta", "data": {"title": {"ru": "Скрою"}}}
     )
+    await publish_page(client, h, page["id"])
     assert len((await client.get("/api/v1/pages/home")).json()["sections"]) == 1
     await client.patch(f"{SECTIONS}/{s['id']}", headers=h, json={"version": 1, "is_visible": False})
+    assert len((await client.get("/api/v1/pages/home")).json()["sections"]) == 1
+    await publish_page(client, h, page["id"])
     assert (await client.get("/api/v1/pages/home")).json()["sections"] == []
 
 
