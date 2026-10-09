@@ -3,6 +3,7 @@ import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.api.cache import register_cache_headers
 from app.api.errors import register_error_handlers
 from app.api.router import api_router
 from app.core.config import get_settings
@@ -26,4 +27,5 @@ app.add_middleware(
     allow_credentials=True,
 )
 register_error_handlers(app)
+register_cache_headers(app)
 app.include_router(api_router)

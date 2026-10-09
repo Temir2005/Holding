@@ -14,7 +14,7 @@ from xml.etree.ElementTree import Element, register_namespace, tostring
 
 from defusedxml import DefusedXmlException
 from defusedxml.ElementTree import ParseError, fromstring
-from PIL import Image, ImageOps, UnidentifiedImageError
+from PIL import ExifTags, Image, ImageOps, UnidentifiedImageError
 
 # Pillow refuses images above this many pixels (decompression bombs).
 Image.MAX_IMAGE_PIXELS = 60_000_000
@@ -116,9 +116,14 @@ def strip_metadata(image: Image.Image) -> tuple[Image.Image, bytes]:
         # Rotating every frame is not worth it for animations; frames are kept as is.
         image.save(buf, fmt, save_all=True, **options)
         return image, buf.getvalue()
-    upright = ImageOps.exif_transpose(image)
-    if fmt == "JPEG" and upright is image:
-        options.update(quality="keep", subsampling="keep")
+    if image.getexif().get(ExifTags.Base.Orientation, 1) in (1, None):
+        # Already upright. `exif_transpose` would return a copy, and a copy loses the
+        # JPEG quantization tables that `quality="keep"` needs.
+        upright = image
+        if fmt == "JPEG":
+            options.update(quality="keep", subsampling="keep")
+    else:
+        upright = ImageOps.exif_transpose(image)
     upright.save(buf, fmt, **options)
     return upright, buf.getvalue()
 

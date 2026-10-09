@@ -94,3 +94,49 @@ async def test_key_fields_are_dropdowns_with_choices_in_meta(
     for section_type in ("project_list", "vacancies"):
         slug = types[section_type]["properties"]["division_slug"]
         assert (slug["x-widget"], slug["x-options"]) == ("select", "divisions")
+
+
+async def make_stat(client: AsyncClient, h: dict[str, str], context: str) -> dict[str, Any]:
+    body = {"value": 1, "label": {"ru": "x"}, "context": context}
+    res = await client.post(f"{ADMIN}/stats", headers=h, json=body)
+    assert res.status_code == 201, res.text
+    return dict(res.json())
+
+
+async def test_last_stat_of_a_used_context_is_kept(client: AsyncClient, editor: AdminUser) -> None:
+    h = auth_header(editor)
+    page = await make_page(client, h)
+    first = await make_stat(client, h, "home")
+    await add_section(client, h, page["id"], {"type": "stats", "data": {"context": "home"}})
+
+    moved = await client.patch(
+        f"{ADMIN}/stats/{first['id']}", headers=h, json={"version": 1, "context": "about"}
+    )
+    assert moved.status_code == 409
+    assert moved.json()["error"]["code"] == "IN_USE"
+    assert [u["field"] for u in moved.json()["error"]["details"]] == ["data.context"]
+    deleted = await client.delete(f"{ADMIN}/stats/{first['id']}", headers=h, params={"version": 1})
+    assert deleted.json()["error"]["code"] == "IN_USE"
+
+    # With another stat left in the set, both are allowed.
+    second = await make_stat(client, h, "home")
+    moved = await client.patch(
+        f"{ADMIN}/stats/{first['id']}", headers=h, json={"version": 1, "context": "about"}
+    )
+    assert moved.status_code == 200, moved.text
+    # Now `second` is the last one of "home".
+    gone = await client.delete(f"{ADMIN}/stats/{second['id']}", headers=h, params={"version": 1})
+    assert gone.json()["error"]["code"] == "IN_USE"
+    gone = await client.delete(f"{ADMIN}/stats/{first['id']}", headers=h, params={"version": 2})
+    assert gone.status_code == 204
+
+
+async def test_unused_context_is_free(client: AsyncClient, editor: AdminUser) -> None:
+    h = auth_header(editor)
+    stat = await make_stat(client, h, "unused")
+    moved = await client.patch(
+        f"{ADMIN}/stats/{stat['id']}", headers=h, json={"version": 1, "context": "other"}
+    )
+    assert moved.status_code == 200
+    gone = await client.delete(f"{ADMIN}/stats/{stat['id']}", headers=h, params={"version": 2})
+    assert gone.status_code == 204

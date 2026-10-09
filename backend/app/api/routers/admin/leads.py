@@ -4,7 +4,7 @@ from typing import Annotated
 from fastapi import APIRouter, Depends
 from fastapi.responses import StreamingResponse
 
-from app.api.deps import AuditDep, SessionDep
+from app.api.deps import AuditDep, SessionDep, SettingsDep
 from app.core.clock import utcnow
 from app.schemas.admin.common import ListParams, Paginated, error_responses
 from app.schemas.admin.leads import LeadAdminRead, LeadFilters, LeadUpdate
@@ -13,8 +13,8 @@ from app.services.admin.leads import LeadAdminService
 router = APIRouter(prefix="/leads", tags=["admin: leads"])
 
 
-def lead_service(session: SessionDep, audit: AuditDep) -> LeadAdminService:
-    return LeadAdminService(session, audit)
+def lead_service(session: SessionDep, audit: AuditDep, settings: SettingsDep) -> LeadAdminService:
+    return LeadAdminService(session, audit, settings)
 
 
 Leads = Annotated[LeadAdminService, Depends(lead_service)]

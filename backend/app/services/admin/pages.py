@@ -1,4 +1,7 @@
-"""Pages: slug, title, SEO, og-image, publication, order; and a page with its sections."""
+"""Pages: slug, title, SEO, og-image, order; and a page with its sections.
+
+Publishing (revisions, preview) is app.services.admin.publishing.
+"""
 
 import uuid
 from collections.abc import Sequence
@@ -8,8 +11,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.errors import AlreadyExists, Conflict, InUse, ValidationFailed
 from app.core.i18n import drop_empty_languages
-from app.models import Page
-from app.repositories.admin.pages import PageRepository
+from app.models import Page, PageRevision
+from app.repositories.admin.pages import PageRepository, RevisionRepository
 from app.schemas.admin.pages import PageAdminRead, PageCreate, PageDetail, PageUpdate, RefCard
 from app.schemas.refs import RefKind
 from app.services.admin.audit import AuditWriter
@@ -17,6 +20,7 @@ from app.services.admin.base import Before, CrudService
 from app.services.admin.refs import RefService
 from app.services.admin.sections import SectionAdminService
 from app.services.admin.usage import UsageFinder
+from app.services.snapshots import build_snapshot, differs, snapshot_hash
 from app.storage.service import Storage
 
 # The site's root route renders this page; it can be edited but not renamed or deleted.
@@ -45,7 +49,8 @@ class PageAdminService(CrudService[Page, PageCreate, PageUpdate, PageAdminRead])
             seo_title=drop_empty_languages(texts["seo_title"] or {}),
             seo_description=drop_empty_languages(texts["seo_description"] or {}),
             og_image_id=data.og_image_id,
-            is_published=data.is_published,
+            # A draft until someone publishes it.
+            is_published=False,
         )
 
     def apply(self, obj: Page, changes: dict[str, Any]) -> None:
@@ -55,21 +60,36 @@ class PageAdminService(CrudService[Page, PageCreate, PageUpdate, PageAdminRead])
         super().apply(obj, changes)
 
     async def present_many(self, rows: Sequence[Page]) -> list[PageAdminRead]:
-        counts = await self.pages.section_counts([p.id for p in rows])
+        drafts = await self.pages.drafts([p.id for p in rows])
+        revisions = await RevisionRepository(self.session).by_ids(
+            [p.published_revision_id for p in rows if p.published_revision_id]
+        )
         cards = await self.refs.load_cards(
             {RefKind.media: {p.og_image_id for p in rows if p.og_image_id}}
         )
-        return [
-            self.to_read(
-                p,
-                sections_count=counts.get(p.id, 0),
-                og_image=cards.get(RefKind.media, p.og_image_id),
+        reads = []
+        for p in rows:
+            revision = revisions.get(p.published_revision_id) if p.published_revision_id else None
+            reads.append(
+                self.to_read(
+                    p,
+                    sections_count=len(drafts[p.id]),
+                    og_image=cards.get(RefKind.media, p.og_image_id),
+                    revision=revision,
+                    changed=differs(build_snapshot(p, drafts[p.id]), revision),
+                )
             )
-            for p in rows
-        ]
+        return reads
 
     @staticmethod
-    def to_read(obj: Page, *, sections_count: int, og_image: RefCard | None) -> PageAdminRead:
+    def to_read(
+        obj: Page,
+        *,
+        sections_count: int,
+        og_image: RefCard | None,
+        revision: PageRevision | None,
+        changed: bool,
+    ) -> PageAdminRead:
         return PageAdminRead(
             id=obj.id,
             slug=obj.slug,
@@ -79,6 +99,9 @@ class PageAdminService(CrudService[Page, PageCreate, PageUpdate, PageAdminRead])
             og_image_id=obj.og_image_id,
             og_image=og_image,
             is_published=obj.is_published,
+            published_revision_number=revision.number if revision else None,
+            published_at=obj.published_at,
+            has_unpublished_changes=changed,
             sort_order=obj.sort_order,
             sections_count=sections_count,
             created_at=obj.created_at,
@@ -91,12 +114,6 @@ class PageAdminService(CrudService[Page, PageCreate, PageUpdate, PageAdminRead])
             raise AlreadyExists(
                 f"Страница с адресом «{obj.slug}» уже есть",
                 details=[{"loc": ["body", "slug"], "msg": "already exists"}],
-            )
-        was_published = bool(before and before["is_published"])
-        if obj.slug == HOME_SLUG and was_published and not obj.is_published:
-            raise Conflict(
-                "Главную страницу нельзя снять с публикации: сайт останется без главной",
-                code="PROTECTED_PAGE",
             )
         renamed_from = before["slug"] if before else None
         if renamed_from and renamed_from != obj.slug:
@@ -137,5 +154,12 @@ class PageAdminService(CrudService[Page, PageCreate, PageUpdate, PageAdminRead])
     # --- page with its sections ----------------------------------------------------------
 
     async def detail(self, page_id: uuid.UUID, sections: SectionAdminService) -> PageDetail:
-        page = await self.read(page_id)
-        return PageDetail(**page.model_dump(), sections=await sections.list_for_page(page.id))
+        page = await self.get_or_404(page_id)
+        drafts = await self.pages.drafts([page.id])
+        return PageDetail(
+            **(await self.present(page)).model_dump(),
+            sections=await sections.present_many(
+                sorted(drafts[page.id], key=lambda s: (s.sort_order, str(s.id)))
+            ),
+            draft_hash=snapshot_hash(build_snapshot(page, drafts[page.id])),
+        )

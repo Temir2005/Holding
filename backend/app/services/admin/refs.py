@@ -124,21 +124,32 @@ class RefService:
     ) -> None:
         """Raise ValidationFailed listing every empty required text, broken reference and
         link, with field paths. `extra`: errors the caller found itself, reported together."""
-        texts = [
-            {"loc": [*loc, *path], "msg": "заполните текст на русском"}
-            for path in empty_required_texts(doc)
-        ]
-        refs = (
-            await self.ref_errors(doc, loc)
-            + await self.key_errors(doc, loc)
-            + await self.link_errors(doc, loc)
-        )
+        texts = self.text_errors(doc, loc)
+        refs = await self.ref_problems(doc, loc)
         errors = [*texts, *extra, *refs]
         if not errors:
             return
         if texts or extra:
             raise ValidationFailed("Проверьте заполнение", details=errors)
         raise ValidationFailed("Есть ссылки на несуществующие объекты", details=errors)
+
+    async def problems(self, doc: BaseModel, loc: Loc) -> list[dict[str, Any]]:
+        """What `check` would refuse, as a list (to report many documents at once)."""
+        return self.text_errors(doc, loc) + await self.ref_problems(doc, loc)
+
+    @staticmethod
+    def text_errors(doc: BaseModel, loc: Loc) -> list[dict[str, Any]]:
+        return [
+            {"loc": [*loc, *path], "msg": "заполните текст на русском"}
+            for path in empty_required_texts(doc)
+        ]
+
+    async def ref_problems(self, doc: BaseModel, loc: Loc) -> list[dict[str, Any]]:
+        return (
+            await self.ref_errors(doc, loc)
+            + await self.key_errors(doc, loc)
+            + await self.link_errors(doc, loc)
+        )
 
     async def ref_errors(self, doc: BaseModel, loc: Loc) -> list[dict[str, Any]]:
         found = list(iter_refs(doc))

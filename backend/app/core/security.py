@@ -1,4 +1,4 @@
-"""Passwords (argon2), access tokens (JWT) and opaque refresh tokens."""
+"""Passwords (argon2), access and preview tokens (JWT) and opaque refresh tokens."""
 
 import hashlib
 import secrets
@@ -16,6 +16,8 @@ from app.core.errors import Unauthorized
 
 ALGORITHM = "HS256"
 ACCESS = "access"
+# Opens the draft of one page; cannot be used as an access token and vice versa.
+PREVIEW = "preview"
 
 _hasher = PasswordHasher()
 # Verified when the email is unknown, so a miss takes as long as a wrong password.
@@ -86,6 +88,24 @@ def decode_access_token(settings: Settings, token: str) -> AccessClaims:
             issued_at=float(payload["iat"]),
         )
     except (KeyError, ValueError) as exc:
+        raise Unauthorized("Недействительный токен") from exc
+
+
+def create_preview_token(settings: Settings, page_id: uuid.UUID) -> str:
+    return create_token(
+        settings,
+        subject=str(page_id),
+        kind=PREVIEW,
+        ttl_seconds=settings.preview_token_ttl_minutes * 60,
+    )
+
+
+def decode_preview_token(settings: Settings, token: str) -> uuid.UUID:
+    """The page the token opens."""
+    payload = decode_token(settings, token, kind=PREVIEW)
+    try:
+        return uuid.UUID(payload["sub"])
+    except ValueError as exc:
         raise Unauthorized("Недействительный токен") from exc
 
 

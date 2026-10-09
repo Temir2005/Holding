@@ -126,6 +126,18 @@ def auth_header(user: "AdminUser") -> dict[str, str]:
     return {"Authorization": f"Bearer {create_access_token(get_settings(), user.id, user.role)}"}
 
 
+async def publish(session: AsyncSession, page: "Page") -> None:
+    """Put a page written straight to the database on the site, as the seeds do."""
+    from app.services.admin.audit import NullAuditWriter
+    from app.services.admin.publishing import PublishingService
+
+    publisher = PublishingService(
+        session, NullAuditWriter(), InMemoryStorage(), get_settings(), acting_user=None
+    )
+    await publisher.publish_now(page, None)
+    await session.commit()
+
+
 @pytest.fixture
 async def admin(session: AsyncSession) -> "AdminUser":
     return await make_user(session, "admin@megasmart.kz", "admin")
@@ -137,4 +149,4 @@ async def editor(session: AsyncSession) -> "AdminUser":
 
 
 if TYPE_CHECKING:
-    from app.models import AdminUser
+    from app.models import AdminUser, Page

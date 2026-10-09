@@ -223,7 +223,7 @@ class DivisionService(
         old_slug = before["slug"] if before else None
         if old_slug and old_slug != obj.slug:
             usages = await UsageFinder(self.session).division(obj.id, old_slug)
-            filtered = [u for u in usages if u.field == "data.division_slug"]
+            filtered = [u for u in usages if u.field.endswith("data.division_slug")]
             if filtered:
                 raise InUse(
                     "Блоки страниц отбирают проекты по старому адресу направления",
@@ -419,7 +419,33 @@ class StatService(CollectionService[Stat, StatCreate, StatUpdate, StatAdminRead]
     ref_kind = RefKind.stat
 
     def __init__(self, session: AsyncSession, audit: AuditWriter, storage: Storage) -> None:
-        super().__init__(session, StatRepository(session), audit, storage)
+        self.stats = StatRepository(session)
+        super().__init__(session, self.stats, audit, storage)
+
+    async def ensure_context_kept(self, obj: Stat, context: str) -> None:
+        """Refuse to take away the last stat of a context that stats blocks show.
+
+        A block filtered by context would quietly become empty on the site.
+        """
+        if await self.stats.context_has_others(context, excluding=obj.id):
+            return
+        usages = await UsageFinder(self.session).stat_context(context)
+        if usages:
+            raise InUse(
+                f"Это последняя цифра набора «{context}», а набор показывают блоки страниц. "
+                "Сначала поменяйте набор в блоках или добавьте в него другую цифру.",
+                details=[u.model_dump(mode="json") for u in usages],
+            )
+
+    async def validate(self, obj: Stat, before: Before) -> None:
+        await super().validate(obj, before)
+        old_context = before["context"] if before else None
+        if old_context and old_context != obj.context:
+            await self.ensure_context_kept(obj, old_context)
+
+    async def before_delete(self, obj: Stat) -> None:
+        await super().before_delete(obj)
+        await self.ensure_context_kept(obj, obj.context)
 
     def to_read(self, obj: Stat, cards: Cards) -> StatAdminRead:
         return StatAdminRead(

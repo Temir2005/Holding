@@ -16,6 +16,7 @@ from app.models.entities import (
 )
 from app.models.lead import Lead, LeadStatus, LeadType
 from app.models.media import Media, MediaStatus
+from app.models.revision import PageRevision
 from app.models.site import Page, Section, SiteSettings
 from app.models.user import AdminUser, RefreshToken, UserRole
 
@@ -32,6 +33,7 @@ __all__ = [
     "Media",
     "MediaStatus",
     "Page",
+    "PageRevision",
     "Person",
     "Project",
     "ProjectMedia",

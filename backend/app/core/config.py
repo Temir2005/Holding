@@ -1,7 +1,7 @@
 from functools import lru_cache
 from typing import Self
 
-from pydantic import field_validator, model_validator
+from pydantic import Field, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 # Values that must never reach production.
@@ -29,10 +29,15 @@ class Settings(BaseSettings):
 
     lead_ip_salt: str = "change-me"
     lead_rate_limit_per_minute: int = 5
+    # Times in the CSV export are shown at this UTC offset. Kazakhstan has one time zone
+    # (UTC+5) and no daylight saving, so a fixed offset is exact and needs no tzdata.
+    leads_export_utc_offset_hours: int = Field(default=5, ge=-12, le=14)
     jwt_secret: str = "change-me"
     access_token_ttl_minutes: int = 15
     refresh_token_ttl_days: int = 30
     login_rate_limit_per_minute: int = 10
+    # A preview link opens one page's draft without signing in, for this long.
+    preview_token_ttl_minutes: int = 30
     # Refresh tokens revoked longer ago than this are deleted by `app.cli cleanup`.
     # Kept a while so a replayed token is still recognized and its session revoked.
     revoked_token_retention_days: int = 7

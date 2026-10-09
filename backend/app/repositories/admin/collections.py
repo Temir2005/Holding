@@ -76,6 +76,10 @@ class StatRepository(AdminRepository[Stat]):
     sort_columns: ClassVar = {"sort_order": Stat.sort_order, "context": Stat.context}
     default_order = (Stat.context, Stat.sort_order, Stat.id)
 
+    async def context_has_others(self, context: str, excluding: uuid.UUID) -> bool:
+        """Whether another stat (not `excluding`) has this context."""
+        return await self.exists(Stat.context == context, Stat.id != excluding)
+
 
 class VacancyRepository(AdminRepository[Vacancy]):
     model = Vacancy

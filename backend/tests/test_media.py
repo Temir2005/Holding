@@ -6,6 +6,7 @@ from typing import Any
 import pytest
 from httpx import AsyncClient
 from PIL import Image
+from PIL.JpegImagePlugin import JpegImageFile
 from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -13,7 +14,7 @@ from app.core.config import get_settings
 from app.models import AdminUser, Media, Page, Project, ProjectStatus, RefreshToken, Section
 from app.services.admin.cleanup import run_cleanup
 from app.storage.memory import InMemoryStorage
-from tests.conftest import auth_header
+from tests.conftest import auth_header, publish
 
 MEDIA = "/api/v1/admin/media"
 
@@ -320,6 +321,7 @@ async def test_public_page_exposes_variants(
     page.sections = [Section(type="hero", data={"background_media_id": str(media["id"])})]
     session.add(page)
     await session.commit()
+    await publish(session, page)
     hero = (await client.get("/api/v1/pages/home")).json()["sections"][0]["data"]
     assert [v["width"] for v in hero["background"]["variants"]] == [480, 960]
 
@@ -477,3 +479,21 @@ async def test_processing_runs_off_the_event_loop_and_without_row_lock(
     res = await completing
     assert res.status_code == 200, res.text
     assert res.json()["media"]["status"] == "ready"
+
+
+async def test_upright_jpeg_keeps_its_quality(
+    client: AsyncClient, editor: AdminUser, storage: InMemoryStorage
+) -> None:
+    """Stripping metadata must not re-compress the photo (found in a live upload: 25 → 12 KB)."""
+    h = auth_header(editor)
+    original = jpeg_with_exif(1000, 600, orientation=1)
+    ticket = await upload(client, storage, h, original, "image/jpeg")
+    await client.post(f"{MEDIA}/{ticket['media']['id']}/complete", headers=h)
+
+    key = ticket["media"]["url"].split(f"/{storage.bucket}/", 1)[1]
+    stored = Image.open(io.BytesIO(storage.objects[key][0]))
+    source = Image.open(io.BytesIO(original))
+    assert isinstance(stored, JpegImageFile) and isinstance(source, JpegImageFile)
+    assert stored.quantization == source.quantization  # same quality, no generational loss
+    assert not stored.getexif()
+    assert b"Secret Camera" not in storage.objects[key][0]

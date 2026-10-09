@@ -7,11 +7,12 @@ or deletes them. Spam is marked with a status, so nothing is lost by mistake.
 import csv
 import io
 from collections.abc import Iterator, Sequence
-from datetime import datetime
+from datetime import datetime, timedelta, timezone, tzinfo
 from typing import Any
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.core.config import Settings
 from app.models import Lead
 from app.repositories.admin.site import LeadRepository
 from app.schemas.admin.common import ListParams, Paginated
@@ -52,11 +53,11 @@ def where(filters: LeadFilters) -> list[Any]:
     return conditions
 
 
-def csv_cell(column: str, value: Any) -> str:
+def csv_cell(column: str, value: Any, tz: tzinfo) -> str:
     if value is None:
         text = ""
     elif isinstance(value, datetime):
-        text = value.isoformat(sep=" ", timespec="minutes")
+        text = value.astimezone(tz).isoformat(sep=" ", timespec="minutes")
     elif column == "type":
         text = LEAD_TYPE_LABELS.get(value, str(value))
     elif column == "status":
@@ -76,9 +77,10 @@ class LeadAdminService(CrudService[Lead, LeadUpdate, LeadUpdate, LeadAdminRead])
     entity_type = "lead"
     entity_label = "Заявка"
 
-    def __init__(self, session: AsyncSession, audit: AuditWriter) -> None:
+    def __init__(self, session: AsyncSession, audit: AuditWriter, settings: Settings) -> None:
         self.leads = LeadRepository(session)
         super().__init__(session, self.leads, audit)
+        self.export_tz = timezone(timedelta(hours=settings.leads_export_utc_offset_hours))
 
     def build(self, data: LeadUpdate) -> Lead:
         raise NotImplementedError("Leads are created by the public form only")
@@ -108,10 +110,10 @@ class LeadAdminService(CrudService[Lead, LeadUpdate, LeadUpdate, LeadAdminRead])
             changes={"filters": filters.model_dump(mode="json"), "q": params.q, "rows": len(rows)},
         )
         await self.session.commit()
-        return self._lines(rows)
+        return self._lines(rows, self.export_tz)
 
     @staticmethod
-    def _lines(rows: Sequence[Lead]) -> Iterator[str]:
+    def _lines(rows: Sequence[Lead], tz: tzinfo) -> Iterator[str]:
         buffer = io.StringIO()
         writer = csv.writer(buffer, delimiter=";")
 
@@ -125,5 +127,5 @@ class LeadAdminService(CrudService[Lead, LeadUpdate, LeadUpdate, LeadAdminRead])
         writer.writerow(CSV_COLUMNS.values())
         yield flush()
         for lead in rows:
-            writer.writerow([csv_cell(column, getattr(lead, column)) for column in CSV_COLUMNS])
+            writer.writerow([csv_cell(c, getattr(lead, c), tz) for c in CSV_COLUMNS])
             yield flush()
