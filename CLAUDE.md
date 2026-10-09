@@ -35,7 +35,8 @@ Node.js локально не установлен, весь фронтенд-т
 make up         # поднять все контейнеры
 make down       # остановить
 make migrate    # alembic upgrade head
-make seed       # картинки в MinIO + тестовый контент (идемпотентно)
+make seed       # картинки в MinIO + тестовый контент (только в пустую базу)
+make seed-force # перезаписать стартовый контент (только APP_ENV=dev)
 make lint       # ruff + mypy + eslint + tsc
 make test       # pytest (+ тесты фронта, когда появятся)
 make gen-types  # OpenAPI → frontend/src/api/schema.d.ts

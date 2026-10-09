@@ -75,7 +75,7 @@ async def get_page(page_id: uuid.UUID, svc: Pages, sections: Sections) -> PageDe
 @router.patch(
     "/{page_id}",
     response_model=PageAdminRead,
-    summary="Edit slug, title, SEO, og-image, publication",
+    summary="Edit slug (at once), title, SEO, og-image (go live on publishing)",
     responses=error_responses(404, 409, 422),
 )
 async def update_page(page_id: uuid.UUID, data: PageUpdate, svc: Pages) -> PageAdminRead:
