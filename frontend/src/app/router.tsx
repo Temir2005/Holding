@@ -19,6 +19,8 @@ const prefetch = (load: (args: LoaderFunctionArgs) => void) => (args: LoaderFunc
 
 export const router = createBrowserRouter([
   { path: '/', element: <Navigate to={`/${DEFAULT_LOCALE}`} replace /> },
+  // The admin is a separate lazy chunk: its code, styles and strings stay out of the site bundle.
+  { path: '/admin/*', lazy: () => import('@/admin/route'), hydrateFallbackElement: <></> },
   {
     path: '/:locale',
     element: <SiteLayout />,

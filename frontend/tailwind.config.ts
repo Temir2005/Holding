@@ -3,8 +3,9 @@ import type { Config } from 'tailwindcss'
 // Colors point at CSS variables (src/styles/tokens.css). Semantic names
 // (surface, fg, tile...) change per section tone, so components never need to know
 // whether they sit on a dark or a light section.
+// The admin has its own config (tailwind.admin.config.ts): its classes stay out of the site CSS.
 export default {
-  content: ['./index.html', './src/**/*.{ts,tsx}'],
+  content: ['./index.html', './src/**/*.{ts,tsx}', '!./src/admin/**'],
   theme: {
     extend: {
       colors: {

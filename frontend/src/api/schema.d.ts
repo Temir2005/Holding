@@ -157,6 +157,1041 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  '/api/v1/preview/pages/{slug}': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** The page's draft, in the same format as GET /pages/{slug} */
+    get: operations['preview_page']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/v1/admin/auth/login': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Sign in with email and password */
+    post: operations['admin_auth_login']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/v1/admin/auth/refresh': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Get a new access token using the refresh cookie (rotates the cookie) */
+    post: operations['admin_auth_refresh']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/v1/admin/auth/logout': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Sign out this browser */
+    post: operations['admin_auth_logout']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/v1/admin/auth/me': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Current user */
+    get: operations['admin_auth_me']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/v1/admin/auth/password': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Change own password; other sessions are signed out */
+    post: operations['admin_auth_change_password']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/v1/admin/media': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Media library (ready files) */
+    get: operations['admin_media_list_media']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/v1/admin/media/folders': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Folders with file counts */
+    get: operations['admin_media_list_folders']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/v1/admin/media/upload-url': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Step 1: check type and size, get a URL to PUT the file to */
+    post: operations['admin_media_request_upload']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/v1/admin/media/{media_id}/complete': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Step 3: confirm the upload; the server checks the real file */
+    post: operations['admin_media_complete_upload']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/v1/admin/media/{media_id}': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Get a file */
+    get: operations['admin_media_get_media']
+    put?: never
+    post?: never
+    /** Delete a file and its stored objects; refused while it is used */
+    delete: operations['admin_media_delete_media']
+    options?: never
+    head?: never
+    /** Edit alt text (all languages), folder, tags, display name */
+    patch: operations['admin_media_update_media']
+    trace?: never
+  }
+  '/api/v1/admin/media/{media_id}/usages': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Where this file is used */
+    get: operations['admin_media_media_usages']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/v1/admin/pages': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** List pages */
+    get: operations['admin_pages_list_pages']
+    put?: never
+    /** Create a page */
+    post: operations['admin_pages_create_page']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/v1/admin/pages/order': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    /** Reorder pages (all ids, in the new order) */
+    put: operations['admin_pages_reorder_pages']
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/v1/admin/pages/{page_id}': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Page with its sections in stored form */
+    get: operations['admin_pages_get_page']
+    put?: never
+    post?: never
+    /** Delete a page with its sections; refused while menus or buttons link to it */
+    delete: operations['admin_pages_delete_page']
+    options?: never
+    head?: never
+    /** Edit slug (at once), title, SEO, og-image (go live on publishing) */
+    patch: operations['admin_pages_update_page']
+    trace?: never
+  }
+  '/api/v1/admin/pages/{page_id}/sections': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Add a section to the page */
+    post: operations['admin_pages_create_section']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/v1/admin/pages/{page_id}/sections/order': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    /** Reorder the page's sections in one request */
+    put: operations['admin_pages_reorder_sections']
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/v1/admin/pages/{page_id}/publish': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Put the draft on the site as a new revision (or bring the page back) */
+    post: operations['admin_publishing_publish']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/v1/admin/pages/{page_id}/unpublish': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Take the page off the site (not the home page) */
+    post: operations['admin_publishing_unpublish']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/v1/admin/pages/{page_id}/discard-draft': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Drop unpublished changes: the draft becomes what the site shows */
+    post: operations['admin_publishing_discard_draft']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/v1/admin/pages/{page_id}/revisions': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Published versions of the page, newest first */
+    get: operations['admin_publishing_list_revisions']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/v1/admin/pages/{page_id}/revisions/{number}': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** One published version with its full content */
+    get: operations['admin_publishing_get_revision']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/v1/admin/pages/{page_id}/revisions/{number}/restore': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Make an old version the draft again; with publish=true, put it on the site */
+    post: operations['admin_publishing_restore_revision']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/v1/admin/pages/{page_id}/preview-token': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** A short-lived link to the draft, rendered like the public page */
+    post: operations['admin_publishing_preview_token']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/v1/admin/sections/{section_id}': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Get a section in stored form with cards of referenced objects */
+    get: operations['admin_pages_get_section']
+    put?: never
+    post?: never
+    /** Delete a section */
+    delete: operations['admin_pages_delete_section']
+    options?: never
+    head?: never
+    /** Edit data, anchor, tone or hide/show (is_visible) */
+    patch: operations['admin_pages_update_section']
+    trace?: never
+  }
+  '/api/v1/admin/sections/{section_id}/duplicate': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Copy the section right after the original (without the anchor) */
+    post: operations['admin_pages_duplicate_section']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/v1/admin/meta': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Languages, enums, icons, limits, dropdown choices */
+    get: operations['admin_schema_get_meta']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/v1/admin/section-types': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Every section type with the JSON Schema of its stored data and UI hints */
+    get: operations['admin_schema_get_section_types']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/v1/admin/lookup': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Search entities for a reference picker (kind from x-ref, or page for links) */
+    get: operations['admin_schema_lookup']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/v1/admin/divisions': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Divisions: list */
+    get: operations['admin_divisions_list_items']
+    put?: never
+    /** Divisions: create */
+    post: operations['admin_divisions_create_item']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/v1/admin/divisions/order': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    /** Divisions: reorder (all ids, in the new order) */
+    put: operations['admin_divisions_reorder_items']
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/v1/admin/divisions/{item_id}': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Divisions: get */
+    get: operations['admin_divisions_get_item']
+    put?: never
+    post?: never
+    /** Divisions: delete; refused while pages use it */
+    delete: operations['admin_divisions_delete_item']
+    options?: never
+    head?: never
+    /** Divisions: edit (publish with is_published) */
+    patch: operations['admin_divisions_update_item']
+    trace?: never
+  }
+  '/api/v1/admin/projects': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Projects: list */
+    get: operations['admin_projects_list_items']
+    put?: never
+    /** Projects: create */
+    post: operations['admin_projects_create_item']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/v1/admin/projects/order': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    /** Projects: reorder (all ids, in the new order) */
+    put: operations['admin_projects_reorder_items']
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/v1/admin/projects/{item_id}': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Projects: get */
+    get: operations['admin_projects_get_item']
+    put?: never
+    post?: never
+    /** Projects: delete; refused while pages use it */
+    delete: operations['admin_projects_delete_item']
+    options?: never
+    head?: never
+    /** Projects: edit (publish with is_published) */
+    patch: operations['admin_projects_update_item']
+    trace?: never
+  }
+  '/api/v1/admin/projects/{item_id}/gallery': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    /** Projects: replace the gallery (ordered media ids) */
+    put: operations['admin_projects_set_gallery']
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/v1/admin/people': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** People: list */
+    get: operations['admin_people_list_items']
+    put?: never
+    /** People: create */
+    post: operations['admin_people_create_item']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/v1/admin/people/order': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    /** People: reorder (all ids, in the new order) */
+    put: operations['admin_people_reorder_items']
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/v1/admin/people/{item_id}': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** People: get */
+    get: operations['admin_people_get_item']
+    put?: never
+    post?: never
+    /** People: delete; refused while pages use it */
+    delete: operations['admin_people_delete_item']
+    options?: never
+    head?: never
+    /** People: edit (publish with is_published) */
+    patch: operations['admin_people_update_item']
+    trace?: never
+  }
+  '/api/v1/admin/clients': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Clients: list */
+    get: operations['admin_clients_list_items']
+    put?: never
+    /** Clients: create */
+    post: operations['admin_clients_create_item']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/v1/admin/clients/order': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    /** Clients: reorder (all ids, in the new order) */
+    put: operations['admin_clients_reorder_items']
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/v1/admin/clients/{item_id}': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Clients: get */
+    get: operations['admin_clients_get_item']
+    put?: never
+    post?: never
+    /** Clients: delete; refused while pages use it */
+    delete: operations['admin_clients_delete_item']
+    options?: never
+    head?: never
+    /** Clients: edit (publish with is_published) */
+    patch: operations['admin_clients_update_item']
+    trace?: never
+  }
+  '/api/v1/admin/timeline-events': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Timeline events: list */
+    get: operations['admin_timeline_list_items']
+    put?: never
+    /** Timeline events: create */
+    post: operations['admin_timeline_create_item']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/v1/admin/timeline-events/order': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    /** Timeline events: reorder (all ids, in the new order) */
+    put: operations['admin_timeline_reorder_items']
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/v1/admin/timeline-events/{item_id}': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Timeline events: get */
+    get: operations['admin_timeline_get_item']
+    put?: never
+    post?: never
+    /** Timeline events: delete; refused while pages use it */
+    delete: operations['admin_timeline_delete_item']
+    options?: never
+    head?: never
+    /** Timeline events: edit (publish with is_published) */
+    patch: operations['admin_timeline_update_item']
+    trace?: never
+  }
+  '/api/v1/admin/stats': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Stats: list */
+    get: operations['admin_stats_list_items']
+    put?: never
+    /** Stats: create */
+    post: operations['admin_stats_create_item']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/v1/admin/stats/order': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    /** Stats: reorder (all ids, in the new order) */
+    put: operations['admin_stats_reorder_items']
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/v1/admin/stats/{item_id}': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Stats: get */
+    get: operations['admin_stats_get_item']
+    put?: never
+    post?: never
+    /** Stats: delete; refused while pages use it */
+    delete: operations['admin_stats_delete_item']
+    options?: never
+    head?: never
+    /** Stats: edit (publish with is_published) */
+    patch: operations['admin_stats_update_item']
+    trace?: never
+  }
+  '/api/v1/admin/vacancies': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Vacancies: list */
+    get: operations['admin_vacancies_list_items']
+    put?: never
+    /** Vacancies: create */
+    post: operations['admin_vacancies_create_item']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/v1/admin/vacancies/order': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    /** Vacancies: reorder (all ids, in the new order) */
+    put: operations['admin_vacancies_reorder_items']
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/v1/admin/vacancies/{item_id}': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Vacancies: get */
+    get: operations['admin_vacancies_get_item']
+    put?: never
+    post?: never
+    /** Vacancies: delete; refused while pages use it */
+    delete: operations['admin_vacancies_delete_item']
+    options?: never
+    head?: never
+    /** Vacancies: edit (publish with is_published) */
+    patch: operations['admin_vacancies_update_item']
+    trace?: never
+  }
+  '/api/v1/admin/leads': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** List leads, newest first */
+    get: operations['admin_leads_list_leads']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/v1/admin/leads/export': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Download leads matching the filters as CSV (for Excel) */
+    get: operations['admin_leads_export_leads']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/v1/admin/leads/{lead_id}': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Get a lead */
+    get: operations['admin_leads_get_lead']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    /** Change the status or the manager note */
+    patch: operations['admin_leads_update_lead']
+    trace?: never
+  }
+  '/api/v1/admin/users': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** List admin users */
+    get: operations['admin_users_list_users']
+    put?: never
+    /** Create a user */
+    post: operations['admin_users_create_user']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/v1/admin/users/{user_id}': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Get a user */
+    get: operations['admin_users_get_user']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    /** Change name, role or deactivate (is_active=false) */
+    patch: operations['admin_users_update_user']
+    trace?: never
+  }
+  '/api/v1/admin/users/{user_id}/password': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** Set a new password for a user; their sessions end */
+    post: operations['admin_users_set_user_password']
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/v1/admin/audit-log': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Who changed what, newest first (search and sort are not used here) */
+    get: operations['admin_audit_log_list_audit_log']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  '/api/v1/admin/settings': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Site settings as stored, with cards of referenced files */
+    get: operations['admin_settings_get_settings']
+    /** Replace the site settings (the whole document, with the version read) */
+    put: operations['admin_settings_put_settings']
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
 }
 export type webhooks = Record<string, never>
 export interface components {
@@ -192,6 +1227,42 @@ export interface components {
        */
       type: 'about_text'
       data: components['schemas']['AboutTextDataRead']
+    }
+    /** AuditActor */
+    AuditActor: {
+      /**
+       * Id
+       * Format: uuid
+       */
+      id: string
+      /** Email */
+      email: string
+      /** Full Name */
+      full_name: string
+    }
+    /** AuditRead */
+    AuditRead: {
+      /**
+       * Id
+       * Format: uuid
+       */
+      id: string
+      /** Action */
+      action: string
+      /** Entity Type */
+      entity_type: string
+      /** Entity Id */
+      entity_id: string | null
+      /** Changes */
+      changes: {
+        [key: string]: unknown
+      } | null
+      user: components['schemas']['AuditActor'] | null
+      /**
+       * Created At
+       * Format: date-time
+       */
+      created_at: string
     }
     /** CapabilitiesDataRead */
     CapabilitiesDataRead: {
@@ -229,6 +1300,81 @@ export interface components {
       type: 'capabilities'
       data: components['schemas']['CapabilitiesDataRead']
     }
+    /** ChangePasswordRequest */
+    ChangePasswordRequest: {
+      /** Current Password */
+      current_password: string
+      /** New Password */
+      new_password: string
+    }
+    /** ClientAdminRead */
+    ClientAdminRead: {
+      /**
+       * Id
+       * Format: uuid
+       */
+      id: string
+      /** Is Published */
+      is_published: boolean
+      /** Sort Order */
+      sort_order: number
+      /**
+       * Created At
+       * Format: date-time
+       */
+      created_at: string
+      /**
+       * Updated At
+       * Format: date-time
+       */
+      updated_at: string
+      /** Version */
+      version: number
+      /** Name */
+      name: {
+        [key: string]: unknown
+      }
+      /** Logo Id */
+      logo_id: string | null
+      logo: components['schemas']['RefCard'] | null
+      /** Industry */
+      industry: string
+      /** Industry Label */
+      industry_label: {
+        [key: string]: unknown
+      }
+      /** Description */
+      description: {
+        [key: string]: unknown
+      }
+      /** Testimonial */
+      testimonial: {
+        [key: string]: unknown
+      } | null
+      /** Website Url */
+      website_url: string | null
+    }
+    /** ClientCreate */
+    ClientCreate: {
+      name: components['schemas']['RequiredText']
+      /** Logo Id */
+      logo_id?: string | null
+      /**
+       * Industry
+       * @description Key for the filter
+       */
+      industry: string
+      industry_label: components['schemas']['RequiredText']
+      description?: components['schemas']['LocalizedText'] | null
+      testimonial?: components['schemas']['Testimonial'] | null
+      /** Website Url */
+      website_url?: string | null
+      /**
+       * Is Published
+       * @default false
+       */
+      is_published: boolean
+    }
     /** ClientRead */
     ClientRead: {
       /**
@@ -248,6 +1394,26 @@ export interface components {
       testimonial: components['schemas']['TestimonialRead'] | null
       /** Website Url */
       website_url: string | null
+    }
+    /** ClientUpdate */
+    ClientUpdate: {
+      /**
+       * Version
+       * @description Version the client read; a stale one gets 409 VERSION_CONFLICT
+       */
+      version: number
+      name?: components['schemas']['RequiredText'] | null
+      /** Logo Id */
+      logo_id?: string | null
+      /** Industry */
+      industry?: string | null
+      industry_label?: components['schemas']['RequiredText'] | null
+      description?: components['schemas']['LocalizedText'] | null
+      testimonial?: components['schemas']['Testimonial'] | null
+      /** Website Url */
+      website_url?: string | null
+      /** Is Published */
+      is_published?: boolean | null
     }
     /** ClientsGridDataRead */
     ClientsGridDataRead: {
@@ -309,6 +1475,15 @@ export interface components {
       type: 'clients_marquee'
       data: components['schemas']['ClientsMarqueeDataRead']
     }
+    /** CompletedUpload */
+    CompletedUpload: {
+      media: components['schemas']['MediaAdminRead']
+      /**
+       * Warnings
+       * @description Things the editor should know, e.g. SVG was cleaned
+       */
+      warnings: string[]
+    }
     /** ContactFormDataRead */
     ContactFormDataRead: {
       /** Eyebrow */
@@ -342,6 +1517,24 @@ export interface components {
       type: 'contact_form'
       data: components['schemas']['ContactFormDataRead']
     }
+    /** Контакты */
+    Contacts: {
+      /** Адрес */
+      address: components['schemas']['LocalizedText']
+      /** Телефоны */
+      phones?: string[]
+      /** Email */
+      email?: string | null
+      /**
+       * WhatsApp
+       * @description Номер в международном формате
+       */
+      whatsapp?: string | null
+      /** Часы работы */
+      hours?: components['schemas']['LocalizedText'] | null
+      /** Точка на карте */
+      coordinates?: components['schemas']['Coordinates'] | null
+    }
     /** ContactsRead */
     ContactsRead: {
       /** Address */
@@ -356,11 +1549,11 @@ export interface components {
       hours: string | null
       coordinates: components['schemas']['Coordinates'] | null
     }
-    /** Coordinates */
+    /** Координаты */
     Coordinates: {
-      /** Lat */
+      /** Широта */
       lat: number
-      /** Lng */
+      /** Долгота */
       lng: number
     }
     /** CountryRead */
@@ -416,6 +1609,97 @@ export interface components {
       type: 'cta'
       data: components['schemas']['CtaDataRead']
     }
+    /** SEO по умолчанию */
+    DefaultSeo: {
+      /** Заголовок */
+      title: components['schemas']['LocalizedText']
+      /** Описание */
+      description: components['schemas']['LocalizedText']
+      /** Картинка для соцсетей */
+      og_image_id?: string | null
+    }
+    /** DivisionAdminRead */
+    DivisionAdminRead: {
+      /**
+       * Id
+       * Format: uuid
+       */
+      id: string
+      /** Is Published */
+      is_published: boolean
+      /** Sort Order */
+      sort_order: number
+      /**
+       * Created At
+       * Format: date-time
+       */
+      created_at: string
+      /**
+       * Updated At
+       * Format: date-time
+       */
+      updated_at: string
+      /** Version */
+      version: number
+      /** Slug */
+      slug: string
+      /** Name */
+      name: {
+        [key: string]: unknown
+      }
+      /** Tagline */
+      tagline: {
+        [key: string]: unknown
+      }
+      /** Description */
+      description: {
+        [key: string]: unknown
+      }
+      /** Logo Id */
+      logo_id: string | null
+      logo: components['schemas']['RefCard'] | null
+      /** Cover Id */
+      cover_id: string | null
+      cover: components['schemas']['RefCard'] | null
+      /** Stats */
+      stats: {
+        [key: string]: unknown
+      }[]
+      /** Website Url */
+      website_url: string | null
+      /** Page Slug */
+      page_slug: string | null
+    }
+    /** DivisionCreate */
+    DivisionCreate: {
+      /**
+       * Slug
+       * @description Latin lowercase letters, digits and single dashes
+       * @example smart-panels
+       */
+      slug: string
+      name: components['schemas']['RequiredText']
+      tagline?: components['schemas']['LocalizedText'] | null
+      description?: components['schemas']['LocalizedText'] | null
+      /** Logo Id */
+      logo_id?: string | null
+      /** Cover Id */
+      cover_id?: string | null
+      /** Stats */
+      stats?: components['schemas']['DivisionStatIn'][]
+      /** Website Url */
+      website_url?: string | null
+      /**
+       * Page Slug
+       * @description The division's page
+       */
+      page_slug?: string | null
+      /**
+       * Is Published
+       * @default false
+       */
+      is_published: boolean
+    }
     /** DivisionRead */
     DivisionRead: {
       /**
@@ -456,6 +1740,38 @@ export interface components {
       /** Label */
       label: string
     }
+    /** DivisionStatIn */
+    DivisionStatIn: {
+      /** Value */
+      value: number
+      suffix?: components['schemas']['LocalizedText'] | null
+      label: components['schemas']['RequiredText']
+    }
+    /** DivisionUpdate */
+    DivisionUpdate: {
+      /**
+       * Version
+       * @description Version the client read; a stale one gets 409 VERSION_CONFLICT
+       */
+      version: number
+      /** Slug */
+      slug?: string | null
+      name?: components['schemas']['RequiredText'] | null
+      tagline?: components['schemas']['LocalizedText'] | null
+      description?: components['schemas']['LocalizedText'] | null
+      /** Logo Id */
+      logo_id?: string | null
+      /** Cover Id */
+      cover_id?: string | null
+      /** Stats */
+      stats?: components['schemas']['DivisionStatIn'][] | null
+      /** Website Url */
+      website_url?: string | null
+      /** Page Slug */
+      page_slug?: string | null
+      /** Is Published */
+      is_published?: boolean | null
+    }
     /** DivisionsGridDataRead */
     DivisionsGridDataRead: {
       /** Eyebrow */
@@ -490,6 +1806,25 @@ export interface components {
      * @enum {string}
      */
     EmploymentType: 'full_time' | 'part_time' | 'contract' | 'internship'
+    /** ErrorBody */
+    ErrorBody: {
+      /**
+       * Code
+       * @example VERSION_CONFLICT
+       */
+      code: string
+      /** Message */
+      message: string
+      /** Details */
+      details?: unknown
+    }
+    /**
+     * ErrorEnvelope
+     * @description Every admin error looks like this; `code` is stable, `message` is for people.
+     */
+    ErrorEnvelope: {
+      error: components['schemas']['ErrorBody']
+    }
     /** FactRead */
     FactRead: {
       /** Value */
@@ -497,12 +1832,39 @@ export interface components {
       /** Label */
       label: string
     }
+    /** FolderCount */
+    FolderCount: {
+      /** Folder */
+      folder: string | null
+      /** Count */
+      count: number
+    }
+    /** Подвал */
+    Footer: {
+      /** Текст */
+      text: components['schemas']['LocalizedText']
+      /** Юридическая строка */
+      legal: components['schemas']['LocalizedText']
+    }
     /** FooterRead */
     FooterRead: {
       /** Text */
       text: string
       /** Legal */
       legal: string
+    }
+    /** GalleryUpdate */
+    GalleryUpdate: {
+      /**
+       * Version
+       * @description Version the client read; a stale one gets 409 VERSION_CONFLICT
+       */
+      version: number
+      /**
+       * Media Ids
+       * @description Gallery images, in order
+       */
+      media_ids: string[]
     }
     /** GeographyDataRead */
     GeographyDataRead: {
@@ -597,6 +1959,42 @@ export interface components {
       text: string
       media: components['schemas']['MediaRead'] | null
     }
+    /** LeadAdminRead */
+    LeadAdminRead: {
+      /**
+       * Id
+       * Format: uuid
+       */
+      id: string
+      /**
+       * Created At
+       * Format: date-time
+       */
+      created_at: string
+      /**
+       * Updated At
+       * Format: date-time
+       */
+      updated_at: string
+      type: components['schemas']['LeadType']
+      status: components['schemas']['LeadStatus']
+      /** Name */
+      name: string
+      /** Phone */
+      phone: string | null
+      /** Email */
+      email: string | null
+      /** Message */
+      message: string | null
+      /** Source Page */
+      source_page: string | null
+      /** Locale */
+      locale: string | null
+      /** Manager Note */
+      manager_note: string | null
+      /** Version */
+      version: number
+    }
     /** LeadCreate */
     LeadCreate: {
       /** Name */
@@ -626,15 +2024,107 @@ export interface components {
       ok: boolean
     }
     /**
+     * LeadStatus
+     * @enum {string}
+     */
+    LeadStatus: 'new' | 'in_progress' | 'done' | 'spam'
+    /**
      * LeadType
      * @enum {string}
      */
     LeadType: 'investor' | 'partner' | 'candidate' | 'client'
+    /** LeadUpdate */
+    LeadUpdate: {
+      /**
+       * Version
+       * @description Version the client read; a stale one gets 409 VERSION_CONFLICT
+       */
+      version: number
+      status?: components['schemas']['LeadStatus'] | null
+      /** Manager Note */
+      manager_note?: string | null
+    }
     /**
      * Locale
      * @enum {string}
      */
     Locale: 'ru' | 'kk' | 'en'
+    /** LocaleInfo */
+    LocaleInfo: {
+      /** Code */
+      code: string
+      /** Label */
+      label: string
+    }
+    /**
+     * Текст на трёх языках
+     * @description A localized string inside section data and other JSONB documents.
+     */
+    LocalizedText: {
+      /** Русский */
+      ru: string
+      /** Қазақша */
+      kk?: string | null
+      /** English */
+      en?: string | null
+    }
+    /** LoginRequest */
+    LoginRequest: {
+      /** Email */
+      email: string
+      /** Password */
+      password: string
+    }
+    /** MediaAdminRead */
+    MediaAdminRead: {
+      /**
+       * Id
+       * Format: uuid
+       */
+      id: string
+      /** Url */
+      url: string
+      status: components['schemas']['MediaStatus']
+      /** Original Filename */
+      original_filename: string | null
+      /** Folder */
+      folder: string | null
+      /** Tags */
+      tags: string[]
+      /** Mime Type */
+      mime_type: string
+      /** Size Bytes */
+      size_bytes: number
+      /** Width */
+      width: number
+      /** Height */
+      height: number
+      /**
+       * Alt
+       * @description All languages, as stored
+       */
+      alt: {
+        [key: string]: string
+      }
+      /** Dominant Color */
+      dominant_color: string | null
+      /** Variants */
+      variants: components['schemas']['MediaVariant'][]
+      /** Uploaded By */
+      uploaded_by: string | null
+      /**
+       * Created At
+       * Format: date-time
+       */
+      created_at: string
+      /**
+       * Updated At
+       * Format: date-time
+       */
+      updated_at: string
+      /** Version */
+      version: number
+    }
     /** MediaGalleryDataRead */
     MediaGalleryDataRead: {
       /** Eyebrow */
@@ -669,6 +2159,20 @@ export interface components {
       type: 'media_gallery'
       data: components['schemas']['MediaGalleryDataRead']
     }
+    /**
+     * MediaKind
+     * @enum {string}
+     */
+    MediaKind: 'image' | 'svg' | 'video' | 'document'
+    /** MediaLimits */
+    MediaLimits: {
+      /** Image Mb */
+      image_mb: number
+      /** Video Mb */
+      video_mb: number
+      /** Types */
+      types: string[]
+    }
     /** MediaPlaceholder */
     MediaPlaceholder: {
       /** Dominant Color */
@@ -694,6 +2198,99 @@ export interface components {
       /** Mime Type */
       mime_type: string
       placeholder: components['schemas']['MediaPlaceholder']
+      /**
+       * Variants
+       * @default []
+       */
+      variants: components['schemas']['MediaVariant'][]
+    }
+    /**
+     * MediaStatus
+     * @enum {string}
+     */
+    MediaStatus: 'pending' | 'ready'
+    /** MediaUpdate */
+    MediaUpdate: {
+      /**
+       * Version
+       * @description Version the client read; a stale one gets 409 VERSION_CONFLICT
+       */
+      version: number
+      alt?: components['schemas']['LocalizedText'] | null
+      /** Folder */
+      folder?: string | null
+      /** Tags */
+      tags?: string[] | null
+      /** Original Filename */
+      original_filename?: string | null
+    }
+    /**
+     * MediaVariant
+     * @description A downscaled WebP copy; use for srcset.
+     */
+    MediaVariant: {
+      /** Width */
+      width: number
+      /** Height */
+      height: number
+      /** Url */
+      url: string
+    }
+    /**
+     * Meta
+     * @description Everything the admin needs so it does not duplicate lists from the backend.
+     */
+    Meta: {
+      /** Locales */
+      locales: components['schemas']['LocaleInfo'][]
+      /** Default Locale */
+      default_locale: string
+      /** Project Statuses */
+      project_statuses: components['schemas']['Option'][]
+      /** Employment Types */
+      employment_types: components['schemas']['Option'][]
+      /** Lead Types */
+      lead_types: components['schemas']['Option'][]
+      /** Lead Statuses */
+      lead_statuses: components['schemas']['Option'][]
+      /** Tones */
+      tones: components['schemas']['Option'][]
+      /** Social Types */
+      social_types: components['schemas']['Option'][]
+      /** Icons */
+      icons: string[]
+      /** Ref Kinds */
+      ref_kinds: string[]
+      /** Section Types */
+      section_types: components['schemas']['Option'][]
+      media: components['schemas']['MediaLimits']
+      /**
+       * Divisions
+       * @description Division slugs for fields with x-options: divisions (label: name)
+       */
+      divisions: components['schemas']['Option'][]
+      /**
+       * Stat Contexts
+       * @description Stats contexts in use, for fields with x-options: stat_contexts
+       */
+      stat_contexts: components['schemas']['Option'][]
+    }
+    /**
+     * Пункт меню
+     * @description A menu item: a page, an anchor (on that page or the current one) or an external URL.
+     */
+    NavItem: {
+      /** Текст пункта */
+      label: components['schemas']['LocalizedText']
+      /** Страница */
+      page_slug?: string | null
+      /** Якорь */
+      anchor?: string | null
+      /**
+       * Внешняя ссылка
+       * @description https://…
+       */
+      url?: string | null
     }
     /** NavItemRead */
     NavItemRead: {
@@ -705,6 +2302,164 @@ export interface components {
       anchor: string | null
       /** Url */
       url: string | null
+    }
+    /** Option */
+    Option: {
+      /** Value */
+      value: string
+      /** Label */
+      label: string
+    }
+    /**
+     * PageAction
+     * @description Take a page down, or drop its draft back to what the site shows.
+     */
+    PageAction: {
+      /**
+       * Version
+       * @description Page version the client read; a stale one gets 409
+       */
+      version: number
+    }
+    /** PageAdminRead */
+    PageAdminRead: {
+      /**
+       * Id
+       * Format: uuid
+       */
+      id: string
+      /** Slug */
+      slug: string
+      /** Title */
+      title: {
+        [key: string]: unknown
+      }
+      /** Seo Title */
+      seo_title: {
+        [key: string]: unknown
+      }
+      /** Seo Description */
+      seo_description: {
+        [key: string]: unknown
+      }
+      /** Og Image Id */
+      og_image_id: string | null
+      og_image: components['schemas']['RefCard'] | null
+      /**
+       * Is Published
+       * @description On the site; changed by publish / unpublish
+       */
+      is_published: boolean
+      /**
+       * Published Revision Number
+       * @description The revision the site shows (kept when the page is taken down)
+       */
+      published_revision_number: number | null
+      /** Published At */
+      published_at: string | null
+      /**
+       * Has Unpublished Changes
+       * @description The draft differs from what the site shows (always true before the first publication)
+       */
+      has_unpublished_changes: boolean
+      /** Sort Order */
+      sort_order: number
+      /** Sections Count */
+      sections_count: number
+      /**
+       * Created At
+       * Format: date-time
+       */
+      created_at: string
+      /**
+       * Updated At
+       * Format: date-time
+       */
+      updated_at: string
+      /** Version */
+      version: number
+    }
+    /**
+     * PageCreate
+     * @description A new page starts as an unpublished draft; POST …/publish puts it on the site.
+     */
+    PageCreate: {
+      /**
+       * Slug
+       * @description Latin lowercase letters, digits and single dashes
+       * @example smart-panels
+       */
+      slug: string
+      title: components['schemas']['RequiredText']
+      seo_title?: components['schemas']['LocalizedText'] | null
+      seo_description?: components['schemas']['LocalizedText'] | null
+      /** Og Image Id */
+      og_image_id?: string | null
+    }
+    /** PageDetail */
+    PageDetail: {
+      /**
+       * Id
+       * Format: uuid
+       */
+      id: string
+      /** Slug */
+      slug: string
+      /** Title */
+      title: {
+        [key: string]: unknown
+      }
+      /** Seo Title */
+      seo_title: {
+        [key: string]: unknown
+      }
+      /** Seo Description */
+      seo_description: {
+        [key: string]: unknown
+      }
+      /** Og Image Id */
+      og_image_id: string | null
+      og_image: components['schemas']['RefCard'] | null
+      /**
+       * Is Published
+       * @description On the site; changed by publish / unpublish
+       */
+      is_published: boolean
+      /**
+       * Published Revision Number
+       * @description The revision the site shows (kept when the page is taken down)
+       */
+      published_revision_number: number | null
+      /** Published At */
+      published_at: string | null
+      /**
+       * Has Unpublished Changes
+       * @description The draft differs from what the site shows (always true before the first publication)
+       */
+      has_unpublished_changes: boolean
+      /** Sort Order */
+      sort_order: number
+      /** Sections Count */
+      sections_count: number
+      /**
+       * Created At
+       * Format: date-time
+       */
+      created_at: string
+      /**
+       * Updated At
+       * Format: date-time
+       */
+      updated_at: string
+      /** Version */
+      version: number
+      /** Sections */
+      sections: components['schemas']['SectionAdminRead'][]
+      /**
+       * Draft Hash
+       * @description Send it back to POST …/publish
+       */
+      draft_hash: string
     }
     /** PageRead */
     PageRead: {
@@ -752,6 +2507,232 @@ export interface components {
       description: string
       og_image: components['schemas']['MediaRead'] | null
     }
+    /**
+     * PageUpdate
+     * @description Slug changes at once (it is the address). Title, SEO and og-image are draft:
+     *     the site shows them after publishing.
+     */
+    PageUpdate: {
+      /**
+       * Version
+       * @description Version the client read; a stale one gets 409 VERSION_CONFLICT
+       */
+      version: number
+      /** Slug */
+      slug?: string | null
+      title?: components['schemas']['RequiredText'] | null
+      seo_title?: components['schemas']['LocalizedText'] | null
+      seo_description?: components['schemas']['LocalizedText'] | null
+      /** Og Image Id */
+      og_image_id?: string | null
+    }
+    /** Paginated[AuditRead] */
+    Paginated_AuditRead_: {
+      /** Items */
+      items: components['schemas']['AuditRead'][]
+      /** Total */
+      total: number
+      /** Page */
+      page: number
+      /** Page Size */
+      page_size: number
+    }
+    /** Paginated[ClientAdminRead] */
+    Paginated_ClientAdminRead_: {
+      /** Items */
+      items: components['schemas']['ClientAdminRead'][]
+      /** Total */
+      total: number
+      /** Page */
+      page: number
+      /** Page Size */
+      page_size: number
+    }
+    /** Paginated[DivisionAdminRead] */
+    Paginated_DivisionAdminRead_: {
+      /** Items */
+      items: components['schemas']['DivisionAdminRead'][]
+      /** Total */
+      total: number
+      /** Page */
+      page: number
+      /** Page Size */
+      page_size: number
+    }
+    /** Paginated[LeadAdminRead] */
+    Paginated_LeadAdminRead_: {
+      /** Items */
+      items: components['schemas']['LeadAdminRead'][]
+      /** Total */
+      total: number
+      /** Page */
+      page: number
+      /** Page Size */
+      page_size: number
+    }
+    /** Paginated[MediaAdminRead] */
+    Paginated_MediaAdminRead_: {
+      /** Items */
+      items: components['schemas']['MediaAdminRead'][]
+      /** Total */
+      total: number
+      /** Page */
+      page: number
+      /** Page Size */
+      page_size: number
+    }
+    /** Paginated[PageAdminRead] */
+    Paginated_PageAdminRead_: {
+      /** Items */
+      items: components['schemas']['PageAdminRead'][]
+      /** Total */
+      total: number
+      /** Page */
+      page: number
+      /** Page Size */
+      page_size: number
+    }
+    /** Paginated[PersonAdminRead] */
+    Paginated_PersonAdminRead_: {
+      /** Items */
+      items: components['schemas']['PersonAdminRead'][]
+      /** Total */
+      total: number
+      /** Page */
+      page: number
+      /** Page Size */
+      page_size: number
+    }
+    /** Paginated[ProjectAdminRead] */
+    Paginated_ProjectAdminRead_: {
+      /** Items */
+      items: components['schemas']['ProjectAdminRead'][]
+      /** Total */
+      total: number
+      /** Page */
+      page: number
+      /** Page Size */
+      page_size: number
+    }
+    /** Paginated[StatAdminRead] */
+    Paginated_StatAdminRead_: {
+      /** Items */
+      items: components['schemas']['StatAdminRead'][]
+      /** Total */
+      total: number
+      /** Page */
+      page: number
+      /** Page Size */
+      page_size: number
+    }
+    /** Paginated[TimelineEventAdminRead] */
+    Paginated_TimelineEventAdminRead_: {
+      /** Items */
+      items: components['schemas']['TimelineEventAdminRead'][]
+      /** Total */
+      total: number
+      /** Page */
+      page: number
+      /** Page Size */
+      page_size: number
+    }
+    /** Paginated[UserRead] */
+    Paginated_UserRead_: {
+      /** Items */
+      items: components['schemas']['UserRead'][]
+      /** Total */
+      total: number
+      /** Page */
+      page: number
+      /** Page Size */
+      page_size: number
+    }
+    /** Paginated[VacancyAdminRead] */
+    Paginated_VacancyAdminRead_: {
+      /** Items */
+      items: components['schemas']['VacancyAdminRead'][]
+      /** Total */
+      total: number
+      /** Page */
+      page: number
+      /** Page Size */
+      page_size: number
+    }
+    /** PersonAdminRead */
+    PersonAdminRead: {
+      /**
+       * Id
+       * Format: uuid
+       */
+      id: string
+      /** Is Published */
+      is_published: boolean
+      /** Sort Order */
+      sort_order: number
+      /**
+       * Created At
+       * Format: date-time
+       */
+      created_at: string
+      /**
+       * Updated At
+       * Format: date-time
+       */
+      updated_at: string
+      /** Version */
+      version: number
+      /** Full Name */
+      full_name: {
+        [key: string]: unknown
+      }
+      /** Position */
+      position: {
+        [key: string]: unknown
+      }
+      /** Division Id */
+      division_id: string | null
+      division: components['schemas']['RefCard'] | null
+      /** Bio */
+      bio: {
+        [key: string]: unknown
+      }
+      /** Photo Id */
+      photo_id: string | null
+      photo: components['schemas']['RefCard'] | null
+      /** Linkedin Url */
+      linkedin_url: string | null
+      /** Is Key */
+      is_key: boolean
+      /** Is Founder */
+      is_founder: boolean
+    }
+    /** PersonCreate */
+    PersonCreate: {
+      full_name: components['schemas']['RequiredText']
+      position?: components['schemas']['LocalizedText'] | null
+      /** Division Id */
+      division_id?: string | null
+      bio?: components['schemas']['LocalizedText'] | null
+      /** Photo Id */
+      photo_id?: string | null
+      /** Linkedin Url */
+      linkedin_url?: string | null
+      /**
+       * Is Key
+       * @default false
+       */
+      is_key: boolean
+      /**
+       * Is Founder
+       * @default false
+       */
+      is_founder: boolean
+      /**
+       * Is Published
+       * @default false
+       */
+      is_published: boolean
+    }
     /** PersonRead */
     PersonRead: {
       /**
@@ -773,6 +2754,45 @@ export interface components {
       /** Is Founder */
       is_founder: boolean
       division: components['schemas']['DivisionRef'] | null
+    }
+    /** PersonUpdate */
+    PersonUpdate: {
+      /**
+       * Version
+       * @description Version the client read; a stale one gets 409 VERSION_CONFLICT
+       */
+      version: number
+      full_name?: components['schemas']['RequiredText'] | null
+      position?: components['schemas']['LocalizedText'] | null
+      /** Division Id */
+      division_id?: string | null
+      bio?: components['schemas']['LocalizedText'] | null
+      /** Photo Id */
+      photo_id?: string | null
+      /** Linkedin Url */
+      linkedin_url?: string | null
+      /** Is Key */
+      is_key?: boolean | null
+      /** Is Founder */
+      is_founder?: boolean | null
+      /** Is Published */
+      is_published?: boolean | null
+    }
+    /** PreviewLink */
+    PreviewLink: {
+      /** Token */
+      token: string
+      /**
+       * Expires In
+       * @description Seconds
+       */
+      expires_in: number
+      /**
+       * Path
+       * @description API path of the draft: GET it to get the page in the PageRead format
+       * @example /api/v1/preview/pages/about?token=…
+       */
+      path: string
     }
     /** ProcessStepRead */
     ProcessStepRead: {
@@ -850,6 +2870,67 @@ export interface components {
       type: 'production'
       data: components['schemas']['ProductionDataRead']
     }
+    /** ProjectAdminRead */
+    ProjectAdminRead: {
+      /**
+       * Id
+       * Format: uuid
+       */
+      id: string
+      /** Is Published */
+      is_published: boolean
+      /** Sort Order */
+      sort_order: number
+      /**
+       * Created At
+       * Format: date-time
+       */
+      created_at: string
+      /**
+       * Updated At
+       * Format: date-time
+       */
+      updated_at: string
+      /** Version */
+      version: number
+      /** Slug */
+      slug: string
+      /** Title */
+      title: {
+        [key: string]: unknown
+      }
+      /** Division Id */
+      division_id: string | null
+      division: components['schemas']['RefCard'] | null
+      status: components['schemas']['ProjectStatus']
+      /** Location */
+      location: {
+        [key: string]: unknown
+      }
+      /** Year */
+      year: number | null
+      /** Area M2 */
+      area_m2: number | null
+      /** Short Description */
+      short_description: {
+        [key: string]: unknown
+      }
+      /** Body */
+      body: {
+        [key: string]: unknown
+      }
+      /** Cover Id */
+      cover_id: string | null
+      cover: components['schemas']['RefCard'] | null
+      /** Gallery */
+      gallery: components['schemas']['RefCard'][]
+      /** Tags */
+      tags: string[]
+      /** Is Featured */
+      is_featured: boolean
+      /** Is Tokenized */
+      is_tokenized: boolean
+    }
     /** ProjectCard */
     ProjectCard: {
       /**
@@ -878,6 +2959,47 @@ export interface components {
       /** Is Tokenized */
       is_tokenized: boolean
       division: components['schemas']['DivisionRef'] | null
+    }
+    /** ProjectCreate */
+    ProjectCreate: {
+      /**
+       * Slug
+       * @description Latin lowercase letters, digits and single dashes
+       * @example smart-panels
+       */
+      slug: string
+      title: components['schemas']['RequiredText']
+      /** Division Id */
+      division_id?: string | null
+      /** @default planned */
+      status: components['schemas']['ProjectStatus']
+      location?: components['schemas']['LocalizedText'] | null
+      /** Year */
+      year?: number | null
+      /** Area M2 */
+      area_m2?: number | null
+      short_description?: components['schemas']['LocalizedText'] | null
+      /** @description Markdown */
+      body?: components['schemas']['LocalizedText'] | null
+      /** Cover Id */
+      cover_id?: string | null
+      /** Tags */
+      tags?: string[]
+      /**
+       * Is Featured
+       * @default false
+       */
+      is_featured: boolean
+      /**
+       * Is Tokenized
+       * @default false
+       */
+      is_tokenized: boolean
+      /**
+       * Is Published
+       * @default false
+       */
+      is_published: boolean
     }
     /** ProjectListDataRead */
     ProjectListDataRead: {
@@ -948,6 +3070,37 @@ export interface components {
      * @enum {string}
      */
     ProjectStatus: 'completed' | 'in_progress' | 'planned'
+    /** ProjectUpdate */
+    ProjectUpdate: {
+      /**
+       * Version
+       * @description Version the client read; a stale one gets 409 VERSION_CONFLICT
+       */
+      version: number
+      /** Slug */
+      slug?: string | null
+      title?: components['schemas']['RequiredText'] | null
+      /** Division Id */
+      division_id?: string | null
+      status?: components['schemas']['ProjectStatus'] | null
+      location?: components['schemas']['LocalizedText'] | null
+      /** Year */
+      year?: number | null
+      /** Area M2 */
+      area_m2?: number | null
+      short_description?: components['schemas']['LocalizedText'] | null
+      body?: components['schemas']['LocalizedText'] | null
+      /** Cover Id */
+      cover_id?: string | null
+      /** Tags */
+      tags?: string[] | null
+      /** Is Featured */
+      is_featured?: boolean | null
+      /** Is Tokenized */
+      is_tokenized?: boolean | null
+      /** Is Published */
+      is_published?: boolean | null
+    }
     /** ProjectsShowcaseDataRead */
     ProjectsShowcaseDataRead: {
       /** Eyebrow */
@@ -978,6 +3131,24 @@ export interface components {
       type: 'projects_showcase'
       data: components['schemas']['ProjectsShowcaseDataRead']
     }
+    /** PublishRequest */
+    PublishRequest: {
+      /**
+       * Version
+       * @description Page version the client read; a stale one gets 409
+       */
+      version: number
+      /**
+       * Draft Hash
+       * @description From GET /admin/pages/{id}: the draft the editor reviewed. If someone changed the page since, publishing is refused (409 DRAFT_CHANGED) instead of putting unseen edits on the site.
+       */
+      draft_hash: string
+      /**
+       * Comment
+       * @description What changed
+       */
+      comment?: string | null
+    }
     /** QuoteDataRead */
     QuoteDataRead: {
       /** Eyebrow */
@@ -1006,6 +3177,278 @@ export interface components {
       type: 'quote'
       data: components['schemas']['QuoteDataRead']
     }
+    /**
+     * RefCard
+     * @description Short card of a referenced object, for pickers and previews in the admin.
+     */
+    RefCard: {
+      /**
+       * Id
+       * Format: uuid
+       */
+      id: string
+      /**
+       * Kind
+       * @example project
+       * @example media
+       * @example page
+       */
+      kind: string
+      /** Title */
+      title: string
+      /** Subtitle */
+      subtitle?: string | null
+      /** Thumb Url */
+      thumb_url?: string | null
+      /** Is Published */
+      is_published?: boolean | null
+    }
+    /**
+     * RefKind
+     * @enum {string}
+     */
+    RefKind:
+      'media' | 'project' | 'person' | 'client' | 'division' | 'timeline_event' | 'stat' | 'vacancy'
+    /** ReorderRequest */
+    ReorderRequest: {
+      /**
+       * Ids
+       * @description All ids of the collection in the new order
+       */
+      ids: string[]
+    }
+    /**
+     * Текст на трёх языках
+     * @description Localized text of a required field (a title, a name): Russian must have text.
+     *
+     *     `LocalizedText` itself accepts an empty string, because section data and settings
+     *     already stored with one must keep rendering on the public site.
+     */
+    RequiredText: {
+      /** Русский */
+      ru: string
+      /** Қазақша */
+      kk?: string | null
+      /** English */
+      en?: string | null
+    }
+    /** RestoreRequest */
+    RestoreRequest: {
+      /**
+       * Version
+       * @description Page version the client read; a stale one gets 409
+       */
+      version: number
+      /**
+       * Publish
+       * @description Also publish the restored content at once (a new revision)
+       * @default false
+       */
+      publish: boolean
+      /** Comment */
+      comment?: string | null
+    }
+    /** RevisionDetail */
+    RevisionDetail: {
+      /**
+       * Id
+       * Format: uuid
+       */
+      id: string
+      /** Number */
+      number: number
+      /** Comment */
+      comment: string | null
+      /**
+       * Created At
+       * Format: date-time
+       */
+      created_at: string
+      /** @description None: the system (seeds, migration) */
+      created_by: components['schemas']['AuditActor'] | null
+      /**
+       * Is Current
+       * @description The revision the site shows now
+       */
+      is_current: boolean
+      /** Sections Count */
+      sections_count: number
+      /**
+       * Snapshot
+       * @description Page texts, SEO and all sections in stored form, as they were published
+       */
+      snapshot: {
+        [key: string]: unknown
+      }
+    }
+    /** RevisionRead */
+    RevisionRead: {
+      /**
+       * Id
+       * Format: uuid
+       */
+      id: string
+      /** Number */
+      number: number
+      /** Comment */
+      comment: string | null
+      /**
+       * Created At
+       * Format: date-time
+       */
+      created_at: string
+      /** @description None: the system (seeds, migration) */
+      created_by: components['schemas']['AuditActor'] | null
+      /**
+       * Is Current
+       * @description The revision the site shows now
+       */
+      is_current: boolean
+      /** Sections Count */
+      sections_count: number
+    }
+    /** SectionAdminRead */
+    SectionAdminRead: {
+      /**
+       * Id
+       * Format: uuid
+       */
+      id: string
+      /**
+       * Page Id
+       * Format: uuid
+       */
+      page_id: string
+      type: components['schemas']['SectionType']
+      /**
+       * Label
+       * @description Block name in the admin, e.g. «Главный экран»
+       */
+      label: string
+      /** Sort Order */
+      sort_order: number
+      /** Is Visible */
+      is_visible: boolean
+      /** Anchor */
+      anchor: string | null
+      tone: components['schemas']['Tone']
+      /**
+       * Data
+       * @description Stored form: every language, ids of references
+       */
+      data: {
+        [key: string]: unknown
+      }
+      /**
+       * Refs
+       * @description Cards of referenced objects, by kind and id
+       */
+      refs?: {
+        [key: string]: {
+          [key: string]: components['schemas']['RefCard']
+        }
+      }
+      /**
+       * Updated At
+       * Format: date-time
+       */
+      updated_at: string
+      /** Version */
+      version: number
+    }
+    /** SectionCreate */
+    SectionCreate: {
+      type: components['schemas']['SectionType']
+      /**
+       * Data
+       * @description Stored form; see GET /admin/section-types
+       */
+      data?: {
+        [key: string]: unknown
+      }
+      /** Anchor */
+      anchor?: string | null
+      /** @default dark */
+      tone: components['schemas']['Tone']
+      /**
+       * Is Visible
+       * @default true
+       */
+      is_visible: boolean
+      /**
+       * Position
+       * @description 0-based place on the page; default: at the end
+       */
+      position?: number | null
+    }
+    /** SectionOrder */
+    SectionOrder: {
+      /**
+       * Ids
+       * @description All section ids of the page, in order
+       */
+      ids: string[]
+    }
+    /**
+     * SectionType
+     * @enum {string}
+     */
+    SectionType:
+      | 'hero'
+      | 'stats'
+      | 'about_text'
+      | 'timeline'
+      | 'divisions_grid'
+      | 'projects_showcase'
+      | 'project_list'
+      | 'capabilities'
+      | 'process_steps'
+      | 'production'
+      | 'tokenization_explainer'
+      | 'team_grid'
+      | 'clients_marquee'
+      | 'clients_grid'
+      | 'testimonials'
+      | 'quote'
+      | 'cta'
+      | 'contact_form'
+      | 'media_gallery'
+      | 'video'
+      | 'vacancies'
+      | 'geography'
+    /** SectionTypeInfo */
+    SectionTypeInfo: {
+      /** Type */
+      type: string
+      /** Label */
+      label: string
+      /** Description */
+      description: string
+      /**
+       * Schema
+       * @description JSON Schema of the stored data with x-widget, x-ref and x-enum-labels hints
+       */
+      schema: {
+        [key: string]: unknown
+      }
+    }
+    /** SectionUpdate */
+    SectionUpdate: {
+      /**
+       * Version
+       * @description Version the client read; a stale one gets 409 VERSION_CONFLICT
+       */
+      version: number
+      /** Data */
+      data?: {
+        [key: string]: unknown
+      } | null
+      /** Anchor */
+      anchor?: string | null
+      tone?: components['schemas']['Tone'] | null
+      /** Is Visible */
+      is_visible?: boolean | null
+    }
     /** SeoRead */
     SeoRead: {
       /** Title */
@@ -1013,6 +3456,86 @@ export interface components {
       /** Description */
       description: string
       og_image: components['schemas']['MediaRead'] | null
+    }
+    /** SetPasswordRequest */
+    SetPasswordRequest: {
+      /** New Password */
+      new_password: string
+    }
+    /**
+     * SettingsAdminRead
+     * @description Every part as stored (all languages, ids), plus cards of the referenced files.
+     */
+    SettingsAdminRead: {
+      /**
+       * Id
+       * Format: uuid
+       */
+      id: string
+      /** Site Name */
+      site_name: {
+        [key: string]: unknown
+      }
+      /** Logo Id */
+      logo_id: string | null
+      /** Navigation */
+      navigation: {
+        [key: string]: unknown
+      }[]
+      /** Contacts */
+      contacts: {
+        [key: string]: unknown
+      }
+      /** Socials */
+      socials: {
+        [key: string]: unknown
+      }[]
+      /** Footer */
+      footer: {
+        [key: string]: unknown
+      }
+      /** Default Seo */
+      default_seo: {
+        [key: string]: unknown
+      }
+      /**
+       * Refs
+       * @description Cards of referenced objects, by kind and id
+       */
+      refs?: {
+        [key: string]: {
+          [key: string]: components['schemas']['RefCard']
+        }
+      }
+      /**
+       * Updated At
+       * Format: date-time
+       */
+      updated_at: string
+      /** Version */
+      version: number
+    }
+    /**
+     * Настройки сайта
+     * @description PUT: every part of the document is replaced; send back what GET returned, edited.
+     */
+    SettingsUpdate: {
+      /**
+       * Version
+       * @description Version the client read; a stale one gets 409 VERSION_CONFLICT
+       */
+      version: number
+      /** Название сайта */
+      site_name: components['schemas']['LocalizedText']
+      /** Логотип */
+      logo_id?: string | null
+      /** Меню */
+      navigation: components['schemas']['NavItem'][]
+      contacts: components['schemas']['Contacts']
+      /** Соцсети */
+      socials: components['schemas']['Social'][]
+      footer: components['schemas']['Footer']
+      default_seo: components['schemas']['DefaultSeo']
     }
     /** SiteSettingsRead */
     SiteSettingsRead: {
@@ -1027,12 +3550,73 @@ export interface components {
       footer: components['schemas']['FooterRead']
       default_seo: components['schemas']['SeoRead']
     }
-    /** Social */
+    /** Соцсеть */
     Social: {
-      /** Type */
+      /** Соцсеть */
       type: string
-      /** Url */
+      /**
+       * Ссылка
+       * @description https://…
+       */
       url: string
+    }
+    /** StatAdminRead */
+    StatAdminRead: {
+      /**
+       * Id
+       * Format: uuid
+       */
+      id: string
+      /** Is Published */
+      is_published: boolean
+      /** Sort Order */
+      sort_order: number
+      /**
+       * Created At
+       * Format: date-time
+       */
+      created_at: string
+      /**
+       * Updated At
+       * Format: date-time
+       */
+      updated_at: string
+      /** Version */
+      version: number
+      /** Value */
+      value: number
+      /** Prefix */
+      prefix: string | null
+      /** Suffix */
+      suffix: {
+        [key: string]: unknown
+      }
+      /** Label */
+      label: {
+        [key: string]: unknown
+      }
+      /** Context */
+      context: string
+    }
+    /** StatCreate */
+    StatCreate: {
+      /** Value */
+      value: number
+      /** Prefix */
+      prefix?: string | null
+      suffix?: components['schemas']['LocalizedText'] | null
+      label: components['schemas']['RequiredText']
+      /**
+       * Context
+       * @example home
+       * @example smart-panels
+       */
+      context: string
+      /**
+       * Is Published
+       * @default false
+       */
+      is_published: boolean
     }
     /** StatRead */
     StatRead: {
@@ -1049,6 +3633,24 @@ export interface components {
       suffix: string
       /** Label */
       label: string
+    }
+    /** StatUpdate */
+    StatUpdate: {
+      /**
+       * Version
+       * @description Version the client read; a stale one gets 409 VERSION_CONFLICT
+       */
+      version: number
+      /** Value */
+      value?: number | null
+      /** Prefix */
+      prefix?: string | null
+      suffix?: components['schemas']['LocalizedText'] | null
+      label?: components['schemas']['RequiredText'] | null
+      /** Context */
+      context?: string | null
+      /** Is Published */
+      is_published?: boolean | null
     }
     /** StatsDataRead */
     StatsDataRead: {
@@ -1131,6 +3733,12 @@ export interface components {
       type: 'team_grid'
       data: components['schemas']['TeamGridDataRead']
     }
+    /** Testimonial */
+    Testimonial: {
+      quote: components['schemas']['RequiredText']
+      author: components['schemas']['RequiredText']
+      position?: components['schemas']['LocalizedText'] | null
+    }
     /** TestimonialRead */
     TestimonialRead: {
       /** Quote */
@@ -1181,6 +3789,57 @@ export interface components {
        */
       events: components['schemas']['TimelineEventRead'][]
     }
+    /** TimelineEventAdminRead */
+    TimelineEventAdminRead: {
+      /**
+       * Id
+       * Format: uuid
+       */
+      id: string
+      /** Is Published */
+      is_published: boolean
+      /** Sort Order */
+      sort_order: number
+      /**
+       * Created At
+       * Format: date-time
+       */
+      created_at: string
+      /**
+       * Updated At
+       * Format: date-time
+       */
+      updated_at: string
+      /** Version */
+      version: number
+      /** Year */
+      year: number
+      /** Title */
+      title: {
+        [key: string]: unknown
+      }
+      /** Description */
+      description: {
+        [key: string]: unknown
+      }
+      /** Image Id */
+      image_id: string | null
+      image: components['schemas']['RefCard'] | null
+    }
+    /** TimelineEventCreate */
+    TimelineEventCreate: {
+      /** Year */
+      year: number
+      title: components['schemas']['RequiredText']
+      description?: components['schemas']['LocalizedText'] | null
+      /** Image Id */
+      image_id?: string | null
+      /**
+       * Is Published
+       * @default false
+       */
+      is_published: boolean
+    }
     /** TimelineEventRead */
     TimelineEventRead: {
       /**
@@ -1195,6 +3854,22 @@ export interface components {
       /** Description */
       description: string
       image: components['schemas']['MediaRead'] | null
+    }
+    /** TimelineEventUpdate */
+    TimelineEventUpdate: {
+      /**
+       * Version
+       * @description Version the client read; a stale one gets 409 VERSION_CONFLICT
+       */
+      version: number
+      /** Year */
+      year?: number | null
+      title?: components['schemas']['RequiredText'] | null
+      description?: components['schemas']['LocalizedText'] | null
+      /** Image Id */
+      image_id?: string | null
+      /** Is Published */
+      is_published?: boolean | null
     }
     /** TimelineSection */
     TimelineSection: {
@@ -1212,6 +3887,26 @@ export interface components {
        */
       type: 'timeline'
       data: components['schemas']['TimelineDataRead']
+    }
+    /**
+     * TokenResponse
+     * @description The refresh token is not here: it is set as an httpOnly cookie.
+     */
+    TokenResponse: {
+      /** Access Token */
+      access_token: string
+      /**
+       * Token Type
+       * @default bearer
+       * @constant
+       */
+      token_type: 'bearer'
+      /**
+       * Expires In
+       * @description Access token lifetime, seconds
+       */
+      expires_in: number
+      user: components['schemas']['UserRead']
     }
     /** TokenizationDataRead */
     TokenizationDataRead: {
@@ -1261,6 +3956,134 @@ export interface components {
      * @enum {string}
      */
     Tone: 'dark' | 'light' | 'accent'
+    /** UploadRequest */
+    UploadRequest: {
+      /**
+       * Filename
+       * @description Original file name
+       */
+      filename: string
+      /**
+       * Content Type
+       * @example image/jpeg
+       */
+      content_type: string
+      /**
+       * Size Bytes
+       * @description Declared size; the real size is checked on complete
+       */
+      size_bytes: number
+      /** Folder */
+      folder?: string | null
+      alt?: components['schemas']['LocalizedText'] | null
+    }
+    /**
+     * UploadTarget
+     * @description Where the browser sends the file: `PUT url` with exactly these headers and the raw body.
+     */
+    UploadTarget: {
+      /** Url */
+      url: string
+      /**
+       * Method
+       * @default PUT
+       */
+      method: string
+      /** Headers */
+      headers: {
+        [key: string]: string
+      }
+      /** Expires In */
+      expires_in: number
+    }
+    /** UploadTicket */
+    UploadTicket: {
+      media: components['schemas']['MediaAdminRead']
+      upload: components['schemas']['UploadTarget']
+    }
+    /**
+     * Usage
+     * @description One place that references something (a file, a page...), for 409 IN_USE and usage lists.
+     */
+    Usage: {
+      /**
+       * Entity Type
+       * @example project
+       * @example section
+       * @example site_settings
+       */
+      entity_type: string
+      /**
+       * Entity Id
+       * Format: uuid
+       */
+      entity_id: string
+      /**
+       * Field
+       * @example cover_id
+       * @example data
+       * @example navigation
+       */
+      field: string
+      /**
+       * Label
+       * @description Human-readable name of the place
+       */
+      label: string
+    }
+    /** UserCreate */
+    UserCreate: {
+      /** Email */
+      email: string
+      /** Full Name */
+      full_name: string
+      /** @default editor */
+      role: components['schemas']['UserRole']
+      /** Password */
+      password: string
+    }
+    /** UserRead */
+    UserRead: {
+      /**
+       * Id
+       * Format: uuid
+       */
+      id: string
+      /** Email */
+      email: string
+      /** Full Name */
+      full_name: string
+      role: components['schemas']['UserRole']
+      /** Is Active */
+      is_active: boolean
+      /** Last Login At */
+      last_login_at: string | null
+      /**
+       * Created At
+       * Format: date-time
+       */
+      created_at: string
+      /** Version */
+      version: number
+    }
+    /**
+     * UserRole
+     * @enum {string}
+     */
+    UserRole: 'admin' | 'editor'
+    /** UserUpdate */
+    UserUpdate: {
+      /**
+       * Version
+       * @description Version the client read; a stale one gets 409 VERSION_CONFLICT
+       */
+      version: number
+      /** Full Name */
+      full_name?: string | null
+      role?: components['schemas']['UserRole'] | null
+      /** Is Active */
+      is_active?: boolean | null
+    }
     /** VacanciesDataRead */
     VacanciesDataRead: {
       /** Eyebrow */
@@ -1294,6 +4117,68 @@ export interface components {
       type: 'vacancies'
       data: components['schemas']['VacanciesDataRead']
     }
+    /** VacancyAdminRead */
+    VacancyAdminRead: {
+      /**
+       * Id
+       * Format: uuid
+       */
+      id: string
+      /** Is Published */
+      is_published: boolean
+      /** Sort Order */
+      sort_order: number
+      /**
+       * Created At
+       * Format: date-time
+       */
+      created_at: string
+      /**
+       * Updated At
+       * Format: date-time
+       */
+      updated_at: string
+      /** Version */
+      version: number
+      /** Title */
+      title: {
+        [key: string]: unknown
+      }
+      /** Division Id */
+      division_id: string | null
+      division: components['schemas']['RefCard'] | null
+      /** Location */
+      location: {
+        [key: string]: unknown
+      }
+      employment_type: components['schemas']['EmploymentType']
+      /** Description */
+      description: {
+        [key: string]: unknown
+      }
+      /** Is Open */
+      is_open: boolean
+    }
+    /** VacancyCreate */
+    VacancyCreate: {
+      title: components['schemas']['RequiredText']
+      /** Division Id */
+      division_id?: string | null
+      location?: components['schemas']['LocalizedText'] | null
+      /** @default full_time */
+      employment_type: components['schemas']['EmploymentType']
+      description?: components['schemas']['LocalizedText'] | null
+      /**
+       * Is Open
+       * @default true
+       */
+      is_open: boolean
+      /**
+       * Is Published
+       * @default false
+       */
+      is_published: boolean
+    }
     /** VacancyRead */
     VacancyRead: {
       /**
@@ -1309,6 +4194,24 @@ export interface components {
       /** Description */
       description: string
       division: components['schemas']['DivisionRef'] | null
+    }
+    /** VacancyUpdate */
+    VacancyUpdate: {
+      /**
+       * Version
+       * @description Version the client read; a stale one gets 409 VERSION_CONFLICT
+       */
+      version: number
+      title?: components['schemas']['RequiredText'] | null
+      /** Division Id */
+      division_id?: string | null
+      location?: components['schemas']['LocalizedText'] | null
+      employment_type?: components['schemas']['EmploymentType'] | null
+      description?: components['schemas']['LocalizedText'] | null
+      /** Is Open */
+      is_open?: boolean | null
+      /** Is Published */
+      is_published?: boolean | null
     }
     /** ValidationError */
     ValidationError: {
@@ -1635,6 +4538,5447 @@ export interface operations {
         }
         content: {
           'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  preview_page: {
+    parameters: {
+      query: {
+        token: string
+        locale?: components['schemas']['Locale']
+      }
+      header?: never
+      path: {
+        slug: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['PageRead']
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  admin_auth_login: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['LoginRequest']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['TokenResponse']
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Unprocessable Entity */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Too Many Requests */
+      429: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+    }
+  }
+  admin_auth_refresh: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['TokenResponse']
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  admin_auth_logout: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      204: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  admin_auth_me: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['UserRead']
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+    }
+  }
+  admin_auth_change_password: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ChangePasswordRequest']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['TokenResponse']
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Unprocessable Entity */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+    }
+  }
+  admin_media_list_media: {
+    parameters: {
+      query?: {
+        kind?: components['schemas']['MediaKind'] | null
+        folder?: string | null
+        page?: number
+        page_size?: number
+        q?: string | null
+        sort?: string | null
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['Paginated_MediaAdminRead_']
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  admin_media_list_folders: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['FolderCount'][]
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+    }
+  }
+  admin_media_request_upload: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UploadRequest']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['UploadTicket']
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Unprocessable Entity */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+    }
+  }
+  admin_media_complete_upload: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        media_id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['CompletedUpload']
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Conflict */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Unprocessable Entity */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+    }
+  }
+  admin_media_get_media: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        media_id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['MediaAdminRead']
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  admin_media_delete_media: {
+    parameters: {
+      query: {
+        version: number
+      }
+      header?: never
+      path: {
+        media_id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      204: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Conflict */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  admin_media_update_media: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        media_id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['MediaUpdate']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['MediaAdminRead']
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Conflict */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Unprocessable Entity */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+    }
+  }
+  admin_media_media_usages: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        media_id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['Usage'][]
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  admin_pages_list_pages: {
+    parameters: {
+      query?: {
+        page?: number
+        page_size?: number
+        q?: string | null
+        sort?: string | null
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['Paginated_PageAdminRead_']
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  admin_pages_create_page: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['PageCreate']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['PageAdminRead']
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Conflict */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Unprocessable Entity */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+    }
+  }
+  admin_pages_reorder_pages: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ReorderRequest']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      204: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Conflict */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  admin_pages_get_page: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        page_id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['PageDetail']
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  admin_pages_delete_page: {
+    parameters: {
+      query: {
+        version: number
+      }
+      header?: never
+      path: {
+        page_id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      204: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Conflict */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  admin_pages_update_page: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        page_id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['PageUpdate']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['PageAdminRead']
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Conflict */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Unprocessable Entity */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+    }
+  }
+  admin_pages_create_section: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        page_id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['SectionCreate']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['SectionAdminRead']
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Conflict */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Unprocessable Entity */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+    }
+  }
+  admin_pages_reorder_sections: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        page_id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['SectionOrder']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['SectionAdminRead'][]
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Conflict */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  admin_publishing_publish: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        page_id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['PublishRequest']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['PageAdminRead']
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Conflict */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Unprocessable Entity */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+    }
+  }
+  admin_publishing_unpublish: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        page_id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['PageAction']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['PageAdminRead']
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Conflict */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  admin_publishing_discard_draft: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        page_id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['PageAction']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['PageAdminRead']
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Conflict */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Unprocessable Entity */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+    }
+  }
+  admin_publishing_list_revisions: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        page_id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['RevisionRead'][]
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  admin_publishing_get_revision: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        page_id: string
+        /** @description Revision number */
+        number: number
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['RevisionDetail']
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  admin_publishing_restore_revision: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        page_id: string
+        /** @description Revision number */
+        number: number
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['RestoreRequest']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['PageAdminRead']
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Conflict */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Unprocessable Entity */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+    }
+  }
+  admin_publishing_preview_token: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        page_id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['PreviewLink']
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  admin_pages_get_section: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        section_id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['SectionAdminRead']
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  admin_pages_delete_section: {
+    parameters: {
+      query: {
+        version: number
+      }
+      header?: never
+      path: {
+        section_id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      204: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Conflict */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  admin_pages_update_section: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        section_id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['SectionUpdate']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['SectionAdminRead']
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Conflict */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Unprocessable Entity */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+    }
+  }
+  admin_pages_duplicate_section: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        section_id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['SectionAdminRead']
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  admin_schema_get_meta: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['Meta']
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+    }
+  }
+  admin_schema_get_section_types: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['SectionTypeInfo'][]
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+    }
+  }
+  admin_schema_lookup: {
+    parameters: {
+      query: {
+        kind:
+          | 'media'
+          | 'project'
+          | 'person'
+          | 'client'
+          | 'division'
+          | 'timeline_event'
+          | 'stat'
+          | 'vacancy'
+          | 'page'
+        q?: string | null
+        ids?: string[] | null
+        limit?: number
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['RefCard'][]
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  admin_divisions_list_items: {
+    parameters: {
+      query?: {
+        page?: number
+        page_size?: number
+        q?: string | null
+        sort?: string | null
+        is_published?: boolean | null
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['Paginated_DivisionAdminRead_']
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  admin_divisions_create_item: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['DivisionCreate']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['DivisionAdminRead']
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Conflict */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Unprocessable Entity */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+    }
+  }
+  admin_divisions_reorder_items: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ReorderRequest']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      204: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Conflict */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  admin_divisions_get_item: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        item_id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['DivisionAdminRead']
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  admin_divisions_delete_item: {
+    parameters: {
+      query: {
+        version: number
+      }
+      header?: never
+      path: {
+        item_id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      204: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Conflict */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  admin_divisions_update_item: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        item_id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['DivisionUpdate']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['DivisionAdminRead']
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Conflict */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Unprocessable Entity */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+    }
+  }
+  admin_projects_list_items: {
+    parameters: {
+      query?: {
+        page?: number
+        page_size?: number
+        q?: string | null
+        sort?: string | null
+        division_id?: string | null
+        status?: components['schemas']['ProjectStatus'] | null
+        is_published?: boolean | null
+        is_featured?: boolean | null
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['Paginated_ProjectAdminRead_']
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  admin_projects_create_item: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ProjectCreate']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ProjectAdminRead']
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Conflict */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Unprocessable Entity */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+    }
+  }
+  admin_projects_reorder_items: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ReorderRequest']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      204: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Conflict */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  admin_projects_get_item: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        item_id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ProjectAdminRead']
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  admin_projects_delete_item: {
+    parameters: {
+      query: {
+        version: number
+      }
+      header?: never
+      path: {
+        item_id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      204: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Conflict */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  admin_projects_update_item: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        item_id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ProjectUpdate']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ProjectAdminRead']
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Conflict */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Unprocessable Entity */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+    }
+  }
+  admin_projects_set_gallery: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        item_id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['GalleryUpdate']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ProjectAdminRead']
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Conflict */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Unprocessable Entity */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+    }
+  }
+  admin_people_list_items: {
+    parameters: {
+      query?: {
+        page?: number
+        page_size?: number
+        q?: string | null
+        sort?: string | null
+        division_id?: string | null
+        is_key?: boolean | null
+        is_published?: boolean | null
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['Paginated_PersonAdminRead_']
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  admin_people_create_item: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['PersonCreate']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['PersonAdminRead']
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Conflict */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Unprocessable Entity */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+    }
+  }
+  admin_people_reorder_items: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ReorderRequest']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      204: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Conflict */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  admin_people_get_item: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        item_id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['PersonAdminRead']
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  admin_people_delete_item: {
+    parameters: {
+      query: {
+        version: number
+      }
+      header?: never
+      path: {
+        item_id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      204: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Conflict */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  admin_people_update_item: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        item_id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['PersonUpdate']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['PersonAdminRead']
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Conflict */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Unprocessable Entity */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+    }
+  }
+  admin_clients_list_items: {
+    parameters: {
+      query?: {
+        page?: number
+        page_size?: number
+        q?: string | null
+        sort?: string | null
+        industry?: string | null
+        has_testimonial?: boolean | null
+        is_published?: boolean | null
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['Paginated_ClientAdminRead_']
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  admin_clients_create_item: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ClientCreate']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ClientAdminRead']
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Conflict */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Unprocessable Entity */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+    }
+  }
+  admin_clients_reorder_items: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ReorderRequest']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      204: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Conflict */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  admin_clients_get_item: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        item_id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ClientAdminRead']
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  admin_clients_delete_item: {
+    parameters: {
+      query: {
+        version: number
+      }
+      header?: never
+      path: {
+        item_id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      204: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Conflict */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  admin_clients_update_item: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        item_id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ClientUpdate']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ClientAdminRead']
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Conflict */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Unprocessable Entity */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+    }
+  }
+  admin_timeline_list_items: {
+    parameters: {
+      query?: {
+        page?: number
+        page_size?: number
+        q?: string | null
+        sort?: string | null
+        is_published?: boolean | null
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['Paginated_TimelineEventAdminRead_']
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  admin_timeline_create_item: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['TimelineEventCreate']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['TimelineEventAdminRead']
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Conflict */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Unprocessable Entity */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+    }
+  }
+  admin_timeline_reorder_items: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ReorderRequest']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      204: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Conflict */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  admin_timeline_get_item: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        item_id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['TimelineEventAdminRead']
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  admin_timeline_delete_item: {
+    parameters: {
+      query: {
+        version: number
+      }
+      header?: never
+      path: {
+        item_id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      204: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Conflict */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  admin_timeline_update_item: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        item_id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['TimelineEventUpdate']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['TimelineEventAdminRead']
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Conflict */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Unprocessable Entity */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+    }
+  }
+  admin_stats_list_items: {
+    parameters: {
+      query?: {
+        page?: number
+        page_size?: number
+        q?: string | null
+        sort?: string | null
+        context?: string | null
+        is_published?: boolean | null
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['Paginated_StatAdminRead_']
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  admin_stats_create_item: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['StatCreate']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['StatAdminRead']
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Conflict */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Unprocessable Entity */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+    }
+  }
+  admin_stats_reorder_items: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ReorderRequest']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      204: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Conflict */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  admin_stats_get_item: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        item_id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['StatAdminRead']
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  admin_stats_delete_item: {
+    parameters: {
+      query: {
+        version: number
+      }
+      header?: never
+      path: {
+        item_id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      204: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Conflict */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  admin_stats_update_item: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        item_id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['StatUpdate']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['StatAdminRead']
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Conflict */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Unprocessable Entity */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+    }
+  }
+  admin_vacancies_list_items: {
+    parameters: {
+      query?: {
+        page?: number
+        page_size?: number
+        q?: string | null
+        sort?: string | null
+        division_id?: string | null
+        is_open?: boolean | null
+        is_published?: boolean | null
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['Paginated_VacancyAdminRead_']
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  admin_vacancies_create_item: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['VacancyCreate']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['VacancyAdminRead']
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Conflict */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Unprocessable Entity */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+    }
+  }
+  admin_vacancies_reorder_items: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ReorderRequest']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      204: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Conflict */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  admin_vacancies_get_item: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        item_id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['VacancyAdminRead']
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  admin_vacancies_delete_item: {
+    parameters: {
+      query: {
+        version: number
+      }
+      header?: never
+      path: {
+        item_id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      204: {
+        headers: {
+          [name: string]: unknown
+        }
+        content?: never
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Conflict */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  admin_vacancies_update_item: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        item_id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['VacancyUpdate']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['VacancyAdminRead']
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Conflict */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Unprocessable Entity */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+    }
+  }
+  admin_leads_list_leads: {
+    parameters: {
+      query?: {
+        page?: number
+        page_size?: number
+        q?: string | null
+        sort?: string | null
+        type?: components['schemas']['LeadType'] | null
+        status?: components['schemas']['LeadStatus'] | null
+        created_from?: string | null
+        created_to?: string | null
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['Paginated_LeadAdminRead_']
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  admin_leads_export_leads: {
+    parameters: {
+      query?: {
+        page?: number
+        page_size?: number
+        q?: string | null
+        sort?: string | null
+        type?: components['schemas']['LeadType'] | null
+        status?: components['schemas']['LeadStatus'] | null
+        created_from?: string | null
+        created_to?: string | null
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'text/csv': unknown
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  admin_leads_get_lead: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        lead_id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['LeadAdminRead']
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  admin_leads_update_lead: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        lead_id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['LeadUpdate']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['LeadAdminRead']
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Conflict */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Unprocessable Entity */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+    }
+  }
+  admin_users_list_users: {
+    parameters: {
+      query?: {
+        page?: number
+        page_size?: number
+        q?: string | null
+        sort?: string | null
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['Paginated_UserRead_']
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  admin_users_create_user: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UserCreate']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      201: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['UserRead']
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Conflict */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Unprocessable Entity */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+    }
+  }
+  admin_users_get_user: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        user_id: string
+      }
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['UserRead']
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  admin_users_update_user: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        user_id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UserUpdate']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['UserRead']
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Conflict */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Unprocessable Entity */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+    }
+  }
+  admin_users_set_user_password: {
+    parameters: {
+      query?: never
+      header?: never
+      path: {
+        user_id: string
+      }
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['SetPasswordRequest']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['UserRead']
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Unprocessable Entity */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+    }
+  }
+  admin_audit_log_list_audit_log: {
+    parameters: {
+      query?: {
+        entity_type?: string | null
+        entity_id?: string | null
+        user_id?: string | null
+        action?: string | null
+        since?: string | null
+        until?: string | null
+        page?: number
+        page_size?: number
+        q?: string | null
+        sort?: string | null
+      }
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['Paginated_AuditRead_']
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Validation Error */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['HTTPValidationError']
+        }
+      }
+    }
+  }
+  admin_settings_get_settings: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['SettingsAdminRead']
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+    }
+  }
+  admin_settings_put_settings: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['SettingsUpdate']
+      }
+    }
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['SettingsAdminRead']
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Not Found */
+      404: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Conflict */
+      409: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Unprocessable Entity */
+      422: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
         }
       }
     }

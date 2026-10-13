@@ -1,0 +1,86 @@
+@config '../../../tailwind.admin.config.ts';
+
+/*
+ * Admin theme. Tokens are RGB triplets for Tailwind's alpha syntax.
+ * Light by default, dark via `data-theme="dark"` on <body> or the system setting.
+ * The accent is the site's gold; on light backgrounds text uses `accent-ink` (AA).
+ */
+.admin {
+  --a-canvas: 245 247 248;
+  --a-panel: 255 255 255;
+  --a-sunken: 236 240 242;
+  --a-fg: 15 26 34;
+  --a-mute: 80 95 106;
+  --a-line: 220 226 230;
+  --a-line-strong: 186 197 204;
+  --a-accent: 232 181 48;
+  --a-accent-ink: 128 92 0;
+  --a-on-accent: 12 28 39;
+  --a-ring: 29 105 210;
+  --a-danger: 180 35 24;
+  --a-danger-soft: 253 232 230;
+  --a-success: 22 120 60;
+  --a-success-soft: 222 245 230;
+  --a-warning: 146 88 0;
+  --a-warning-soft: 253 243 214;
+  --a-info: 29 78 186;
+  --a-info-soft: 224 234 252;
+  color-scheme: light;
+}
+
+.admin[data-theme='dark'] {
+  --a-canvas: 11 19 26;
+  --a-panel: 18 29 38;
+  --a-sunken: 7 13 18;
+  --a-fg: 230 236 239;
+  --a-mute: 150 167 178;
+  --a-line: 36 51 63;
+  --a-line-strong: 60 78 92;
+  --a-accent: 232 181 48;
+  --a-accent-ink: 240 198 92;
+  --a-on-accent: 12 28 39;
+  --a-ring: 110 168 250;
+  --a-danger: 248 120 110;
+  --a-danger-soft: 68 24 22;
+  --a-success: 92 214 140;
+  --a-success-soft: 18 52 34;
+  --a-warning: 245 190 70;
+  --a-warning-soft: 62 45 10;
+  --a-info: 120 170 250;
+  --a-info-soft: 22 38 78;
+  color-scheme: dark;
+}
+
+/* Site globals (src/styles/globals.css) style body, headings and focus; reset them here. */
+body.admin {
+  background: rgb(var(--a-canvas));
+  color: rgb(var(--a-fg));
+  font-family: 'Golos Text', system-ui, sans-serif;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+
+.admin h1,
+.admin h2,
+.admin h3 {
+  font-family: inherit;
+  font-weight: 600;
+  text-wrap: pretty;
+}
+
+.admin :focus-visible {
+  outline: 2px solid rgb(var(--a-ring));
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .admin *,
+  .admin *::before,
+  .admin *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@tailwind components;
+@tailwind utilities;
