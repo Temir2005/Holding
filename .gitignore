@@ -17,6 +17,10 @@ dist/
 *.tsbuildinfo
 # Vite's dependency cache, rebuilt on every start
 .vite/
+# Playwright output and layout screenshots (make e2e)
+frontend/test-results/
+frontend/playwright-report/
+frontend/e2e/screenshots/
 
 # os / editors
 .DS_Store

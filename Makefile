@@ -2,7 +2,7 @@ COMPOSE := docker compose -f infra/docker-compose.yml --env-file .env
 BACKEND := $(COMPOSE) exec backend
 FRONTEND := $(COMPOSE) exec frontend
 
-.PHONY: env up down logs migrate seed seed-force lint test gen-types fmt reset
+.PHONY: env up down logs migrate seed seed-force lint test e2e gen-types fmt reset
 
 env:
 	@test -f .env || (cp .env.example .env && echo "created .env from .env.example")
@@ -45,6 +45,27 @@ fmt:
 
 test:
 	$(BACKEND) pytest
+	$(FRONTEND) npm test
+
+# End-to-end tests and layout screenshots (frontend/e2e) in a separate compose project with
+# its own database and bucket, seeded from scratch and removed afterwards (down -v of that
+# project only). The dev stack and its data are not touched. Pass Playwright args via ARGS.
+E2E_COMPOSE := docker compose -p megasmart-e2e -f infra/docker-compose.yml \
+	-f infra/docker-compose.e2e.yml --env-file .env.example
+E2E_ADMIN_EMAIL ?= e2e-admin@example.com
+E2E_ADMIN_PASSWORD ?= e2e-password-not-secret
+export E2E_ADMIN_EMAIL E2E_ADMIN_PASSWORD
+
+e2e:
+	@status=0; \
+	$(E2E_COMPOSE) up -d --build --wait postgres minio backend frontend && \
+	$(E2E_COMPOSE) exec -T backend alembic upgrade head && \
+	$(E2E_COMPOSE) exec -T backend python -m seed.run && \
+	printf '%s\n' "$$E2E_ADMIN_PASSWORD" | $(E2E_COMPOSE) exec -T backend \
+		python -m app.cli create-admin --email "$$E2E_ADMIN_EMAIL" --name "E2E Admin" --password-stdin && \
+	$(E2E_COMPOSE) run --rm e2e npx playwright test $(ARGS) || status=$$?; \
+	$(E2E_COMPOSE) --profile e2e down -v --remove-orphans; \
+	exit $$status
 
 gen-types:
 	$(FRONTEND) npm run gen-types
