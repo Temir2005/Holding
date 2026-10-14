@@ -4,7 +4,7 @@
  */
 import './styles/admin.css'
 import { QueryClientProvider } from '@tanstack/react-query'
-import { useState } from 'react'
+import { lazy, Suspense, useState } from 'react'
 import { Helmet } from 'react-helmet-async'
 import { Route, Routes } from 'react-router-dom'
 import { createAdminQueryClient } from './api/queries'
@@ -18,6 +18,13 @@ import { SessionProvider } from './session/SessionProvider'
 import { ConfirmProvider } from './ui/Confirm'
 import { ToastProvider } from './ui/Toast'
 import { TooltipProvider } from './ui/Tooltip'
+
+// Development tools: not part of the production build.
+const FormsPlayground = import.meta.env.DEV
+  ? lazy(() =>
+      import('./features/dev/FormsPlayground').then((m) => ({ default: m.FormsPlayground })),
+    )
+  : null
 
 function AdminRoutes() {
   const theme = useThemeChoice()
@@ -61,6 +68,16 @@ function AdminRoutes() {
             </RequireRole>
           }
         />
+        {FormsPlayground && (
+          <Route
+            path="dev/forms"
+            element={
+              <Suspense fallback={null}>
+                <FormsPlayground />
+              </Suspense>
+            }
+          />
+        )}
         <Route path="*" element={<AdminNotFound />} />
       </Route>
     </Routes>
