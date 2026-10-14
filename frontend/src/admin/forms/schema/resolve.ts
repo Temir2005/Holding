@@ -23,6 +23,8 @@ const WIDGET_KINDS: Record<string, FieldKind> = {
   link: 'link',
   color: 'color',
   select: 'options',
+  combobox: 'combobox',
+  tags: 'tags',
 }
 
 /** Widgets whose value is a plain string: rendered as a text field until they get an editor. */
@@ -95,7 +97,7 @@ export function fieldKind(node: ResolvedNode, root: JsonSchema): FieldKind {
   if (widget) {
     if (LOCALIZED_WIDGETS[widget]) return schema.type === 'array' ? 'array' : 'localized'
     const kind = WIDGET_KINDS[widget]
-    if (kind === 'options' && !schema['x-options']) return 'json'
+    if ((kind === 'options' || kind === 'combobox') && !schema['x-options']) return 'json'
     if (kind) return kind
     if (!PLAIN_WIDGETS.has(widget)) return 'json'
   }

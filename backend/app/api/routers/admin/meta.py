@@ -4,9 +4,9 @@ from typing import Annotated, Literal
 from fastapi import APIRouter, Query
 
 from app.api.deps import SessionDep, SettingsDep, StorageDep
-from app.schemas.admin.meta import Meta, SectionTypeInfo
+from app.schemas.admin.meta import EntityTypeInfo, Meta, SectionTypeInfo
 from app.schemas.admin.pages import RefCard
-from app.services.admin.meta import build_meta, section_types
+from app.services.admin.meta import entity_types, load_meta, section_types
 from app.services.admin.refs import RefService
 
 router = APIRouter(tags=["admin: schema"])
@@ -20,7 +20,7 @@ LookupKind = Literal[
     "/meta", response_model=Meta, summary="Languages, enums, icons, limits, dropdown choices"
 )
 async def get_meta(settings: SettingsDep, session: SessionDep, storage: StorageDep) -> Meta:
-    return build_meta(settings, await RefService(session, storage).key_options())
+    return await load_meta(settings, session, storage)
 
 
 @router.get(
@@ -31,6 +31,16 @@ async def get_meta(settings: SettingsDep, session: SessionDep, storage: StorageD
 )
 async def get_section_types() -> list[SectionTypeInfo]:
     return section_types()
+
+
+@router.get(
+    "/entity-types",
+    response_model=list[EntityTypeInfo],
+    response_model_by_alias=True,
+    summary="Editable entities (media…) with the JSON Schema of their forms and UI hints",
+)
+async def get_entity_types() -> list[EntityTypeInfo]:
+    return entity_types()
 
 
 @router.get(

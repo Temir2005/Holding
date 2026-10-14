@@ -13,7 +13,7 @@ from collections import defaultdict
 from collections.abc import Iterator, Mapping
 from dataclasses import dataclass
 from enum import StrEnum
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import BaseModel, GetJsonSchemaHandler
 from pydantic.json_schema import JsonSchemaValue
@@ -33,17 +33,26 @@ class RefKind(StrEnum):
     vacancy = "vacancy"
 
 
+# Kinds of media files (MediaKind in app/services/admin/media_files.py, kept in sync by a test).
+MediaAccept = Literal["image", "svg", "video", "document"]
+
+
 @dataclass(frozen=True)
 class Ref:
     kind: RefKind
     target: str
+    # Media only: which kinds of files fit the field (the picker filters by them).
+    accept: tuple[MediaAccept, ...] = ()
 
     def __get_pydantic_json_schema__(
         self, core_schema: CoreSchema, handler: GetJsonSchemaHandler
     ) -> JsonSchemaValue:
         """Mark the field for the admin UI: pick entities of `kind`, one or a list."""
         schema = handler(core_schema)
-        schema["x-ref"] = {"kind": self.kind.value, "many": schema.get("type") == "array"}
+        hint: dict[str, Any] = {"kind": self.kind.value, "many": schema.get("type") == "array"}
+        if self.accept:
+            hint["accept"] = list(self.accept)
+        schema["x-ref"] = hint
         return schema
 
 

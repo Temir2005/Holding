@@ -1,12 +1,13 @@
 import uuid
 from datetime import datetime
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from app.core.i18n import LocalizedText
 from app.models import MediaStatus
 from app.schemas.admin.common import Usage, VersionedUpdate
 from app.schemas.entities import MediaVariant
+from app.schemas.fields import field
 
 Folder = str
 
@@ -63,6 +64,27 @@ class MediaUpdate(VersionedUpdate):
     folder: str | None = Field(default=None, max_length=128)
     tags: list[str] | None = Field(default=None, max_length=30)
     original_filename: str | None = Field(default=None, min_length=1, max_length=255)
+
+
+class MediaForm(BaseModel):
+    """Editable fields of a media file, as the admin card shows them (GET /admin/entity-types).
+
+    Saved with PATCH /admin/media/{id} (`MediaUpdate`); a test keeps the two in step.
+    """
+
+    model_config = ConfigDict(extra="forbid", title="Файл")
+
+    alt: LocalizedText | None = field(
+        "Подпись (alt)",
+        widget="localized-text",
+        description="Что изображено: её читают незрячие посетители и поисковики",
+        default=None,
+    )
+    original_filename: str | None = field("Имя файла", default=None, min_length=1, max_length=255)
+    folder: str | None = field(
+        "Папка", widget="combobox", options="media_folders", default=None, max_length=128
+    )
+    tags: list[str] = field("Теги", widget="tags", default_factory=list, max_length=30)
 
 
 # Kept as a name for the media endpoints; the shape is shared.

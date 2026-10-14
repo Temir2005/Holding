@@ -640,6 +640,23 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  '/api/v1/admin/entity-types': {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** Editable entities (media…) with the JSON Schema of their forms and UI hints */
+    get: operations['admin_schema_get_entity_types']
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
   '/api/v1/admin/lookup': {
     parameters: {
       query?: never
@@ -1806,6 +1823,23 @@ export interface components {
      * @enum {string}
      */
     EmploymentType: 'full_time' | 'part_time' | 'contract' | 'internship'
+    /**
+     * EntityTypeInfo
+     * @description An editable entity with the JSON Schema of its form (same hints as section types).
+     */
+    EntityTypeInfo: {
+      /** Type */
+      type: string
+      /** Label */
+      label: string
+      /**
+       * Schema
+       * @description JSON Schema of the form with x-widget, x-ref and x-options hints
+       */
+      schema: {
+        [key: string]: unknown
+      }
+    }
     /** ErrorBody */
     ErrorBody: {
       /**
@@ -2274,6 +2308,16 @@ export interface components {
        * @description Stats contexts in use, for fields with x-options: stat_contexts
        */
       stat_contexts: components['schemas']['Option'][]
+      /**
+       * Media Kinds
+       * @description Kinds of media files (filter of GET /admin/media, x-ref accept)
+       */
+      media_kinds: components['schemas']['Option'][]
+      /**
+       * Media Folders
+       * @description Media folders in use, for fields with x-options: media_folders
+       */
+      media_folders: components['schemas']['Option'][]
     }
     /**
      * Пункт меню
@@ -6532,6 +6576,44 @@ export interface operations {
         }
         content: {
           'application/json': components['schemas']['SectionTypeInfo'][]
+        }
+      }
+      /** @description Unauthorized */
+      401: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+      /** @description Forbidden */
+      403: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['ErrorEnvelope']
+        }
+      }
+    }
+  }
+  admin_schema_get_entity_types: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description Successful Response */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          'application/json': components['schemas']['EntityTypeInfo'][]
         }
       }
       /** @description Unauthorized */

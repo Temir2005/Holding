@@ -4,9 +4,12 @@ The hints end up in the JSON Schema of GET /admin/section-types, so the admin ca
 build an editing form for any section without knowing it in advance:
 
 - `x-widget`: localized-text | localized-textarea | markdown | icon | link | color | anchor
-- `x-ref`: {kind, many}, added by `Ref` itself (app.schemas.refs)
+  | tags (a list of short strings)
+- `x-ref`: {kind, many, accept?}, added by `Ref` itself (app.schemas.refs); `accept` lists
+  the kinds of media files that fit a media field
 - `x-widget: select` + `x-options`: a dropdown whose choices are the GET /admin/meta list
   of that name, added by `KeyOf` (division slugs, stats contexts)
+- `x-widget: combobox` + `x-options`: the same list as suggestions, any value allowed
 - `x-enum-labels`: {value: label} for choice fields
 - `x-widget: page`: a page picker (GET /admin/lookup?kind=page); the value is the slug
 """
@@ -30,13 +33,14 @@ def field(
 ) -> Any:
     """`Field` with a Russian title and optional UI hints. Other kwargs pass through.
 
-    `options` names a list in GET /admin/meta to choose from (a dropdown).
+    `options` names a list in GET /admin/meta to choose from: a dropdown, or suggestions
+    with `widget="combobox"`.
     """
     extra: dict[str, Any] = {}
     if widget:
         extra["x-widget"] = widget
     if options:
-        extra["x-widget"] = "select"
+        extra["x-widget"] = widget or "select"
         extra["x-options"] = options
     if labels:
         extra["x-enum-labels"] = {str(k): v for k, v in labels.items()}

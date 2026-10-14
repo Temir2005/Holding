@@ -14,6 +14,7 @@ from fastapi.responses import JSONResponse, Response
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.core.errors import AppError
+from app.core.validation_messages import ru_message
 from app.schemas.admin.common import ErrorBody, ErrorEnvelope, FieldError
 
 ENVELOPE_PREFIXES = ("/api/v1/admin", "/api/v1/preview")
@@ -52,7 +53,7 @@ async def handle_validation_error(request: Request, exc: Exception) -> Response:
     if not uses_envelope(request):
         return await request_validation_exception_handler(request, exc)
     fields = [
-        FieldError(loc=list(err.get("loc", ())), msg=str(err.get("msg", ""))).model_dump()
+        FieldError(loc=list(err.get("loc", ())), msg=ru_message(err)).model_dump()
         for err in exc.errors()
     ]
     return envelope(422, "VALIDATION_ERROR", "Проверьте заполнение полей", fields)

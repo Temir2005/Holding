@@ -1,4 +1,4 @@
-import { QueryClient, queryOptions } from '@tanstack/react-query'
+import { infiniteQueryOptions, QueryClient, queryOptions } from '@tanstack/react-query'
 import type { components } from '@/api/schema'
 import { api } from './client'
 import { AdminApiError } from './errors'
@@ -63,3 +63,82 @@ export function metaOptions(meta: Meta | undefined, name: string): MetaOption[] 
     ? (list as MetaOption[])
     : []
 }
+
+export type EntityTypeInfo = components['schemas']['EntityTypeInfo']
+export type RefCard = components['schemas']['RefCard']
+export type LookupKind = NonNullable<
+  Parameters<typeof api.get<'/api/v1/admin/lookup'>>[1]
+>['query']['kind']
+
+/** Forms of non-block entities (media card…), built by SchemaForm. */
+export const entityTypesQuery = () =>
+  queryOptions({
+    queryKey: [...adminKey, 'entity-types'],
+    queryFn: ({ signal }) => api.get('/api/v1/admin/entity-types', { signal }),
+    staleTime: Infinity,
+  })
+
+export const mediaKey = [...adminKey, 'media'] as const
+
+export interface MediaFilters {
+  q?: string
+  kind?: components['schemas']['MediaKind'] | null
+  folder?: string | null
+  sort?: string
+}
+
+export const MEDIA_PAGE_SIZE = 40
+
+/** The library, page by page ("show more"). */
+export const mediaListQuery = (filters: MediaFilters) =>
+  infiniteQueryOptions({
+    queryKey: [...mediaKey, 'list', filters],
+    queryFn: ({ pageParam, signal }) =>
+      api.get('/api/v1/admin/media', {
+        query: {
+          page: pageParam,
+          page_size: MEDIA_PAGE_SIZE,
+          q: filters.q || null,
+          kind: filters.kind ?? null,
+          folder: filters.folder ?? null,
+          sort: filters.sort ?? null,
+        },
+        signal,
+      }),
+    initialPageParam: 1,
+    getNextPageParam: (last) =>
+      last.page * last.page_size < last.total ? last.page + 1 : undefined,
+  })
+
+export const mediaFoldersQuery = () =>
+  queryOptions({
+    queryKey: [...mediaKey, 'folders'],
+    queryFn: ({ signal }) => api.get('/api/v1/admin/media/folders', { signal }),
+  })
+
+export const mediaItemQuery = (id: string) =>
+  queryOptions({
+    queryKey: [...mediaKey, 'item', id],
+    queryFn: ({ signal }) =>
+      api.get('/api/v1/admin/media/{media_id}', { path: { media_id: id }, signal }),
+  })
+
+export const mediaUsagesQuery = (id: string) =>
+  queryOptions({
+    queryKey: [...mediaKey, 'usages', id],
+    queryFn: ({ signal }) =>
+      api.get('/api/v1/admin/media/{media_id}/usages', { path: { media_id: id }, signal }),
+  })
+
+/** Cards of already selected objects, to show a reference field without the full records. */
+export const refCardsQuery = (kind: LookupKind, ids: readonly string[]) =>
+  queryOptions({
+    queryKey: [...adminKey, 'ref-cards', kind, [...ids].sort()],
+    queryFn: ({ signal }) =>
+      api.get('/api/v1/admin/lookup', {
+        query: { kind, ids: [...ids], limit: Math.min(100, Math.max(ids.length, 1)) },
+        signal,
+      }),
+    enabled: ids.length > 0,
+    staleTime: 60_000,
+  })

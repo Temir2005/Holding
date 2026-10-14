@@ -199,13 +199,17 @@ async def test_invalid_data_points_at_the_field(client: AsyncClient, editor: Adm
         },
     )
     assert res.status_code == 422
-    locs = [e["loc"] for e in res.json()["error"]["details"]]
-    assert ["body", "data", "steps", 0, "title", "ru"] in locs
+    details = res.json()["error"]["details"]
+    missing_ru = {"loc": ["body", "data", "steps", 0, "title", "ru"], "msg": "Обязательное поле"}
+    assert missing_ru in details
 
     unknown = await client.post(
         f"{PAGES}/{page['id']}/sections", headers=h, json={"type": "hero", "data": {"oops": 1}}
     )
-    assert unknown.json()["error"]["details"][0]["loc"] == ["body", "data", "oops"]
+    assert unknown.json()["error"]["details"][0] == {
+        "loc": ["body", "data", "oops"],
+        "msg": "Лишнее поле",
+    }
 
     icon = await client.post(
         f"{PAGES}/{page['id']}/sections",
@@ -215,7 +219,10 @@ async def test_invalid_data_points_at_the_field(client: AsyncClient, editor: Adm
             "data": {"items": [{"icon": "rocket", "title": {"ru": "a"}, "text": {"ru": "b"}}]},
         },
     )
-    assert icon.json()["error"]["details"][0]["loc"] == ["body", "data", "items", 0, "icon"]
+    assert icon.json()["error"]["details"][0] == {
+        "loc": ["body", "data", "items", 0, "icon"],
+        "msg": "Неизвестная иконка «rocket»",
+    }
 
 
 async def test_broken_references_and_links_are_refused(
@@ -394,7 +401,11 @@ async def test_section_types_describe_every_block(client: AsyncClient, editor: A
 
     hero = types["hero"]["schema"]
     assert hero["properties"]["title"]["x-widget"] == "localized-text"
-    assert hero["properties"]["background_media_id"]["x-ref"] == {"kind": "media", "many": False}
+    assert hero["properties"]["background_media_id"]["x-ref"] == {
+        "kind": "media",
+        "many": False,
+        "accept": ["image"],
+    }
     cta = hero["$defs"]["Cta"]["properties"]
     assert cta["href"]["x-widget"] == "link"
     assert cta["variant"]["x-enum-labels"] == {"primary": "Основная", "secondary": "Второстепенная"}

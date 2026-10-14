@@ -10,6 +10,7 @@ import { LinkField } from './LinkField'
 import { LocalizedField } from './LocalizedField'
 import { ObjectField } from './ObjectField'
 import { RefField } from './RefField'
+import { ComboboxField, TagsField } from './TextListFields'
 
 registerWidget('localized', LocalizedField)
 registerWidget('string', StringField)
@@ -18,6 +19,8 @@ registerWidget('boolean', BooleanField)
 registerWidget('enum', EnumField)
 registerWidget('enum-list', EnumListField)
 registerWidget('options', OptionsField)
+registerWidget('combobox', ComboboxField)
+registerWidget('tags', TagsField)
 registerWidget('icon', IconField)
 registerWidget('link', LinkField)
 registerWidget('color', ColorField)

@@ -2,13 +2,20 @@ import { Link2 } from 'lucide-react'
 import { useController } from 'react-hook-form'
 import { useT } from '../../../i18n'
 import { useFieldError } from '../useFieldError'
+import { MediaRefField } from './MediaRefField'
 import type { WidgetProps } from '../registry'
 
 /**
  * `x-ref` (media, projects, people…). Until the pickers arrive (media library, lookup),
  * the field shows what is selected and keeps the value exactly as it came.
  */
-export function RefField({ name, label, description }: WidgetProps) {
+export function RefField(props: WidgetProps) {
+  // Media has its picker; other kinds get theirs with the page editor (lookup).
+  if (props.node.schema['x-ref']?.kind === 'media') return <MediaRefField {...props} />
+  return <PendingRefField {...props} />
+}
+
+function PendingRefField({ name, label, description }: WidgetProps) {
   const t = useT()
   const { field } = useController({ name })
   const error = useFieldError(name)

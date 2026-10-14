@@ -40,6 +40,26 @@ class Meta(BaseModel):
     stat_contexts: list[Option] = Field(
         description="Stats contexts in use, for fields with x-options: stat_contexts"
     )
+    media_kinds: list[Option] = Field(
+        description="Kinds of media files (filter of GET /admin/media, x-ref accept)"
+    )
+    media_folders: list[Option] = Field(
+        description="Media folders in use, for fields with x-options: media_folders"
+    )
+
+
+class EntityTypeInfo(BaseModel):
+    """An editable entity with the JSON Schema of its form (same hints as section types)."""
+
+    type: str
+    label: str
+    schema_: dict[str, Any] = Field(
+        alias="schema",
+        serialization_alias="schema",
+        description="JSON Schema of the form with x-widget, x-ref and x-options hints",
+    )
+
+    model_config = {"populate_by_name": True}
 
 
 class SectionTypeInfo(BaseModel):

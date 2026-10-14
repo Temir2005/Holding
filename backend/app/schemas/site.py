@@ -60,7 +60,7 @@ class DefaultSeo(BaseModel):
     model_config = ConfigDict(extra="forbid", title="SEO по умолчанию")
     title: L = field("Заголовок", widget="localized-text")
     description: L = field("Описание", widget="localized-textarea")
-    og_image_id: Annotated[uuid.UUID | None, Ref(RefKind.media, "og_image")] = field(
+    og_image_id: Annotated[uuid.UUID | None, Ref(RefKind.media, "og_image", ("image",))] = field(
         "Картинка для соцсетей", default=None
     )
 
@@ -69,7 +69,7 @@ class SiteSettingsDoc(BaseModel):
     """All JSONB parts of site_settings, validated together."""
 
     site_name: L = field("Название сайта", widget="localized-text")
-    logo_id: Annotated[uuid.UUID | None, Ref(RefKind.media, "logo")] = field(
+    logo_id: Annotated[uuid.UUID | None, Ref(RefKind.media, "logo", ("image", "svg"))] = field(
         "Логотип", default=None
     )
     navigation: list[NavItem] = field("Меню")

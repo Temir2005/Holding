@@ -162,6 +162,7 @@
           "default": null,
           "title": "Фоновое изображение",
           "x-ref": {
+            "accept": ["image"],
             "kind": "media",
             "many": false
           }
@@ -179,6 +180,7 @@
           "default": null,
           "title": "Фоновое видео",
           "x-ref": {
+            "accept": ["video"],
             "kind": "media",
             "many": false
           }
@@ -395,6 +397,7 @@
           "default": null,
           "title": "Изображение",
           "x-ref": {
+            "accept": ["image", "svg"],
             "kind": "media",
             "many": false
           }
@@ -900,6 +903,7 @@
               "default": null,
               "title": "Картинка вместо иконки",
               "x-ref": {
+                "accept": ["image", "svg"],
                 "kind": "media",
                 "many": false
               }
@@ -1078,6 +1082,7 @@
               "default": null,
               "title": "Изображение",
               "x-ref": {
+                "accept": ["image", "svg"],
                 "kind": "media",
                 "many": false
               }
@@ -1267,6 +1272,7 @@
           "title": "Галерея",
           "type": "array",
           "x-ref": {
+            "accept": ["image"],
             "kind": "media",
             "many": true
           }
@@ -1338,6 +1344,7 @@
               "default": null,
               "title": "Картинка вместо иконки",
               "x-ref": {
+                "accept": ["image", "svg"],
                 "kind": "media",
                 "many": false
               }
@@ -1953,6 +1960,7 @@
           "description": "Пусто — фото автора",
           "title": "Фото",
           "x-ref": {
+            "accept": ["image"],
             "kind": "media",
             "many": false
           }
@@ -2098,6 +2106,7 @@
           "default": null,
           "title": "Изображение",
           "x-ref": {
+            "accept": ["image"],
             "kind": "media",
             "many": false
           }
@@ -2315,6 +2324,7 @@
           "title": "Изображения",
           "type": "array",
           "x-ref": {
+            "accept": ["image", "svg"],
             "kind": "media",
             "many": true
           }
@@ -2432,6 +2442,7 @@
           "default": null,
           "title": "Видеофайл",
           "x-ref": {
+            "accept": ["video"],
             "kind": "media",
             "many": false
           }
@@ -2449,6 +2460,7 @@
           "default": null,
           "title": "Обложка",
           "x-ref": {
+            "accept": ["image"],
             "kind": "media",
             "many": false
           }
