@@ -130,15 +130,10 @@ export const mediaUsagesQuery = (id: string) =>
       api.get('/api/v1/admin/media/{media_id}/usages', { path: { media_id: id }, signal }),
   })
 
-/** Cards of already selected objects, to show a reference field without the full records. */
-export const refCardsQuery = (kind: LookupKind, ids: readonly string[]) =>
+/** Search for a reference picker (`kind` from `x-ref`, or `page` for links). */
+export const lookupQuery = (kind: LookupKind, q: string) =>
   queryOptions({
-    queryKey: [...adminKey, 'ref-cards', kind, [...ids].sort()],
+    queryKey: [...adminKey, 'lookup', kind, q],
     queryFn: ({ signal }) =>
-      api.get('/api/v1/admin/lookup', {
-        query: { kind, ids: [...ids], limit: Math.min(100, Math.max(ids.length, 1)) },
-        signal,
-      }),
-    enabled: ids.length > 0,
-    staleTime: 60_000,
+      api.get('/api/v1/admin/lookup', { query: { kind, q: q || null, limit: 50 }, signal }),
   })

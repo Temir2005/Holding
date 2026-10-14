@@ -1,7 +1,10 @@
 import { useId, useState } from 'react'
 import { useController } from 'react-hook-form'
 import { cn } from '@/lib/cn'
+import { Search } from 'lucide-react'
 import { useT } from '../../../i18n'
+import { Button } from '../../../ui/Button'
+import { EntityPicker } from '../../EntityPicker'
 import { controlClass } from '../../../ui/styles'
 import { useFieldError } from '../useFieldError'
 import type { WidgetProps } from '../registry'
@@ -14,7 +17,7 @@ import {
   type LinkMode,
 } from '../../link'
 
-/** `x-widget: link`. Page and project pickers from `lookup` come with the page editor. */
+/** `x-widget: link`: a page, a project, an anchor or an external address. */
 export function LinkField({ name, node, required, label, description }: WidgetProps) {
   const t = useT()
   const id = useId()
@@ -24,6 +27,8 @@ export function LinkField({ name, node, required, label, description }: WidgetPr
   const [mode, setMode] = useState<LinkMode>(() => linkMode(href))
   const target = linkTarget(href, mode)
   const nullable = node.nullable
+  const [pickerOpen, setPickerOpen] = useState(false)
+  const pickerKind = mode === 'page' ? 'page' : mode === 'project' ? 'project' : null
 
   const update = (nextMode: LinkMode, nextTarget: string) => {
     const next = buildHref(nextMode, nextTarget)
@@ -88,7 +93,26 @@ export function LinkField({ name, node, required, label, description }: WidgetPr
             (mode === 'anchor' || mode === 'project') && 'rounded-l-none',
           )}
         />
+        {pickerKind && (
+          <Button
+            size="sm"
+            icon={<Search size={16} aria-hidden="true" />}
+            className="ml-2 shrink-0 self-center"
+            onClick={() => setPickerOpen(true)}
+          >
+            {t(pickerKind === 'page' ? 'refs.pickPage' : 'refs.pickProject')}
+          </Button>
+        )}
       </div>
+      {pickerKind && (
+        <EntityPicker
+          open={pickerOpen}
+          onOpenChange={setPickerOpen}
+          kind={pickerKind}
+          title={t(pickerKind === 'page' ? 'refs.pickPage' : 'refs.pickProject')}
+          onPick={([card]) => card?.slug && update(mode, card.slug)}
+        />
+      )}
       {error && (
         <p id={`${id}-error`} className="text-sm text-danger">
           {error}

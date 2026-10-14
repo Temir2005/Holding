@@ -84,3 +84,7 @@ class Usage(BaseModel):
     entity_id: uuid.UUID
     field: str = Field(examples=["cover_id", "data", "navigation"])
     label: str = Field(description="Human-readable name of the place")
+    page_id: uuid.UUID | None = Field(
+        default=None,
+        description="Page of a block or a published version: where the admin opens the place",
+    )

@@ -3246,6 +3246,11 @@ export interface components {
       thumb_url?: string | null
       /** Is Published */
       is_published?: boolean | null
+      /**
+       * Slug
+       * @description Address key of pages, projects and divisions (for links and filters)
+       */
+      slug?: string | null
     }
     /**
      * RefKind
@@ -4074,6 +4079,11 @@ export interface components {
        * @description Human-readable name of the place
        */
       label: string
+      /**
+       * Page Id
+       * @description Page of a block or a published version: where the admin opens the place
+       */
+      page_id?: string | null
     }
     /** UserCreate */
     UserCreate: {

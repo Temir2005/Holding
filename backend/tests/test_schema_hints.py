@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import AdminUser, Media, MediaStatus
 from app.schemas.admin.media import MediaForm, MediaUpdate
+from app.schemas.admin.pages import PageForm, PageUpdate, SectionForm, SectionUpdate
 from app.schemas.refs import MediaAccept
 from app.schemas.sections import SECTION_SCHEMAS, SectionType
 from app.schemas.site import SiteSettingsDoc
@@ -56,9 +57,10 @@ def test_every_media_field_says_which_files_fit() -> None:
     assert site["logo_id"]["x-ref"]["accept"] == ["image", "svg"]
 
 
-def test_media_form_matches_what_patch_accepts() -> None:
-    editable = set(MediaUpdate.model_fields) - {"version"}
-    assert set(MediaForm.model_fields) == editable
+def test_entity_forms_match_what_patch_accepts() -> None:
+    assert set(MediaForm.model_fields) == set(MediaUpdate.model_fields) - {"version"}
+    assert set(PageForm.model_fields) == set(PageUpdate.model_fields) - {"version"}
+    assert set(SectionForm.model_fields) == set(SectionUpdate.model_fields) - {"version", "data"}
 
 
 async def test_meta_lists_media_kinds_and_folders(
@@ -103,3 +105,41 @@ async def test_entity_types_describe_the_media_form(client: AsyncClient, editor:
 
 async def test_entity_types_need_a_token(client: AsyncClient) -> None:
     assert (await client.get(f"{ADMIN}/entity-types")).status_code == 401
+
+
+async def test_entity_types_describe_page_and_block_settings(
+    client: AsyncClient, editor: AdminUser
+) -> None:
+    types = {
+        t["type"]: t
+        for t in (await client.get(f"{ADMIN}/entity-types", headers=auth_header(editor))).json()
+    }
+    page = types["page"]["schema"]["properties"]
+    assert page["og_image_id"]["x-ref"] == {"kind": "media", "many": False, "accept": ["image"]}
+    assert page["seo_description"]["x-widget"] == "localized-textarea"
+    block = types["section"]["schema"]["properties"]
+    assert block["anchor"]["x-widget"] == "anchor"
+    assert block["tone"]["x-enum-labels"] == {
+        "dark": "Тёмный",
+        "light": "Светлый",
+        "accent": "Акцентный",
+    }
+
+
+async def test_lookup_cards_carry_slugs(
+    client: AsyncClient, editor: AdminUser, session: AsyncSession
+) -> None:
+    from app.models import Division, Project, ProjectStatus
+
+    division = Division(slug="dev", name={"ru": "Девелопмент"}, stats=[])
+    session.add(division)
+    await session.flush()
+    session.add(
+        Project(slug="alatau", title={"ru": "Alatau"}, status=ProjectStatus.planned, tags=[])
+    )
+    await session.commit()
+    h = auth_header(editor)
+    projects = (await client.get(f"{ADMIN}/lookup", headers=h, params={"kind": "project"})).json()
+    divisions = (await client.get(f"{ADMIN}/lookup", headers=h, params={"kind": "division"})).json()
+    assert [p["slug"] for p in projects] == ["alatau"]
+    assert [d["slug"] for d in divisions] == ["dev"]

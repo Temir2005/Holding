@@ -14,13 +14,14 @@ import {
   sortableKeyboardCoordinates,
   useSortable,
 } from '@dnd-kit/sortable'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQueryClient } from '@tanstack/react-query'
 import { ImageOff, Plus, Replace, X } from 'lucide-react'
 import { useState } from 'react'
 import { useController } from 'react-hook-form'
 import { cn } from '@/lib/cn'
 import type { MediaItem, MediaKind } from '../../../api/media'
-import { refCardsQuery, type RefCard } from '../../../api/queries'
+import type { RefCard } from '../../../api/queries'
+import { rememberCards, useRefCards } from '../../../api/refCards'
 import { MediaPicker } from '../../../features/media/MediaPicker'
 import { useT } from '../../../i18n'
 import { Button } from '../../../ui/Button'
@@ -115,29 +116,23 @@ export function MediaRefField({ name, node, label, description }: WidgetProps) {
     : field.value
       ? [field.value as string]
       : []
-  const { data: cards = [] } = useQuery(refCardsQuery('media', ids))
+  const { data: cards = [] } = useRefCards(queryClient, 'media', ids)
   const cardOf = (id: string) => cards.find((c) => c.id === id)
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
   )
 
-  const remember = (items: MediaItem[], nextIds: string[]) => {
-    // Seed the cards cache so the new selection shows at once.
-    const known = new Map([...cards, ...items.map(toCard)].map((c) => [c.id, c]))
-    queryClient.setQueryData(
-      refCardsQuery('media', nextIds).queryKey,
-      nextIds.flatMap((id) => known.get(id) ?? []),
-    )
-  }
+  // The chosen files are known: their cards show at once, without a request.
+  const remember = (items: MediaItem[]) => rememberCards(queryClient, 'media', items.map(toCard))
 
   const pick = (items: MediaItem[]) => {
     if (many) {
       const next = [...ids, ...items.map((i) => i.id).filter((id) => !ids.includes(id))]
-      remember(items, next)
+      remember(items)
       field.onChange(next)
     } else if (items[0]) {
-      remember(items, [items[0].id])
+      remember(items)
       field.onChange(items[0].id)
     }
   }

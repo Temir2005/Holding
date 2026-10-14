@@ -1,0 +1,190 @@
+import { render, screen, waitFor, within } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { apiError, fakeFetch, json, signedIn } from '../../test/fakeApi'
+import { withProviders } from '../../test/renderForm'
+import { PageEditorPage } from './PageEditorPage'
+import { pageDetail, section } from './testData'
+import type { PageDetail } from '../../api/pages'
+
+function renderEditor() {
+  const user = userEvent.setup()
+  render(withProviders(<PageEditorPage />, '/admin/pages/p1', '/admin/pages/:pageId'))
+  return user
+}
+
+const DRAFT_HASH = 'a'.repeat(64)
+
+describe('publishing', () => {
+  beforeEach(() => {
+    vi.unstubAllGlobals()
+    signedIn()
+  })
+
+  it('is off when the page on the site is up to date', async () => {
+    fakeFetch({
+      'GET /api/v1/admin/pages/{id}': () =>
+        json(200, pageDetail({ is_published: true, has_unpublished_changes: false })),
+    })
+    renderEditor()
+    expect(await screen.findByRole('button', { name: 'Опубликовать' })).toHaveProperty(
+      'disabled',
+      true,
+    )
+    expect(screen.getByText('На сайте')).toBeTruthy()
+  })
+
+  it('sends the version and draft hash it showed, with a comment', async () => {
+    const bodies: unknown[] = []
+    fakeFetch({
+      'GET /api/v1/admin/pages/{id}': () => json(200, pageDetail()),
+      'POST /api/v1/admin/pages/{id}/publish': ({ body }) => {
+        bodies.push(body)
+        return json(200, { ...pageDetail({ has_unpublished_changes: false }), sections: undefined })
+      },
+      'GET /api/v1/admin/pages': () => json(200, { items: [], total: 0, page: 1, page_size: 100 }),
+      'GET /api/v1/admin/pages/{id}/revisions': () => json(200, []),
+    })
+    const user = renderEditor()
+    await user.click(await screen.findByRole('button', { name: 'Опубликовать' }))
+    const dialog = await screen.findByRole('dialog', { name: 'Опубликовать страницу' })
+    await user.type(within(dialog).getByLabelText('Что изменилось'), 'Новый текст')
+    await user.click(within(dialog).getByRole('button', { name: 'Опубликовать' }))
+    await waitFor(() =>
+      expect(bodies).toEqual([{ version: 4, draft_hash: DRAFT_HASH, comment: 'Новый текст' }]),
+    )
+  })
+
+  it('lists problems and opens the block with the field marked', async () => {
+    fakeFetch({
+      'GET /api/v1/admin/pages/{id}': () => json(200, pageDetail()),
+      'POST /api/v1/admin/pages/{id}/publish': () =>
+        apiError(422, 'VALIDATION_ERROR', 'Проверьте блоки', [
+          { loc: ['sections', 0, 'data', 'text', 'ru'], msg: 'Слишком коротко', section_id: 's1' },
+        ]),
+    })
+    const user = renderEditor()
+    await user.click(await screen.findByRole('button', { name: 'Опубликовать' }))
+    const dialog = await screen.findByRole('dialog', { name: 'Опубликовать страницу' })
+    await user.click(within(dialog).getByRole('button', { name: 'Опубликовать' }))
+    expect(await within(dialog).findByText('Слишком коротко')).toBeTruthy()
+
+    await user.click(within(dialog).getByRole('button', { name: 'Перейти к полю' }))
+    const editor = await screen.findByRole('dialog', { name: /Цитата/ })
+    expect(await within(editor).findByText('Слишком коротко')).toBeTruthy()
+    expect(
+      within(editor).getByRole('textbox', { name: 'Цитата' }).getAttribute('aria-invalid'),
+    ).toBe('true')
+  })
+
+  it('asks to reload when someone changed the draft meanwhile', async () => {
+    fakeFetch({
+      'GET /api/v1/admin/pages/{id}': () => json(200, pageDetail()),
+      'POST /api/v1/admin/pages/{id}/publish': () =>
+        apiError(409, 'DRAFT_CHANGED', 'Черновик изменился'),
+    })
+    const user = renderEditor()
+    await user.click(await screen.findByRole('button', { name: 'Опубликовать' }))
+    const dialog = await screen.findByRole('dialog', { name: 'Опубликовать страницу' })
+    await user.click(within(dialog).getByRole('button', { name: 'Опубликовать' }))
+    expect(await within(dialog).findByText(/Страницу изменили, пока вы её смотрели/)).toBeTruthy()
+    expect(within(dialog).getByRole('button', { name: 'Обновить' })).toBeTruthy()
+  })
+})
+
+describe('blocks', () => {
+  beforeEach(() => {
+    vi.unstubAllGlobals()
+    signedIn()
+  })
+
+  it('never overwrites a block someone else saved', async () => {
+    fakeFetch({
+      'GET /api/v1/admin/pages/{id}': () => json(200, pageDetail()),
+      'PATCH /api/v1/admin/sections/{id}': ({ body }) => {
+        expect(body).toMatchObject({ version: 1, data: { text: { ru: 'Делаем на совесть!' } } })
+        return apiError(409, 'VERSION_CONFLICT', 'Запись изменилась')
+      },
+    })
+    const user = renderEditor()
+    await user.click(await screen.findByRole('button', { name: /^1\s*Цитата/ }))
+    const editor = await screen.findByRole('dialog', { name: /Цитата/ })
+    await user.type(within(editor).getByRole('textbox', { name: 'Цитата' }), '!')
+    await user.click(within(editor).getByRole('button', { name: 'Сохранить' }))
+    expect(
+      await screen.findByRole('alertdialog', { name: 'Запись изменили, пока вы её редактировали' }),
+    ).toBeTruthy()
+  })
+
+  it('adds a block of the chosen type at the chosen place', async () => {
+    let posted: unknown
+    const page: PageDetail = pageDetail({ sections: [section({ id: 'a' }), section({ id: 'b' })] })
+    fakeFetch({
+      'GET /api/v1/admin/pages/{id}': () => json(200, page),
+      'POST /api/v1/admin/pages/{id}/sections': ({ body }) => {
+        posted = body
+        return json(201, section({ id: 'new' }))
+      },
+      'GET /api/v1/admin/pages': () => json(200, { items: [], total: 0, page: 1, page_size: 100 }),
+    })
+    const user = renderEditor()
+    const first = await screen.findAllByRole('button', { name: /Действия с блоком/ })
+    await user.click(first[0] as HTMLElement)
+    await user.click(await screen.findByRole('menuitem', { name: 'Добавить блок ниже' }))
+    const chooser = await screen.findByRole('dialog', { name: 'Какой блок добавить?' })
+    await user.click(within(chooser).getByRole('button', { name: /^Цитата/ }))
+
+    const editor = await screen.findByRole('dialog', { name: 'Новый блок: Цитата' })
+    await user.type(within(editor).getByRole('textbox', { name: 'Цитата' }), 'Новая цитата')
+    await user.click(within(editor).getByRole('button', { name: 'Сохранить' }))
+    await waitFor(() =>
+      expect(posted).toMatchObject({
+        type: 'quote',
+        position: 1,
+        tone: 'dark',
+        is_visible: true,
+        data: { text: { ru: 'Новая цитата' } },
+      }),
+    )
+  })
+
+  it('picks a page for a button link from the list', async () => {
+    fakeFetch({
+      'GET /api/v1/admin/pages/{id}': () =>
+        json(
+          200,
+          pageDetail({
+            sections: [
+              section({
+                id: 'c',
+                type: 'cta',
+                label: 'Призыв',
+                data: { ctas: [{ label: { ru: 'Связаться' }, href: '', variant: 'primary' }] },
+              }),
+            ],
+          }),
+        ),
+      'GET /api/v1/admin/lookup': () =>
+        json(200, [
+          {
+            id: 'pg',
+            kind: 'page',
+            title: 'Контакты',
+            subtitle: 'contacts',
+            slug: 'contacts',
+            is_published: true,
+          },
+        ]),
+    })
+    const user = renderEditor()
+    await user.click(await screen.findByRole('button', { name: /Связаться|Без заголовка/ }))
+    const editor = await screen.findByRole('dialog', { name: /Призыв к действию/ })
+    await user.click(within(editor).getByRole('button', { name: 'Выбрать страницу' }))
+    const picker = await screen.findByRole('dialog', { name: 'Выбрать страницу' })
+    await user.click(await within(picker).findByRole('button', { name: 'Выбрать «Контакты»' }))
+    expect(within(editor).getByRole('textbox', { name: 'Ссылка: Страница' })).toHaveProperty(
+      'value',
+      'contacts',
+    )
+  })
+})

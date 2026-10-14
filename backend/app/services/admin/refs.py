@@ -38,8 +38,19 @@ from app.models import (
 from app.repositories.admin.base import like_pattern
 from app.schemas.admin.meta import Option
 from app.schemas.admin.pages import RefCard, RefCards
-from app.schemas.refs import KeyKind, Loc, RefKind, iter_instances, iter_keys, iter_refs
+from app.schemas.refs import (
+    KeyKind,
+    Loc,
+    MediaAccept,
+    Ref,
+    RefKind,
+    iter_instances,
+    iter_keys,
+    iter_marked,
+    iter_refs,
+)
 from app.schemas.sections import Cta
+from app.services.admin.media_files import MEDIA_TYPES
 from app.storage.service import Storage
 
 ENTITY_MODELS: dict[RefKind, Any] = {
@@ -112,6 +123,14 @@ class Cards:
         return [found[i] for i in ids if i in found]
 
 
+MEDIA_KIND_NAMES: dict[str, str] = {
+    "image": "фото",
+    "svg": "SVG",
+    "video": "видео",
+    "document": "документ",
+}
+
+
 class RefService:
     def __init__(self, session: AsyncSession, storage: Storage) -> None:
         self.session = session
@@ -152,20 +171,51 @@ class RefService:
         )
 
     async def ref_errors(self, doc: BaseModel, loc: Loc) -> list[dict[str, Any]]:
-        found = list(iter_refs(doc))
+        found: list[tuple[Loc, Ref, uuid.UUID]] = list(iter_marked(doc, Ref))
         by_kind: dict[RefKind, set[uuid.UUID]] = defaultdict(set)
-        for _, kind, ref_id in found:
-            by_kind[kind].add(ref_id)
+        for _, ref, ref_id in found:
+            by_kind[ref.kind].add(ref_id)
         existing = {kind: await self.existing(kind, ids) for kind, ids in by_kind.items()}
-        return [
+        missing = [
             {
                 "loc": [*loc, *path],
-                "msg": f"{KIND_LABELS[kind]} не найден: {ref_id}"
-                if kind != RefKind.media
+                "msg": f"{KIND_LABELS[ref.kind]} не найден: {ref_id}"
+                if ref.kind != RefKind.media
                 else f"файл не найден или не загружен до конца: {ref_id}",
             }
-            for path, kind, ref_id in found
-            if ref_id not in existing[kind]
+            for path, ref, ref_id in found
+            if ref_id not in existing[ref.kind]
+        ]
+        # Media fields take only the kinds of files they can show (a photo, not a video).
+        fitting = [
+            ((*loc, *path), ref.accept, ref_id)
+            for path, ref, ref_id in found
+            if ref.kind == RefKind.media and ref.accept and ref_id in existing[RefKind.media]
+        ]
+        return missing + await self.accept_errors(fitting)
+
+    async def accept_errors(
+        self, items: Sequence[tuple[Loc, Sequence[MediaAccept], uuid.UUID]]
+    ) -> list[dict[str, Any]]:
+        """Files whose kind does not fit the field: (path, accepted kinds, media id)."""
+        if not items:
+            return []
+        rows = await self.session.execute(
+            select(Media.id, Media.mime_type).where(Media.id.in_({i for _, _, i in items}))
+        )
+        kinds = {
+            media_id: MEDIA_TYPES[mime].kind.value if mime in MEDIA_TYPES else "document"
+            for media_id, mime in rows
+        }
+        return [
+            {
+                "loc": list(path),
+                "msg": "сюда подходит: "
+                + ", ".join(MEDIA_KIND_NAMES[k] for k in accept)
+                + f"; выбран файл: {MEDIA_KIND_NAMES.get(kinds[media_id], kinds[media_id])}",
+            }
+            for path, accept, media_id in items
+            if media_id in kinds and kinds[media_id] not in accept
         ]
 
     async def existing(self, kind: RefKind, ids: Iterable[uuid.UUID]) -> set[uuid.UUID]:
@@ -309,6 +359,7 @@ class RefService:
                     subtitle=ru(row.location) or None,
                     thumb_url=self.media_thumb(row.cover),
                     is_published=published,
+                    slug=row.slug,
                 )
             case RefKind.person:
                 return RefCard(
@@ -336,6 +387,7 @@ class RefService:
                     subtitle=ru(row.tagline) or None,
                     thumb_url=self.media_thumb(row.cover),
                     is_published=published,
+                    slug=row.slug,
                 )
             case RefKind.timeline_event:
                 return RefCard(
@@ -390,6 +442,7 @@ class RefService:
                     title=ru(p.title),
                     subtitle=p.slug,
                     is_published=p.is_published,
+                    slug=p.slug,
                 )
                 for p in rows
             ]

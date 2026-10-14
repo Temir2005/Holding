@@ -21,7 +21,7 @@ from app.core.security import create_preview_token
 from app.models import AdminUser, Page, PageRevision, Section
 from app.repositories.admin.pages import RevisionRepository, SectionRepository
 from app.schemas.admin.audit import AuditActor
-from app.schemas.admin.pages import PageAdminRead
+from app.schemas.admin.pages import OG_IMAGE_ACCEPT, PageAdminRead
 from app.schemas.admin.publishing import (
     PageAction,
     PreviewLink,
@@ -235,6 +235,10 @@ class PublishingService:
         errors: list[dict[str, Any]] = []
         if page.og_image_id and not await self.refs.existing(RefKind.media, [page.og_image_id]):
             errors.append({"loc": ["page", "og_image_id"], "msg": "файл не найден"})
+        elif page.og_image_id:
+            errors += await self.refs.accept_errors(
+                [(("page", "og_image_id"), OG_IMAGE_ACCEPT, page.og_image_id)]
+            )
         ordered = sorted(sections, key=lambda s: (s.sort_order, str(s.id)))
         for i, section in enumerate(ordered):
             for error in await self.section_checks.problems(section, ("sections", i)):

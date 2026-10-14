@@ -11,7 +11,8 @@ export function CmsPage({ slug }: { slug: string }) {
   const { data, error, isPending, refetch } = usePage(slug, locale)
 
   if (isPending) return <PageSkeleton />
-  if (error) return isNotFound(error) ? <NotFoundPage /> : <ErrorState onRetry={() => void refetch()} />
+  if (error)
+    return isNotFound(error) ? <NotFoundPage /> : <ErrorState onRetry={() => void refetch()} />
 
   return (
     <>
