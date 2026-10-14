@@ -34,6 +34,13 @@ from app.repositories.admin.collections import (
     TimelineEventRepository,
     VacancyRepository,
 )
+from app.schemas.admin.collection_forms import (
+    ClientForm,
+    DivisionForm,
+    PersonForm,
+    ProjectForm,
+    TimelineEventForm,
+)
 from app.schemas.admin.collections import (
     ClientAdminRead,
     ClientCreate,
@@ -59,7 +66,7 @@ from app.schemas.admin.collections import (
     VacancyUpdate,
 )
 from app.schemas.admin.common import Usage, VersionedUpdate
-from app.schemas.refs import RefKind
+from app.schemas.refs import RefKind, media_accepts
 from app.services.admin.audit import AuditWriter
 from app.services.admin.base import Before, CrudService, ensure_version, row
 from app.services.admin.refs import KIND_LABELS, Cards, RefService
@@ -85,6 +92,9 @@ class CollectionService[M: Any, C: BaseModel, U: VersionedUpdate, R: BaseModel](
     ref_fields: ClassVar[dict[str, RefKind]] = {}
     # How sections reference this collection (None if they cannot).
     ref_kind: ClassVar[RefKind | None] = None
+    # The admin form (GET /admin/entity-types): its media fields name the kinds of files
+    # that fit, and saving checks the same.
+    form: ClassVar[type[BaseModel] | None] = None
 
     def __init__(
         self, session: AsyncSession, repo: Any, audit: AuditWriter, storage: Storage
@@ -120,6 +130,16 @@ class CollectionService[M: Any, C: BaseModel, U: VersionedUpdate, R: BaseModel](
                 )
         if errors:
             raise ValidationFailed("Есть ссылки на несуществующие объекты", details=errors)
+        accepts = media_accepts(self.form) if self.form else {}
+        wrong_kind = await self.refs.accept_errors(
+            [
+                (("body", name), accept, media_id)
+                for name, accept in accepts.items()
+                if name in self.ref_fields and (media_id := getattr(obj, name)) is not None
+            ]
+        )
+        if wrong_kind:
+            raise ValidationFailed("Файл не подходит", details=wrong_kind)
 
     async def load_cards(
         self, rows: Sequence[M], extra: dict[RefKind, set[uuid.UUID]] | None = None
@@ -190,6 +210,7 @@ class DivisionService(
     text_fields = ("name", "tagline", "description")
     ref_fields: ClassVar = {"logo_id": RefKind.media, "cover_id": RefKind.media}
     ref_kind = RefKind.division
+    form = DivisionForm
 
     def __init__(self, session: AsyncSession, audit: AuditWriter, storage: Storage) -> None:
         super().__init__(session, DivisionRepository(session), audit, storage)
@@ -244,6 +265,7 @@ class ProjectService(CollectionService[Project, ProjectCreate, ProjectUpdate, Pr
     text_fields = ("title", "location", "short_description", "body")
     ref_fields: ClassVar = {"cover_id": RefKind.media, "division_id": RefKind.division}
     ref_kind = RefKind.project
+    form = ProjectForm
 
     def __init__(self, session: AsyncSession, audit: AuditWriter, storage: Storage) -> None:
         self.projects = ProjectRepository(session)
@@ -310,6 +332,14 @@ class ProjectService(CollectionService[Project, ProjectCreate, ProjectUpdate, Pr
             ]
             if missing:
                 raise ValidationFailed("В галерее есть несуществующие файлы", details=missing)
+            wrong_kind = await self.refs.accept_errors(
+                [
+                    (("body", "media_ids", i), media_accepts(ProjectForm)["gallery"], m)
+                    for i, m in enumerate(data.media_ids)
+                ]
+            )
+            if wrong_kind:
+                raise ValidationFailed("В галерею подходят только фото", details=wrong_kind)
             if len(set(data.media_ids)) != len(data.media_ids):
                 raise ValidationFailed(
                     "Файл добавлен в галерею дважды",
@@ -340,6 +370,7 @@ class PersonService(CollectionService[Person, PersonCreate, PersonUpdate, Person
     text_fields = ("full_name", "position", "bio")
     ref_fields: ClassVar = {"photo_id": RefKind.media, "division_id": RefKind.division}
     ref_kind = RefKind.person
+    form = PersonForm
 
     def __init__(self, session: AsyncSession, audit: AuditWriter, storage: Storage) -> None:
         super().__init__(session, PersonRepository(session), audit, storage)
@@ -367,6 +398,7 @@ class ClientService(CollectionService[Client, ClientCreate, ClientUpdate, Client
     text_fields = ("name", "industry_label", "description")
     ref_fields: ClassVar = {"logo_id": RefKind.media}
     ref_kind = RefKind.client
+    form = ClientForm
 
     def __init__(self, session: AsyncSession, audit: AuditWriter, storage: Storage) -> None:
         super().__init__(session, ClientRepository(session), audit, storage)
@@ -396,6 +428,7 @@ class TimelineEventService(
     text_fields = ("title", "description")
     ref_fields: ClassVar = {"image_id": RefKind.media}
     ref_kind = RefKind.timeline_event
+    form = TimelineEventForm
 
     def __init__(self, session: AsyncSession, audit: AuditWriter, storage: Storage) -> None:
         super().__init__(session, TimelineEventRepository(session), audit, storage)

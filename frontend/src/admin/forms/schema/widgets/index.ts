@@ -9,6 +9,7 @@ import { JsonField } from './JsonField'
 import { LinkField } from './LinkField'
 import { LocalizedField } from './LocalizedField'
 import { ObjectField } from './ObjectField'
+import { PageField } from './PageField'
 import { RefField } from './RefField'
 import { ComboboxField, TagsField } from './TextListFields'
 
@@ -23,6 +24,7 @@ registerWidget('combobox', ComboboxField)
 registerWidget('tags', TagsField)
 registerWidget('icon', IconField)
 registerWidget('link', LinkField)
+registerWidget('page', PageField)
 registerWidget('color', ColorField)
 registerWidget('object', ObjectField)
 registerWidget('array', ArrayField)

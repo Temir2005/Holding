@@ -1,8 +1,8 @@
-import * as Switch from '@radix-ui/react-switch'
 import { useId } from 'react'
 import { useController } from 'react-hook-form'
 import { cn } from '@/lib/cn'
 import { Field } from '../../../ui/Field'
+import { Switch } from '../../../ui/Switch'
 import { controlClass } from '../../../ui/styles'
 import { useFieldError } from '../useFieldError'
 import type { WidgetProps } from '../registry'
@@ -68,17 +68,14 @@ export function BooleanField({ name, label, description }: WidgetProps) {
   return (
     <div className="flex flex-col gap-1">
       <div className="flex min-h-touch items-center gap-3 md:min-h-9">
-        <Switch.Root
+        <Switch
           id={id}
           ref={field.ref}
           checked={Boolean(field.value)}
           onCheckedChange={field.onChange}
           onBlur={field.onBlur}
           aria-describedby={description ? `${id}-hint` : undefined}
-          className="relative h-6 w-11 shrink-0 rounded-full bg-line-strong transition-colors data-[state=checked]:bg-accent"
-        >
-          <Switch.Thumb className="block h-5 w-5 translate-x-0.5 rounded-full bg-panel shadow transition-transform data-[state=checked]:translate-x-[22px]" />
-        </Switch.Root>
+        />
         <label htmlFor={id} className="text-sm">
           {label}
         </label>

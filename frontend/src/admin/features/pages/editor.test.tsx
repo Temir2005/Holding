@@ -188,3 +188,89 @@ describe('blocks', () => {
     )
   })
 })
+
+describe('deleting a page', () => {
+  beforeEach(() => {
+    vi.unstubAllGlobals()
+    signedIn()
+  })
+
+  const openDelete = async (user: ReturnType<typeof userEvent.setup>) => {
+    await user.click(await screen.findByRole('button', { name: 'Ещё действия' }))
+    await user.click(await screen.findByRole('menuitem', { name: 'Удалить страницу' }))
+    return screen.findByRole('alertdialog', { name: 'Удалить страницу «О нас»?' })
+  }
+
+  it('warns that the history goes too, then deletes with the version', async () => {
+    let version: string | null = null
+    fakeFetch({
+      'GET /api/v1/admin/pages/{id}': () => json(200, pageDetail()),
+      'DELETE /api/v1/admin/pages/{id}': ({ url }) => {
+        version = url.searchParams.get('version')
+        return new Response(null, { status: 204 })
+      },
+      'GET /api/v1/admin/pages': () => json(200, { items: [], total: 0, page: 1, page_size: 100 }),
+    })
+    const user = renderEditor()
+    const confirm = await openDelete(user)
+    expect(within(confirm).getByText(/вся история версий удалятся безвозвратно/)).toBeTruthy()
+    await user.click(within(confirm).getByRole('button', { name: 'Удалить страницу' }))
+    expect(await screen.findByText('elsewhere')).toBeTruthy()
+    expect(version).toBe('4')
+  })
+
+  it('lists the places that link to the page when it cannot be deleted', async () => {
+    fakeFetch({
+      'GET /api/v1/admin/pages/{id}': () => json(200, pageDetail()),
+      'DELETE /api/v1/admin/pages/{id}': () =>
+        apiError(409, 'IN_USE', 'На страницу ссылаются меню, кнопки или направления', [
+          {
+            entity_type: 'section',
+            entity_id: 's9',
+            field: 'data.ctas.0.href',
+            label: 'Страница «home», блок «Призыв к действию»',
+            page_id: 'p0',
+          },
+          { entity_type: 'site_settings', entity_id: 'x', field: 'navigation', label: 'Меню' },
+        ]),
+    })
+    const user = renderEditor()
+    await user.click(
+      within(await openDelete(user)).getByRole('button', { name: 'Удалить страницу' }),
+    )
+    const dialog = await screen.findByRole('dialog', { name: 'Страницу нельзя удалить' })
+    expect(
+      within(dialog).getByText('На страницу ссылаются меню, кнопки или направления'),
+    ).toBeTruthy()
+    expect(
+      within(dialog)
+        .getByRole('link', { name: /блок «Призыв к действию»/ })
+        .getAttribute('href'),
+    ).toBe('/admin/pages/p0?block=s9')
+    expect(within(dialog).getByRole('link', { name: /Меню/ }).getAttribute('href')).toBe(
+      '/admin/settings',
+    )
+  })
+
+  it('is not offered for the home page', async () => {
+    fakeFetch({ 'GET /api/v1/admin/pages/{id}': () => json(200, pageDetail({ slug: 'home' })) })
+    const user = renderEditor()
+    await user.click(await screen.findByRole('button', { name: 'Ещё действия' }))
+    expect(await screen.findByRole('menuitem', { name: 'История версий' })).toBeTruthy()
+    expect(screen.queryByRole('menuitem', { name: 'Удалить страницу' })).toBeNull()
+  })
+})
+
+describe('a link to a block', () => {
+  beforeEach(() => {
+    vi.unstubAllGlobals()
+    signedIn()
+  })
+
+  it('opens that block in the editor', async () => {
+    fakeFetch({ 'GET /api/v1/admin/pages/{id}': () => json(200, pageDetail()) })
+    render(withProviders(<PageEditorPage />, '/admin/pages/p1?block=s1', '/admin/pages/:pageId'))
+    const editor = await screen.findByRole('dialog', { name: /Цитата/ })
+    expect(within(editor).getByRole('textbox', { name: 'Цитата' })).toBeTruthy()
+  })
+})

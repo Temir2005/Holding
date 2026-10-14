@@ -38,14 +38,25 @@ export function UsageList({ usages, onNavigate }: { usages: Usage[]; onNavigate?
 }
 
 /** 409 IN_USE: the object cannot be deleted while these places reference it. */
-export function InUseDialog({ usages, onClose }: { usages: Usage[] | null; onClose: () => void }) {
+export function InUseDialog({
+  usages,
+  onClose,
+  title,
+  text,
+}: {
+  usages: Usage[] | null
+  onClose: () => void
+  /** What cannot be done and why; by default about deleting. */
+  title?: string
+  text?: string
+}) {
   const t = useT()
   return (
     <Dialog
       open={usages !== null}
       onOpenChange={(open) => !open && onClose()}
-      title={t('conflict.inUseTitle')}
-      description={t('conflict.inUseText')}
+      title={title ?? t('conflict.inUseTitle')}
+      description={text ?? t('conflict.inUseText')}
       footer={
         <Button variant="primary" onClick={onClose}>
           {t('conflict.close')}

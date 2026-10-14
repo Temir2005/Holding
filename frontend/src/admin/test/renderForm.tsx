@@ -62,6 +62,13 @@ export const testMeta = {
     { value: 'document', label: 'Документы' },
   ],
   media_folders: [{ value: 'projects', label: 'projects' }],
+  project_statuses: [
+    { value: 'completed', label: 'Реализован' },
+    { value: 'in_progress', label: 'Строится' },
+    { value: 'planned', label: 'В планах' },
+  ],
+  employment_types: [{ value: 'full_time', label: 'Полная занятость' }],
+  client_industries: [{ value: 'finance', label: 'Финансы' }],
 } as unknown as Meta
 
 /** Real form schemas of non-block entities (`GET /admin/entity-types`). */

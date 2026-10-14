@@ -1,7 +1,5 @@
 import { Construction, SearchX } from 'lucide-react'
-import { useParams } from 'react-router-dom'
 import { useT } from '../i18n'
-import { COLLECTIONS } from '../layout/nav'
 import { ButtonLink } from '../ui/Button'
 import { EmptyState } from '../ui/feedback'
 
@@ -22,12 +20,6 @@ export function SectionPlaceholder({ title }: { title: string }) {
       />
     </>
   )
-}
-
-export function CollectionPlaceholder() {
-  const { collection } = useParams()
-  const known = COLLECTIONS.some((c) => c.slug === collection)
-  return known ? <SectionPlaceholder title={`collections.${collection}`} /> : <AdminNotFound />
 }
 
 export function AdminNotFound() {

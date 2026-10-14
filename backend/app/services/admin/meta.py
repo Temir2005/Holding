@@ -4,13 +4,19 @@ from collections.abc import Mapping
 from typing import Any
 
 from pydantic import BaseModel
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import Settings
 from app.core.i18n import DEFAULT_LOCALE, Locale
 from app.core.icons import ICON_NAMES
-from app.models import EmploymentType, LeadStatus, ProjectStatus
+from app.models import Client, LeadStatus
 from app.repositories.admin.media import MediaRepository
+from app.schemas.admin.collection_forms import (
+    COLLECTION_FORMS,
+    EMPLOYMENT_LABELS,
+    PROJECT_STATUS_LABELS,
+)
 from app.schemas.admin.media import MediaForm
 from app.schemas.admin.meta import (
     EntityTypeInfo,
@@ -24,21 +30,10 @@ from app.schemas.admin.pages import TONE_LABELS, PageForm, SectionForm
 from app.schemas.refs import KeyKind, RefKind
 from app.schemas.sections import LEAD_TYPE_LABELS, SECTION_SCHEMAS
 from app.services.admin.media_files import MEDIA_TYPES, MediaKind
-from app.services.admin.refs import RefService
+from app.services.admin.refs import RefService, ru
 from app.storage.service import Storage
 
 LOCALE_LABELS = {Locale.ru: "Русский", Locale.kk: "Қазақша", Locale.en: "English"}
-PROJECT_STATUS_LABELS = {
-    ProjectStatus.completed: "Реализован",
-    ProjectStatus.in_progress: "Строится",
-    ProjectStatus.planned: "В планах",
-}
-EMPLOYMENT_LABELS = {
-    EmploymentType.full_time: "Полная занятость",
-    EmploymentType.part_time: "Частичная занятость",
-    EmploymentType.contract: "Контракт",
-    EmploymentType.internship: "Стажировка",
-}
 LEAD_STATUS_LABELS = {
     LeadStatus.new: "Новая",
     LeadStatus.in_progress: "В работе",
@@ -69,9 +64,13 @@ def options(labels: Mapping[Any, str]) -> list[Option]:
 
 
 def build_meta(
-    settings: Settings, keys: Mapping[KeyKind, list[Option]], folders: list[str]
+    settings: Settings,
+    keys: Mapping[KeyKind, list[Option]],
+    folders: list[str],
+    industries: list[Option],
 ) -> Meta:
-    """`keys`: current choices for key fields (RefService.key_options); `folders`: media folders."""
+    """`keys`: current choices for key fields (RefService.key_options); `folders`: media
+    folders; `industries`: client industries in use."""
     return Meta(
         locales=[LocaleInfo(code=loc.value, label=LOCALE_LABELS[loc]) for loc in Locale],
         default_locale=DEFAULT_LOCALE.value,
@@ -93,6 +92,7 @@ def build_meta(
         stat_contexts=keys[KeyKind.stat_context],
         media_kinds=options(MEDIA_KIND_LABELS),
         media_folders=[Option(value=f, label=f) for f in folders],
+        client_industries=industries,
     )
 
 
@@ -100,14 +100,28 @@ async def load_meta(settings: Settings, session: AsyncSession, storage: Storage)
     """Meta with the current choices: division slugs, stats contexts, media folders."""
     keys = await RefService(session, storage).key_options()
     folders = [folder for folder, _ in await MediaRepository(session).folders() if folder]
-    return build_meta(settings, keys, folders)
+    return build_meta(settings, keys, folders, await client_industries(session))
 
 
-# Forms of entities that are not section blocks; collections, pages and settings come next.
+async def client_industries(session: AsyncSession) -> list[Option]:
+    """Industry keys of the clients, labelled with the Russian name of the first client."""
+    rows = await session.execute(
+        select(Client.industry, Client.industry_label).order_by(
+            Client.industry, Client.sort_order, Client.id
+        )
+    )
+    labels: dict[str, str] = {}
+    for industry, label in rows:
+        labels.setdefault(industry, ru(label) or industry)
+    return [Option(value=k, label=v) for k, v in labels.items()]
+
+
+# Forms of entities that are not section blocks; site settings come next.
 ENTITY_FORMS: dict[str, tuple[str, type[BaseModel]]] = {
     "media": ("Файл медиатеки", MediaForm),
     "page": ("Страница", PageForm),
     "section": ("Блок", SectionForm),
+    **COLLECTION_FORMS,
 }
 
 

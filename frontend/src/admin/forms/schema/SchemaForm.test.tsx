@@ -364,3 +364,33 @@ describe('media card form (entity schema)', () => {
     expect(getForm().getValues('folder')).toBeNull()
   })
 })
+
+describe('collection forms (entity schemas)', () => {
+  it('picks a page by its address for a page field', async () => {
+    vi.unstubAllGlobals()
+    signedIn()
+    fakeFetch({
+      'GET /api/v1/admin/lookup': () =>
+        json(200, [
+          { id: 'pg', kind: 'page', title: 'Девелопмент', slug: 'development', is_published: true },
+        ]),
+    })
+    const schema = entitySchema('division')
+    const { user, getForm } = renderForm(schema)
+    const field = screen.getByRole('textbox', { name: 'Страница направления' })
+    await user.click(screen.getByRole('button', { name: 'Выбрать страницу' }))
+    const picker = await screen.findByRole('dialog', { name: 'Выбрать страницу' })
+    await user.click(await within(picker).findByRole('button', { name: 'Выбрать «Девелопмент»' }))
+    expect(field).toHaveProperty('value', 'development')
+    expect(getForm().getValues('page_slug')).toBe('development')
+    await user.clear(field)
+    expect(getForm().getValues('page_slug')).toBeNull()
+  })
+
+  it('suggests the client industries in use for the industry key', () => {
+    renderForm(entitySchema('client'))
+    const input = screen.getByRole('combobox', { name: /Ключ отрасли/ })
+    const list = document.getElementById(input.getAttribute('list') ?? '')
+    expect([...(list?.querySelectorAll('option') ?? [])].map((o) => o.value)).toEqual(['finance'])
+  })
+})

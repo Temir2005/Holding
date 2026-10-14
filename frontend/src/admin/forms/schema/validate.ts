@@ -118,6 +118,7 @@ function validateNode(
     }
     case 'string':
     case 'link':
+    case 'page':
     case 'color':
     case 'icon':
     case 'options':

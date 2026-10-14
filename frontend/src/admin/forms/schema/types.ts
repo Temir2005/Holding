@@ -48,6 +48,7 @@ export type FieldKind =
   | 'options'
   | 'icon'
   | 'link'
+  | 'page'
   | 'color'
   | 'tags'
   | 'combobox'

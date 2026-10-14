@@ -86,6 +86,16 @@ class KeyOf:
         return schema
 
 
+def media_accepts(model: type[BaseModel]) -> dict[str, tuple[MediaAccept, ...]]:
+    """Media fields of a model (top level) with the kinds of files that fit them."""
+    out: dict[str, tuple[MediaAccept, ...]] = {}
+    for name, info in model.model_fields.items():
+        ref = next((m for m in info.metadata if isinstance(m, Ref)), None)
+        if ref is not None and ref.kind is RefKind.media and ref.accept:
+            out[name] = ref.accept
+    return out
+
+
 RefIds = dict[RefKind, set[uuid.UUID]]
 Loaded = Mapping[RefKind, Mapping[uuid.UUID, BaseModel]]
 

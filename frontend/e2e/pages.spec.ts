@@ -73,7 +73,7 @@ test.describe('pages and blocks', () => {
     await expect(site.getByText(changed)).toHaveCount(0)
   })
 
-  test('create a page, add a block and publish', async ({ page }) => {
+  test('create a page, add a block, publish and delete it', async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 900 })
     await signIn(page, '/admin/pages')
     await page.getByRole('button', { name: 'Новая страница' }).click()
@@ -104,6 +104,15 @@ test.describe('pages and blocks', () => {
     const site = await page.context().newPage()
     await site.goto('/ru/e2e-page')
     await expect(site.getByText('Первая цитата e2e')).toBeVisible()
+
+    // Deleting takes the page off the site, with its history.
+    await page.getByRole('button', { name: 'Ещё действия' }).click()
+    await page.getByRole('menuitem', { name: 'Удалить страницу' }).click()
+    await page.getByRole('alertdialog').getByRole('button', { name: 'Удалить страницу' }).click()
+    await expect(page.getByText('Страница удалена').first()).toBeVisible()
+    await expect(page.getByRole('link', { name: /\/e2e-page/ })).toHaveCount(0)
+    await site.reload()
+    await expect(site.getByRole('heading', { name: 'Страница не найдена' })).toBeVisible()
   })
 
   test('works on a phone: edit a text and publish', async ({ page }) => {

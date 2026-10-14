@@ -2318,6 +2318,11 @@ export interface components {
        * @description Media folders in use, for fields with x-options: media_folders
        */
       media_folders: components['schemas']['Option'][]
+      /**
+       * Client Industries
+       * @description Client industry keys in use (label: the Russian name), for fields with x-options: client_industries
+       */
+      client_industries: components['schemas']['Option'][]
     }
     /**
      * Пункт меню

@@ -15,6 +15,9 @@ export type SectionCreate = S['SectionCreate']
 
 export const pagesKey = [...adminKey, 'pages'] as const
 
+/** The home page: its address is fixed and it cannot be deleted. */
+export const HOME_SLUG = 'home'
+
 export const pagesListQuery = () =>
   queryOptions({
     queryKey: [...pagesKey, 'list'],
