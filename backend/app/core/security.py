@@ -15,6 +15,9 @@ from app.core.config import Settings
 from app.core.errors import Unauthorized
 
 ALGORITHM = "HS256"
+# Tolerated clock skew for `iat`: a token issued "slightly in the future" (another server, or
+# a VM whose clock was stepped back) is still accepted. Expiry stays exact.
+IAT_LEEWAY_SECONDS = 30
 ACCESS = "access"
 # Opens the draft of one page; cannot be used as an access token and vice versa.
 PREVIEW = "preview"
@@ -58,12 +61,21 @@ def create_token(
 def decode_token(settings: Settings, token: str, *, kind: str) -> dict[str, Any]:
     try:
         payload: dict[str, Any] = jwt.decode(
-            token, settings.jwt_secret, algorithms=[ALGORITHM], options={"require": ["exp", "sub"]}
+            token,
+            settings.jwt_secret,
+            algorithms=[ALGORITHM],
+            # PyJWT checks `iat` without tolerance; it is checked below with IAT_LEEWAY_SECONDS.
+            options={"require": ["exp", "sub"], "verify_iat": False},
         )
     except jwt.ExpiredSignatureError as exc:
         raise Unauthorized("Срок действия токена истёк", code="TOKEN_EXPIRED") from exc
     except jwt.PyJWTError as exc:
         raise Unauthorized("Недействительный токен") from exc
+    iat = payload.get("iat")
+    if iat is not None and (
+        not isinstance(iat, int | float) or iat > time.time() + IAT_LEEWAY_SECONDS
+    ):
+        raise Unauthorized("Недействительный токен")
     if payload.get("typ") != kind:
         raise Unauthorized("Недействительный токен")
     return payload

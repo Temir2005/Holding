@@ -18,4 +18,9 @@ export default tseslint.config(
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
     },
   },
+  {
+    // Fast refresh does not apply to tests and their helpers.
+    files: ['**/*.test.{ts,tsx}', 'src/admin/test/**', 'e2e/**'],
+    rules: { 'react-refresh/only-export-components': 'off' },
+  },
 )

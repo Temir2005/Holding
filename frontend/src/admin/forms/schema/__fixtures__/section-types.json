@@ -1,0 +1,2719 @@
+[
+  {
+    "type": "hero",
+    "label": "Главный экран",
+    "description": "Крупный заголовок, кнопки и фото; с образцами панелей — сетка образцов",
+    "schema": {
+      "$defs": {
+        "Cta": {
+          "additionalProperties": false,
+          "properties": {
+            "label": {
+              "$ref": "#/$defs/LocalizedText",
+              "title": "Текст кнопки",
+              "x-widget": "localized-text"
+            },
+            "href": {
+              "description": "https://…, #якорь на странице, slug страницы или projects/<slug>",
+              "maxLength": 500,
+              "minLength": 1,
+              "title": "Ссылка",
+              "type": "string",
+              "x-widget": "link"
+            },
+            "variant": {
+              "default": "primary",
+              "enum": ["primary", "secondary"],
+              "title": "Вид",
+              "type": "string",
+              "x-enum-labels": {
+                "primary": "Основная",
+                "secondary": "Второстепенная"
+              }
+            }
+          },
+          "required": ["label", "href"],
+          "title": "Кнопка",
+          "type": "object"
+        },
+        "LocalizedText": {
+          "description": "A localized string inside section data and other JSONB documents.",
+          "properties": {
+            "ru": {
+              "title": "Русский",
+              "type": "string"
+            },
+            "kk": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Қазақша"
+            },
+            "en": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "English"
+            }
+          },
+          "required": ["ru"],
+          "title": "Текст на трёх языках",
+          "type": "object"
+        },
+        "Swatch": {
+          "additionalProperties": false,
+          "properties": {
+            "code": {
+              "maxLength": 32,
+              "title": "Код (RAL, LAB…)",
+              "type": "string"
+            },
+            "label": {
+              "$ref": "#/$defs/LocalizedText",
+              "title": "Название",
+              "x-widget": "localized-text"
+            },
+            "color": {
+              "pattern": "^#[0-9a-fA-F]{6}$",
+              "title": "Цвет",
+              "type": "string",
+              "x-widget": "color"
+            },
+            "finish": {
+              "default": "matte",
+              "enum": ["matte", "gloss", "texture"],
+              "title": "Покрытие",
+              "type": "string",
+              "x-enum-labels": {
+                "gloss": "Глянец",
+                "matte": "Матовое",
+                "texture": "Текстура"
+              }
+            }
+          },
+          "required": ["code", "label", "color"],
+          "title": "Образец панели",
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "properties": {
+        "eyebrow": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LocalizedText"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Надзаголовок",
+          "x-widget": "localized-text"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LocalizedText"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Заголовок",
+          "x-widget": "localized-text"
+        },
+        "subtitle": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LocalizedText"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Подзаголовок",
+          "x-widget": "localized-textarea"
+        },
+        "background_media_id": {
+          "anyOf": [
+            {
+              "format": "uuid",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Фоновое изображение",
+          "x-ref": {
+            "kind": "media",
+            "many": false
+          }
+        },
+        "video_media_id": {
+          "anyOf": [
+            {
+              "format": "uuid",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Фоновое видео",
+          "x-ref": {
+            "kind": "media",
+            "many": false
+          }
+        },
+        "ctas": {
+          "items": {
+            "$ref": "#/$defs/Cta"
+          },
+          "title": "Кнопки",
+          "type": "array"
+        },
+        "swatches": {
+          "description": "Если заполнены, фото показывается в сетке с образцами",
+          "items": {
+            "$ref": "#/$defs/Swatch"
+          },
+          "title": "Образцы панелей",
+          "type": "array"
+        }
+      },
+      "title": "HeroData",
+      "type": "object"
+    }
+  },
+  {
+    "type": "stats",
+    "label": "Цифры",
+    "description": "Полоса ключевых показателей со счётчиками",
+    "schema": {
+      "$defs": {
+        "LocalizedText": {
+          "description": "A localized string inside section data and other JSONB documents.",
+          "properties": {
+            "ru": {
+              "title": "Русский",
+              "type": "string"
+            },
+            "kk": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Қазақша"
+            },
+            "en": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "English"
+            }
+          },
+          "required": ["ru"],
+          "title": "Текст на трёх языках",
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "properties": {
+        "eyebrow": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LocalizedText"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Надзаголовок",
+          "x-widget": "localized-text"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LocalizedText"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Заголовок",
+          "x-widget": "localized-text"
+        },
+        "context": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Например home или smart-panels; не нужен, если цифры выбраны",
+          "title": "Набор цифр",
+          "x-options": "stat_contexts",
+          "x-widget": "select"
+        },
+        "stat_ids": {
+          "items": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "title": "Цифры",
+          "type": "array",
+          "x-ref": {
+            "kind": "stat",
+            "many": true
+          }
+        }
+      },
+      "title": "StatsData",
+      "type": "object"
+    }
+  },
+  {
+    "type": "about_text",
+    "label": "Текст",
+    "description": "Текст с форматированием и картинкой сбоку",
+    "schema": {
+      "$defs": {
+        "LocalizedText": {
+          "description": "A localized string inside section data and other JSONB documents.",
+          "properties": {
+            "ru": {
+              "title": "Русский",
+              "type": "string"
+            },
+            "kk": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Қазақша"
+            },
+            "en": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "English"
+            }
+          },
+          "required": ["ru"],
+          "title": "Текст на трёх языках",
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "properties": {
+        "eyebrow": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LocalizedText"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Надзаголовок",
+          "x-widget": "localized-text"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LocalizedText"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Заголовок",
+          "x-widget": "localized-text"
+        },
+        "body": {
+          "$ref": "#/$defs/LocalizedText",
+          "title": "Текст",
+          "x-widget": "markdown"
+        },
+        "media_id": {
+          "anyOf": [
+            {
+              "format": "uuid",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Изображение",
+          "x-ref": {
+            "kind": "media",
+            "many": false
+          }
+        },
+        "layout": {
+          "default": "text_only",
+          "enum": ["text_only", "media_left", "media_right"],
+          "title": "Расположение",
+          "type": "string",
+          "x-enum-labels": {
+            "media_left": "Картинка слева",
+            "media_right": "Картинка справа",
+            "text_only": "Только текст"
+          }
+        }
+      },
+      "required": ["body"],
+      "title": "AboutTextData",
+      "type": "object"
+    }
+  },
+  {
+    "type": "timeline",
+    "label": "История",
+    "description": "Хронология событий по годам",
+    "schema": {
+      "$defs": {
+        "LocalizedText": {
+          "description": "A localized string inside section data and other JSONB documents.",
+          "properties": {
+            "ru": {
+              "title": "Русский",
+              "type": "string"
+            },
+            "kk": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Қазақша"
+            },
+            "en": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "English"
+            }
+          },
+          "required": ["ru"],
+          "title": "Текст на трёх языках",
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "properties": {
+        "eyebrow": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LocalizedText"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Надзаголовок",
+          "x-widget": "localized-text"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LocalizedText"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Заголовок",
+          "x-widget": "localized-text"
+        },
+        "event_ids": {
+          "description": "Пусто — все опубликованные события по годам",
+          "items": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "title": "События",
+          "type": "array",
+          "x-ref": {
+            "kind": "timeline_event",
+            "many": true
+          }
+        }
+      },
+      "title": "TimelineData",
+      "type": "object"
+    }
+  },
+  {
+    "type": "divisions_grid",
+    "label": "Направления",
+    "description": "Карточки подразделений холдинга",
+    "schema": {
+      "$defs": {
+        "LocalizedText": {
+          "description": "A localized string inside section data and other JSONB documents.",
+          "properties": {
+            "ru": {
+              "title": "Русский",
+              "type": "string"
+            },
+            "kk": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Қазақша"
+            },
+            "en": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "English"
+            }
+          },
+          "required": ["ru"],
+          "title": "Текст на трёх языках",
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "properties": {
+        "eyebrow": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LocalizedText"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Надзаголовок",
+          "x-widget": "localized-text"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LocalizedText"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Заголовок",
+          "x-widget": "localized-text"
+        },
+        "division_ids": {
+          "items": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "title": "Направления",
+          "type": "array",
+          "x-ref": {
+            "kind": "division",
+            "many": true
+          }
+        }
+      },
+      "title": "DivisionsGridData",
+      "type": "object"
+    }
+  },
+  {
+    "type": "projects_showcase",
+    "label": "Избранные проекты",
+    "description": "Крупный проект и список рядом",
+    "schema": {
+      "$defs": {
+        "Cta": {
+          "additionalProperties": false,
+          "properties": {
+            "label": {
+              "$ref": "#/$defs/LocalizedText",
+              "title": "Текст кнопки",
+              "x-widget": "localized-text"
+            },
+            "href": {
+              "description": "https://…, #якорь на странице, slug страницы или projects/<slug>",
+              "maxLength": 500,
+              "minLength": 1,
+              "title": "Ссылка",
+              "type": "string",
+              "x-widget": "link"
+            },
+            "variant": {
+              "default": "primary",
+              "enum": ["primary", "secondary"],
+              "title": "Вид",
+              "type": "string",
+              "x-enum-labels": {
+                "primary": "Основная",
+                "secondary": "Второстепенная"
+              }
+            }
+          },
+          "required": ["label", "href"],
+          "title": "Кнопка",
+          "type": "object"
+        },
+        "LocalizedText": {
+          "description": "A localized string inside section data and other JSONB documents.",
+          "properties": {
+            "ru": {
+              "title": "Русский",
+              "type": "string"
+            },
+            "kk": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Қазақша"
+            },
+            "en": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "English"
+            }
+          },
+          "required": ["ru"],
+          "title": "Текст на трёх языках",
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "properties": {
+        "eyebrow": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LocalizedText"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Надзаголовок",
+          "x-widget": "localized-text"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LocalizedText"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Заголовок",
+          "x-widget": "localized-text"
+        },
+        "featured": {
+          "default": false,
+          "title": "Показывать избранные проекты",
+          "type": "boolean"
+        },
+        "project_ids": {
+          "description": "Используется, если не включены избранные",
+          "items": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "title": "Проекты",
+          "type": "array",
+          "x-ref": {
+            "kind": "project",
+            "many": true
+          }
+        },
+        "link": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Cta"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Ссылка «Все проекты»"
+        }
+      },
+      "title": "ProjectsShowcaseData",
+      "type": "object"
+    }
+  },
+  {
+    "type": "project_list",
+    "label": "Список проектов",
+    "description": "Все проекты с фильтром по статусу",
+    "schema": {
+      "$defs": {
+        "LocalizedText": {
+          "description": "A localized string inside section data and other JSONB documents.",
+          "properties": {
+            "ru": {
+              "title": "Русский",
+              "type": "string"
+            },
+            "kk": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Қазақша"
+            },
+            "en": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "English"
+            }
+          },
+          "required": ["ru"],
+          "title": "Текст на трёх языках",
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "properties": {
+        "eyebrow": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LocalizedText"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Надзаголовок",
+          "x-widget": "localized-text"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LocalizedText"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Заголовок",
+          "x-widget": "localized-text"
+        },
+        "division_slug": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Пусто — проекты всех направлений",
+          "title": "Только направление",
+          "x-options": "divisions",
+          "x-widget": "select"
+        },
+        "show_filter": {
+          "default": true,
+          "title": "Фильтр по статусу",
+          "type": "boolean"
+        },
+        "project_ids": {
+          "description": "Пусто — все опубликованные",
+          "items": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "title": "Проекты",
+          "type": "array",
+          "x-ref": {
+            "kind": "project",
+            "many": true
+          }
+        }
+      },
+      "title": "ProjectListData",
+      "type": "object"
+    }
+  },
+  {
+    "type": "capabilities",
+    "label": "Преимущества",
+    "description": "Сетка пунктов с иконками или картинками",
+    "schema": {
+      "$defs": {
+        "IconItem": {
+          "additionalProperties": false,
+          "properties": {
+            "icon": {
+              "enum": [
+                "factory",
+                "ruler",
+                "shield",
+                "clock",
+                "map",
+                "key",
+                "square",
+                "sparkle",
+                "layers",
+                "palette",
+                "fingerprint",
+                "leaf",
+                "sofa",
+                "pen",
+                "building",
+                "store",
+                "split",
+                "wallet",
+                "chart",
+                "hammer",
+                "check",
+                "trend"
+              ],
+              "title": "Иконка",
+              "type": "string",
+              "x-widget": "icon"
+            },
+            "title": {
+              "$ref": "#/$defs/LocalizedText",
+              "title": "Заголовок",
+              "x-widget": "localized-text"
+            },
+            "text": {
+              "$ref": "#/$defs/LocalizedText",
+              "title": "Текст",
+              "x-widget": "localized-textarea"
+            },
+            "media_id": {
+              "anyOf": [
+                {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Картинка вместо иконки",
+              "x-ref": {
+                "kind": "media",
+                "many": false
+              }
+            }
+          },
+          "required": ["icon", "title", "text"],
+          "title": "Пункт с иконкой",
+          "type": "object"
+        },
+        "LocalizedText": {
+          "description": "A localized string inside section data and other JSONB documents.",
+          "properties": {
+            "ru": {
+              "title": "Русский",
+              "type": "string"
+            },
+            "kk": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Қазақша"
+            },
+            "en": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "English"
+            }
+          },
+          "required": ["ru"],
+          "title": "Текст на трёх языках",
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "properties": {
+        "eyebrow": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LocalizedText"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Надзаголовок",
+          "x-widget": "localized-text"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LocalizedText"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Заголовок",
+          "x-widget": "localized-text"
+        },
+        "intro": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LocalizedText"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Вступление",
+          "x-widget": "localized-textarea"
+        },
+        "items": {
+          "items": {
+            "$ref": "#/$defs/IconItem"
+          },
+          "title": "Пункты",
+          "type": "array"
+        },
+        "columns": {
+          "default": 3,
+          "enum": [2, 3, 4],
+          "title": "Колонок",
+          "type": "integer",
+          "x-enum-labels": {
+            "2": "Две",
+            "3": "Три",
+            "4": "Четыре"
+          }
+        }
+      },
+      "title": "CapabilitiesData",
+      "type": "object"
+    }
+  },
+  {
+    "type": "process_steps",
+    "label": "Этапы",
+    "description": "Нумерованные этапы процесса",
+    "schema": {
+      "$defs": {
+        "LocalizedText": {
+          "description": "A localized string inside section data and other JSONB documents.",
+          "properties": {
+            "ru": {
+              "title": "Русский",
+              "type": "string"
+            },
+            "kk": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Қазақша"
+            },
+            "en": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "English"
+            }
+          },
+          "required": ["ru"],
+          "title": "Текст на трёх языках",
+          "type": "object"
+        },
+        "ProcessStep": {
+          "additionalProperties": false,
+          "properties": {
+            "title": {
+              "$ref": "#/$defs/LocalizedText",
+              "title": "Название этапа",
+              "x-widget": "localized-text"
+            },
+            "text": {
+              "$ref": "#/$defs/LocalizedText",
+              "title": "Описание",
+              "x-widget": "localized-textarea"
+            },
+            "media_id": {
+              "anyOf": [
+                {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Изображение",
+              "x-ref": {
+                "kind": "media",
+                "many": false
+              }
+            },
+            "division_id": {
+              "anyOf": [
+                {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Ссылка на направление",
+              "x-ref": {
+                "kind": "division",
+                "many": false
+              }
+            }
+          },
+          "required": ["title", "text"],
+          "title": "Этап",
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "properties": {
+        "eyebrow": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LocalizedText"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Надзаголовок",
+          "x-widget": "localized-text"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LocalizedText"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Заголовок",
+          "x-widget": "localized-text"
+        },
+        "intro": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LocalizedText"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Вступление",
+          "x-widget": "localized-textarea"
+        },
+        "steps": {
+          "items": {
+            "$ref": "#/$defs/ProcessStep"
+          },
+          "title": "Этапы",
+          "type": "array"
+        }
+      },
+      "title": "ProcessStepsData",
+      "type": "object"
+    }
+  },
+  {
+    "type": "production",
+    "label": "Производство",
+    "description": "Текст, факты и галерея производства",
+    "schema": {
+      "$defs": {
+        "Fact": {
+          "additionalProperties": false,
+          "properties": {
+            "value": {
+              "maxLength": 64,
+              "title": "Значение",
+              "type": "string"
+            },
+            "label": {
+              "$ref": "#/$defs/LocalizedText",
+              "title": "Подпись",
+              "x-widget": "localized-text"
+            }
+          },
+          "required": ["value", "label"],
+          "title": "Факт",
+          "type": "object"
+        },
+        "LocalizedText": {
+          "description": "A localized string inside section data and other JSONB documents.",
+          "properties": {
+            "ru": {
+              "title": "Русский",
+              "type": "string"
+            },
+            "kk": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Қазақша"
+            },
+            "en": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "English"
+            }
+          },
+          "required": ["ru"],
+          "title": "Текст на трёх языках",
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "properties": {
+        "eyebrow": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LocalizedText"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Надзаголовок",
+          "x-widget": "localized-text"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LocalizedText"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Заголовок",
+          "x-widget": "localized-text"
+        },
+        "body": {
+          "$ref": "#/$defs/LocalizedText",
+          "title": "Текст",
+          "x-widget": "localized-textarea"
+        },
+        "facts": {
+          "items": {
+            "$ref": "#/$defs/Fact"
+          },
+          "title": "Факты",
+          "type": "array"
+        },
+        "gallery_media_ids": {
+          "items": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "title": "Галерея",
+          "type": "array",
+          "x-ref": {
+            "kind": "media",
+            "many": true
+          }
+        }
+      },
+      "required": ["body"],
+      "title": "ProductionData",
+      "type": "object"
+    }
+  },
+  {
+    "type": "tokenization_explainer",
+    "label": "Токенизация",
+    "description": "Как работает токенизация, преимущества и дисклеймер",
+    "schema": {
+      "$defs": {
+        "IconItem": {
+          "additionalProperties": false,
+          "properties": {
+            "icon": {
+              "enum": [
+                "factory",
+                "ruler",
+                "shield",
+                "clock",
+                "map",
+                "key",
+                "square",
+                "sparkle",
+                "layers",
+                "palette",
+                "fingerprint",
+                "leaf",
+                "sofa",
+                "pen",
+                "building",
+                "store",
+                "split",
+                "wallet",
+                "chart",
+                "hammer",
+                "check",
+                "trend"
+              ],
+              "title": "Иконка",
+              "type": "string",
+              "x-widget": "icon"
+            },
+            "title": {
+              "$ref": "#/$defs/LocalizedText",
+              "title": "Заголовок",
+              "x-widget": "localized-text"
+            },
+            "text": {
+              "$ref": "#/$defs/LocalizedText",
+              "title": "Текст",
+              "x-widget": "localized-textarea"
+            },
+            "media_id": {
+              "anyOf": [
+                {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Картинка вместо иконки",
+              "x-ref": {
+                "kind": "media",
+                "many": false
+              }
+            }
+          },
+          "required": ["icon", "title", "text"],
+          "title": "Пункт с иконкой",
+          "type": "object"
+        },
+        "LocalizedText": {
+          "description": "A localized string inside section data and other JSONB documents.",
+          "properties": {
+            "ru": {
+              "title": "Русский",
+              "type": "string"
+            },
+            "kk": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Қазақша"
+            },
+            "en": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "English"
+            }
+          },
+          "required": ["ru"],
+          "title": "Текст на трёх языках",
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "properties": {
+        "eyebrow": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LocalizedText"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Надзаголовок",
+          "x-widget": "localized-text"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LocalizedText"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Заголовок",
+          "x-widget": "localized-text"
+        },
+        "intro": {
+          "$ref": "#/$defs/LocalizedText",
+          "title": "Вступление",
+          "x-widget": "localized-textarea"
+        },
+        "steps": {
+          "items": {
+            "$ref": "#/$defs/IconItem"
+          },
+          "title": "Как это работает",
+          "type": "array"
+        },
+        "benefits": {
+          "items": {
+            "$ref": "#/$defs/LocalizedText"
+          },
+          "title": "Преимущества",
+          "type": "array",
+          "x-widget": "localized-text"
+        },
+        "disclaimer": {
+          "$ref": "#/$defs/LocalizedText",
+          "title": "Юридический дисклеймер",
+          "x-widget": "localized-textarea"
+        },
+        "project_ids": {
+          "items": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "title": "Токенизированные проекты",
+          "type": "array",
+          "x-ref": {
+            "kind": "project",
+            "many": true
+          }
+        }
+      },
+      "required": ["intro", "disclaimer"],
+      "title": "TokenizationData",
+      "type": "object"
+    }
+  },
+  {
+    "type": "team_grid",
+    "label": "Команда",
+    "description": "Основатель, руководство или вся команда",
+    "schema": {
+      "$defs": {
+        "LocalizedText": {
+          "description": "A localized string inside section data and other JSONB documents.",
+          "properties": {
+            "ru": {
+              "title": "Русский",
+              "type": "string"
+            },
+            "kk": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Қазақша"
+            },
+            "en": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "English"
+            }
+          },
+          "required": ["ru"],
+          "title": "Текст на трёх языках",
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "properties": {
+        "eyebrow": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LocalizedText"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Надзаголовок",
+          "x-widget": "localized-text"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LocalizedText"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Заголовок",
+          "x-widget": "localized-text"
+        },
+        "intro": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LocalizedText"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Вступление",
+          "x-widget": "localized-textarea"
+        },
+        "mode": {
+          "default": "all",
+          "enum": ["founder", "key", "rest", "all"],
+          "title": "Кого показывать",
+          "type": "string",
+          "x-enum-labels": {
+            "all": "Всех",
+            "founder": "Основателя",
+            "key": "Руководство",
+            "rest": "Остальную команду"
+          }
+        },
+        "show_division_filter": {
+          "default": false,
+          "title": "Фильтр по направлению",
+          "type": "boolean"
+        },
+        "person_ids": {
+          "description": "Если выбраны, заменяют выборку по режиму",
+          "items": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "title": "Люди",
+          "type": "array",
+          "x-ref": {
+            "kind": "person",
+            "many": true
+          }
+        }
+      },
+      "title": "TeamGridData",
+      "type": "object"
+    }
+  },
+  {
+    "type": "clients_marquee",
+    "label": "Бегущая строка клиентов",
+    "description": "Логотипы клиентов в движущейся ленте",
+    "schema": {
+      "$defs": {
+        "LocalizedText": {
+          "description": "A localized string inside section data and other JSONB documents.",
+          "properties": {
+            "ru": {
+              "title": "Русский",
+              "type": "string"
+            },
+            "kk": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Қазақша"
+            },
+            "en": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "English"
+            }
+          },
+          "required": ["ru"],
+          "title": "Текст на трёх языках",
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "properties": {
+        "eyebrow": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LocalizedText"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Надзаголовок",
+          "x-widget": "localized-text"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LocalizedText"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Заголовок",
+          "x-widget": "localized-text"
+        },
+        "client_ids": {
+          "description": "Пусто — все опубликованные",
+          "items": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "title": "Клиенты",
+          "type": "array",
+          "x-ref": {
+            "kind": "client",
+            "many": true
+          }
+        }
+      },
+      "title": "ClientsMarqueeData",
+      "type": "object"
+    }
+  },
+  {
+    "type": "clients_grid",
+    "label": "Сетка клиентов",
+    "description": "Логотипы клиентов с фильтром по отрасли",
+    "schema": {
+      "$defs": {
+        "LocalizedText": {
+          "description": "A localized string inside section data and other JSONB documents.",
+          "properties": {
+            "ru": {
+              "title": "Русский",
+              "type": "string"
+            },
+            "kk": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Қазақша"
+            },
+            "en": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "English"
+            }
+          },
+          "required": ["ru"],
+          "title": "Текст на трёх языках",
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "properties": {
+        "eyebrow": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LocalizedText"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Надзаголовок",
+          "x-widget": "localized-text"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LocalizedText"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Заголовок",
+          "x-widget": "localized-text"
+        },
+        "show_industry_filter": {
+          "default": true,
+          "title": "Фильтр по отрасли",
+          "type": "boolean"
+        },
+        "client_ids": {
+          "description": "Пусто — все опубликованные",
+          "items": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "title": "Клиенты",
+          "type": "array",
+          "x-ref": {
+            "kind": "client",
+            "many": true
+          }
+        }
+      },
+      "title": "ClientsGridData",
+      "type": "object"
+    }
+  },
+  {
+    "type": "testimonials",
+    "label": "Отзывы",
+    "description": "Отзывы клиентов",
+    "schema": {
+      "$defs": {
+        "LocalizedText": {
+          "description": "A localized string inside section data and other JSONB documents.",
+          "properties": {
+            "ru": {
+              "title": "Русский",
+              "type": "string"
+            },
+            "kk": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Қазақша"
+            },
+            "en": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "English"
+            }
+          },
+          "required": ["ru"],
+          "title": "Текст на трёх языках",
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "properties": {
+        "eyebrow": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LocalizedText"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Надзаголовок",
+          "x-widget": "localized-text"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LocalizedText"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Заголовок",
+          "x-widget": "localized-text"
+        },
+        "client_ids": {
+          "description": "Пусто — все, у кого есть отзыв",
+          "items": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "title": "Клиенты с отзывами",
+          "type": "array",
+          "x-ref": {
+            "kind": "client",
+            "many": true
+          }
+        }
+      },
+      "title": "TestimonialsData",
+      "type": "object"
+    }
+  },
+  {
+    "type": "quote",
+    "label": "Цитата",
+    "description": "Крупная цитата с фото автора",
+    "schema": {
+      "$defs": {
+        "LocalizedText": {
+          "description": "A localized string inside section data and other JSONB documents.",
+          "properties": {
+            "ru": {
+              "title": "Русский",
+              "type": "string"
+            },
+            "kk": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Қазақша"
+            },
+            "en": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "English"
+            }
+          },
+          "required": ["ru"],
+          "title": "Текст на трёх языках",
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "properties": {
+        "eyebrow": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LocalizedText"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Надзаголовок",
+          "x-widget": "localized-text"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LocalizedText"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Заголовок",
+          "x-widget": "localized-text"
+        },
+        "text": {
+          "$ref": "#/$defs/LocalizedText",
+          "title": "Цитата",
+          "x-widget": "localized-textarea"
+        },
+        "person_id": {
+          "anyOf": [
+            {
+              "format": "uuid",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Автор",
+          "x-ref": {
+            "kind": "person",
+            "many": false
+          }
+        },
+        "media_id": {
+          "anyOf": [
+            {
+              "format": "uuid",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Пусто — фото автора",
+          "title": "Фото",
+          "x-ref": {
+            "kind": "media",
+            "many": false
+          }
+        }
+      },
+      "required": ["text"],
+      "title": "QuoteData",
+      "type": "object"
+    }
+  },
+  {
+    "type": "cta",
+    "label": "Призыв к действию",
+    "description": "Заголовок и кнопки, обычно на акцентном фоне",
+    "schema": {
+      "$defs": {
+        "Cta": {
+          "additionalProperties": false,
+          "properties": {
+            "label": {
+              "$ref": "#/$defs/LocalizedText",
+              "title": "Текст кнопки",
+              "x-widget": "localized-text"
+            },
+            "href": {
+              "description": "https://…, #якорь на странице, slug страницы или projects/<slug>",
+              "maxLength": 500,
+              "minLength": 1,
+              "title": "Ссылка",
+              "type": "string",
+              "x-widget": "link"
+            },
+            "variant": {
+              "default": "primary",
+              "enum": ["primary", "secondary"],
+              "title": "Вид",
+              "type": "string",
+              "x-enum-labels": {
+                "primary": "Основная",
+                "secondary": "Второстепенная"
+              }
+            }
+          },
+          "required": ["label", "href"],
+          "title": "Кнопка",
+          "type": "object"
+        },
+        "LocalizedText": {
+          "description": "A localized string inside section data and other JSONB documents.",
+          "properties": {
+            "ru": {
+              "title": "Русский",
+              "type": "string"
+            },
+            "kk": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Қазақша"
+            },
+            "en": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "English"
+            }
+          },
+          "required": ["ru"],
+          "title": "Текст на трёх языках",
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "properties": {
+        "eyebrow": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LocalizedText"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Надзаголовок",
+          "x-widget": "localized-text"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LocalizedText"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Заголовок",
+          "x-widget": "localized-text"
+        },
+        "text": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LocalizedText"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Текст",
+          "x-widget": "localized-textarea"
+        },
+        "ctas": {
+          "items": {
+            "$ref": "#/$defs/Cta"
+          },
+          "title": "Кнопки",
+          "type": "array"
+        },
+        "media_id": {
+          "anyOf": [
+            {
+              "format": "uuid",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Изображение",
+          "x-ref": {
+            "kind": "media",
+            "many": false
+          }
+        }
+      },
+      "title": "CtaData",
+      "type": "object"
+    }
+  },
+  {
+    "type": "contact_form",
+    "label": "Форма заявки",
+    "description": "Форма с контактами компании",
+    "schema": {
+      "$defs": {
+        "LeadType": {
+          "enum": ["investor", "partner", "candidate", "client"],
+          "title": "LeadType",
+          "type": "string"
+        },
+        "LocalizedText": {
+          "description": "A localized string inside section data and other JSONB documents.",
+          "properties": {
+            "ru": {
+              "title": "Русский",
+              "type": "string"
+            },
+            "kk": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Қазақша"
+            },
+            "en": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "English"
+            }
+          },
+          "required": ["ru"],
+          "title": "Текст на трёх языках",
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "properties": {
+        "eyebrow": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LocalizedText"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Надзаголовок",
+          "x-widget": "localized-text"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LocalizedText"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Заголовок",
+          "x-widget": "localized-text"
+        },
+        "text": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LocalizedText"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Текст рядом с формой",
+          "x-widget": "localized-textarea"
+        },
+        "lead_types": {
+          "items": {
+            "$ref": "#/$defs/LeadType"
+          },
+          "title": "Темы обращения",
+          "type": "array",
+          "x-enum-labels": {
+            "candidate": "Работа в команде",
+            "client": "Заказ продукции",
+            "investor": "Инвестиции",
+            "partner": "Партнёрство"
+          }
+        },
+        "default_type": {
+          "$ref": "#/$defs/LeadType",
+          "default": "partner",
+          "title": "Тема по умолчанию",
+          "x-enum-labels": {
+            "candidate": "Работа в команде",
+            "client": "Заказ продукции",
+            "investor": "Инвестиции",
+            "partner": "Партнёрство"
+          }
+        },
+        "consent_text": {
+          "$ref": "#/$defs/LocalizedText",
+          "title": "Согласие на обработку данных",
+          "x-widget": "localized-textarea"
+        },
+        "success_text": {
+          "$ref": "#/$defs/LocalizedText",
+          "title": "Сообщение после отправки",
+          "x-widget": "localized-textarea"
+        }
+      },
+      "required": ["consent_text", "success_text"],
+      "title": "ContactFormData",
+      "type": "object"
+    }
+  },
+  {
+    "type": "media_gallery",
+    "label": "Галерея",
+    "description": "Сетка или лента изображений",
+    "schema": {
+      "$defs": {
+        "LocalizedText": {
+          "description": "A localized string inside section data and other JSONB documents.",
+          "properties": {
+            "ru": {
+              "title": "Русский",
+              "type": "string"
+            },
+            "kk": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Қазақша"
+            },
+            "en": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "English"
+            }
+          },
+          "required": ["ru"],
+          "title": "Текст на трёх языках",
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "properties": {
+        "eyebrow": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LocalizedText"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Надзаголовок",
+          "x-widget": "localized-text"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LocalizedText"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Заголовок",
+          "x-widget": "localized-text"
+        },
+        "media_ids": {
+          "items": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "title": "Изображения",
+          "type": "array",
+          "x-ref": {
+            "kind": "media",
+            "many": true
+          }
+        },
+        "layout": {
+          "default": "grid",
+          "enum": ["grid", "strip"],
+          "title": "Раскладка",
+          "type": "string",
+          "x-enum-labels": {
+            "grid": "Сетка",
+            "strip": "Лента"
+          }
+        }
+      },
+      "title": "MediaGalleryData",
+      "type": "object"
+    }
+  },
+  {
+    "type": "video",
+    "label": "Видео",
+    "description": "Встроенное видео или видеофайл",
+    "schema": {
+      "$defs": {
+        "LocalizedText": {
+          "description": "A localized string inside section data and other JSONB documents.",
+          "properties": {
+            "ru": {
+              "title": "Русский",
+              "type": "string"
+            },
+            "kk": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Қазақша"
+            },
+            "en": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "English"
+            }
+          },
+          "required": ["ru"],
+          "title": "Текст на трёх языках",
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "properties": {
+        "eyebrow": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LocalizedText"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Надзаголовок",
+          "x-widget": "localized-text"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LocalizedText"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Заголовок",
+          "x-widget": "localized-text"
+        },
+        "embed_url": {
+          "anyOf": [
+            {
+              "maxLength": 500,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "YouTube/Vimeo embed; или загруженное видео",
+          "title": "Ссылка для встраивания"
+        },
+        "video_media_id": {
+          "anyOf": [
+            {
+              "format": "uuid",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Видеофайл",
+          "x-ref": {
+            "kind": "media",
+            "many": false
+          }
+        },
+        "poster_media_id": {
+          "anyOf": [
+            {
+              "format": "uuid",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Обложка",
+          "x-ref": {
+            "kind": "media",
+            "many": false
+          }
+        }
+      },
+      "title": "VideoData",
+      "type": "object"
+    }
+  },
+  {
+    "type": "vacancies",
+    "label": "Вакансии",
+    "description": "Список открытых вакансий",
+    "schema": {
+      "$defs": {
+        "LocalizedText": {
+          "description": "A localized string inside section data and other JSONB documents.",
+          "properties": {
+            "ru": {
+              "title": "Русский",
+              "type": "string"
+            },
+            "kk": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Қазақша"
+            },
+            "en": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "English"
+            }
+          },
+          "required": ["ru"],
+          "title": "Текст на трёх языках",
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "properties": {
+        "eyebrow": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LocalizedText"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Надзаголовок",
+          "x-widget": "localized-text"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LocalizedText"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Заголовок",
+          "x-widget": "localized-text"
+        },
+        "intro": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LocalizedText"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Вступление",
+          "x-widget": "localized-textarea"
+        },
+        "division_slug": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Пусто — все направления",
+          "title": "Только направление",
+          "x-options": "divisions",
+          "x-widget": "select"
+        },
+        "vacancy_ids": {
+          "description": "Пусто — все открытые",
+          "items": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "title": "Вакансии",
+          "type": "array",
+          "x-ref": {
+            "kind": "vacancy",
+            "many": true
+          }
+        },
+        "empty_text": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LocalizedText"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Текст, когда вакансий нет",
+          "x-widget": "localized-textarea"
+        }
+      },
+      "title": "VacanciesData",
+      "type": "object"
+    }
+  },
+  {
+    "type": "geography",
+    "label": "География",
+    "description": "Страны поставок",
+    "schema": {
+      "$defs": {
+        "Country": {
+          "additionalProperties": false,
+          "properties": {
+            "code": {
+              "maxLength": 2,
+              "minLength": 2,
+              "title": "Код страны (2 буквы)",
+              "type": "string"
+            },
+            "name": {
+              "$ref": "#/$defs/LocalizedText",
+              "title": "Название",
+              "x-widget": "localized-text"
+            },
+            "note": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/LocalizedText"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Пояснение",
+              "x-widget": "localized-text"
+            }
+          },
+          "required": ["code", "name"],
+          "title": "Страна",
+          "type": "object"
+        },
+        "LocalizedText": {
+          "description": "A localized string inside section data and other JSONB documents.",
+          "properties": {
+            "ru": {
+              "title": "Русский",
+              "type": "string"
+            },
+            "kk": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Қазақша"
+            },
+            "en": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "English"
+            }
+          },
+          "required": ["ru"],
+          "title": "Текст на трёх языках",
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "properties": {
+        "eyebrow": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LocalizedText"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Надзаголовок",
+          "x-widget": "localized-text"
+        },
+        "title": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LocalizedText"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Заголовок",
+          "x-widget": "localized-text"
+        },
+        "intro": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LocalizedText"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Вступление",
+          "x-widget": "localized-textarea"
+        },
+        "countries": {
+          "items": {
+            "$ref": "#/$defs/Country"
+          },
+          "title": "Страны",
+          "type": "array"
+        }
+      },
+      "title": "GeographyData",
+      "type": "object"
+    }
+  }
+]
