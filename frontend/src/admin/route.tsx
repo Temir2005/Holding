@@ -9,6 +9,8 @@ import { Helmet } from 'react-helmet-async'
 import { Route, Routes } from 'react-router-dom'
 import { createAdminQueryClient } from './api/queries'
 import { MediaLibraryPage } from './features/media/MediaLibraryPage'
+import { PageEditorPage } from './features/pages/PageEditorPage'
+import { PagesListPage } from './features/pages/PagesListPage'
 import { AdminNotFound, CollectionPlaceholder, SectionPlaceholder } from './features/Placeholder'
 import { useT } from './i18n'
 import { AdminLayout } from './layout/AdminLayout'
@@ -41,7 +43,8 @@ function AdminRoutes() {
         }
       >
         <Route index element={<SectionPlaceholder title="nav.dashboard" />} />
-        <Route path="pages/*" element={<SectionPlaceholder title="nav.pages" />} />
+        <Route path="pages" element={<PagesListPage />} />
+        <Route path="pages/:pageId" element={<PageEditorPage />} />
         <Route path="media" element={<MediaLibraryPage />} />
         <Route path="leads/*" element={<SectionPlaceholder title="nav.leads" />} />
         <Route path="collections/:collection/*" element={<CollectionPlaceholder />} />

@@ -38,5 +38,6 @@
     "notFoundTitle": "Page not found",
     "notFoundText": "The link may be outdated or the address may contain a typo."
   },
-  "a11y": { "playVideo": "Play video", "prev": "Previous", "next": "Next" }
+  "a11y": { "playVideo": "Play video", "prev": "Previous", "next": "Next" },
+  "preview": { "banner": "Preview — this is not the published version", "expiredTitle": "The preview link has expired", "expiredText": "Open the preview from the admin again: the link is valid for 30 minutes." }
 }

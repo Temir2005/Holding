@@ -60,6 +60,7 @@ class Block(NamedTuple):
     section_id: uuid.UUID
     data: Any
     page_slug: str
+    page_id: uuid.UUID
     type: str
     # Set for the published snapshot.
     revision_id: uuid.UUID | None = None
@@ -70,24 +71,36 @@ class Block(NamedTuple):
 
     def usage(self, field: str, label: str) -> Usage:
         if self.revision_id is None:
-            return Usage(entity_type="section", entity_id=self.section_id, field=field, label=label)
+            return Usage(
+                entity_type="section",
+                entity_id=self.section_id,
+                field=field,
+                label=label,
+                page_id=self.page_id,
+            )
         return Usage(
             entity_type="page_revision",
             entity_id=self.revision_id,
             field=f"sections.{self.section_id}.{field}",
             label=f"{label} (опубликованная версия)",
+            page_id=self.page_id,
         )
 
 
 def parse_block(
-    section_id: uuid.UUID, section_type: str, data: Any, slug: str, revision_id: uuid.UUID | None
+    section_id: uuid.UUID,
+    section_type: str,
+    data: Any,
+    slug: str,
+    page_id: uuid.UUID,
+    revision_id: uuid.UUID | None,
 ) -> Block | None:
     try:
         stored = SECTION_SCHEMAS[SectionType(section_type)].stored.model_validate(data)
     except (ValueError, ValidationError):
         log.warning("usage scan: section %s has invalid data, skipped", section_id)
         return None
-    return Block(section_id, stored, slug, section_type, revision_id)
+    return Block(section_id, stored, slug, page_id, section_type, revision_id)
 
 
 class UsageFinder:
@@ -194,30 +207,30 @@ class UsageFinder:
         """Draft sections of every page, then sections of every published snapshot."""
         blocks: list[Block] = []
         drafts = await self.session.execute(
-            select(Section.id, Section.type, Section.data, Page.slug).join(
+            select(Section.id, Section.type, Section.data, Page.slug, Page.id).join(
                 Page, Page.id == Section.page_id
             )
         )
-        for section_id, section_type, data, slug in drafts:
-            if block := parse_block(section_id, section_type, data, slug, None):
+        for section_id, section_type, data, slug, page_id in drafts:
+            if block := parse_block(section_id, section_type, data, slug, page_id, None):
                 blocks.append(block)
-        for revision_id, slug, snapshot in await self._published():
+        for revision_id, slug, page_id, snapshot in await self._published():
             for item in snapshot.sections:
-                if block := parse_block(item.id, item.type, item.data, slug, revision_id):
+                if block := parse_block(item.id, item.type, item.data, slug, page_id, revision_id):
                     blocks.append(block)
         return blocks
 
-    async def _published(self) -> list[tuple[uuid.UUID, str, PageSnapshot]]:
+    async def _published(self) -> list[tuple[uuid.UUID, str, uuid.UUID, PageSnapshot]]:
         """The current revision of every page that has one."""
         rows = await self.session.execute(
-            select(PageRevision.id, Page.slug, PageRevision.snapshot).join(
+            select(PageRevision.id, Page.slug, Page.id, PageRevision.snapshot).join(
                 Page, Page.published_revision_id == PageRevision.id
             )
         )
         out = []
-        for revision_id, slug, snapshot in rows:
+        for revision_id, slug, page_id, snapshot in rows:
             try:
-                out.append((revision_id, slug, PageSnapshot.model_validate(snapshot)))
+                out.append((revision_id, slug, page_id, PageSnapshot.model_validate(snapshot)))
             except ValidationError:
                 log.warning("usage scan: revision %s has an unknown shape, skipped", revision_id)
         return out
@@ -243,6 +256,7 @@ class UsageFinder:
                         entity_id=row[0],
                         field=column.key,
                         label=_label(row[1]) if title is not None else "Настройки сайта",
+                        page_id=row[0] if entity_type == "page" else None,
                     )
                 )
 
@@ -272,7 +286,7 @@ class UsageFinder:
             if target in collect_refs(block.data).get(kind, set())
         ]
         if kind == RefKind.media:
-            for revision_id, slug, snapshot in await self._published():
+            for revision_id, slug, page_id, snapshot in await self._published():
                 if snapshot.page.og_image_id == target:
                     found.append(
                         MediaUsage(
@@ -281,6 +295,7 @@ class UsageFinder:
                             field="page.og_image_id",
                             label=f"Страница «{slug}»: картинка для соцсетей "
                             "(опубликованная версия)",
+                            page_id=page_id,
                         )
                     )
         return found

@@ -2,7 +2,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { render } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import type { ReactElement } from 'react'
-import { MemoryRouter } from 'react-router-dom'
+import { createMemoryRouter, RouterProvider } from 'react-router-dom'
 import { vi } from 'vitest'
 import { adminKey, type Meta } from '../api/queries'
 import entityTypesFixture from '../forms/schema/__fixtures__/entity-types.json'
@@ -77,19 +77,35 @@ export function entitySchema(type: string): JsonSchema {
   return info.schema
 }
 
-export function withProviders(ui: ReactElement, initialPath = '/') {
+/**
+ * Providers of the admin around `ui`, inside a data router (the unsaved-changes guard needs
+ * one). `routePath` gives route params, e.g. `/admin/pages/:pageId`.
+ */
+export function withProviders(ui: ReactElement, initialPath = '/', routePath = '*') {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   queryClient.setQueryData([...adminKey, 'meta'], testMeta)
   queryClient.setQueryData([...adminKey, 'entity-types'], entityTypes)
+  queryClient.setQueryData([...adminKey, 'section-types'], allSectionTypes)
+  const router = createMemoryRouter(
+    [
+      {
+        path: routePath,
+        element: (
+          <TooltipProvider>
+            <ToastProvider>
+              <ConfirmProvider>{ui}</ConfirmProvider>
+            </ToastProvider>
+          </TooltipProvider>
+        ),
+      },
+      // Links leave the tested screen; the router still needs somewhere to go.
+      { path: '*', element: <p>elsewhere</p> },
+    ],
+    { initialEntries: [initialPath] },
+  )
   return (
     <QueryClientProvider client={queryClient}>
-      <MemoryRouter initialEntries={[initialPath]}>
-        <TooltipProvider>
-          <ToastProvider>
-            <ConfirmProvider>{ui}</ConfirmProvider>
-          </ToastProvider>
-        </TooltipProvider>
-      </MemoryRouter>
+      <RouterProvider router={router} />
     </QueryClientProvider>
   )
 }

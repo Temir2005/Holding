@@ -1,5 +1,6 @@
 import { act, screen, within } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
+import { fakeFetch, json, signedIn } from '../../test/fakeApi'
 import { entitySchema, renderForm, schemaOf } from '../../test/renderForm'
 import { applyServerErrors } from './errors'
 import type { JsonSchema } from './types'
@@ -222,13 +223,39 @@ describe('lists and objects', () => {
     expect(getForm().getValues('link')).toBeNull()
   })
 
-  it('keeps non-media references untouched until their pickers exist', async () => {
+  it('shows chosen people by their cards, adds from the picker and keeps the order', async () => {
+    signedIn()
+    const people = [
+      { id: 'p1', kind: 'person', title: 'Основатель', subtitle: 'Директор', is_published: true },
+      { id: 'p2', kind: 'person', title: 'Архитектор', subtitle: null, is_published: false },
+      { id: 'p3', kind: 'person', title: 'Инженер', subtitle: null, is_published: true },
+    ]
+    fakeFetch({
+      'GET /api/v1/admin/lookup': ({ url }) => {
+        const ids = url.searchParams.getAll('ids')
+        return json(200, ids.length ? people.filter((p) => ids.includes(p.id)) : people)
+      },
+    })
     const schema = schemaOf('team_grid')
-    const ids = ['3f3c1f8e-0000-4000-8000-000000000001', '3f3c1f8e-0000-4000-8000-000000000002']
-    const { submit, onSubmit } = renderForm(schema, { ...emptyForm(schema), person_ids: ids })
-    expect(screen.getByText('Выбрано 2 объекта')).toBeTruthy()
+    const { user, submit, onSubmit } = renderForm(schema, {
+      ...emptyForm(schema),
+      person_ids: ['p2', 'p1'],
+    })
+    const first = await screen.findByText('Архитектор')
+    const list = first.closest('ul') as HTMLElement
+    expect(
+      within(list)
+        .getAllByRole('listitem')
+        .map((li) => li.textContent),
+    ).toEqual([expect.stringContaining('Архитектор'), expect.stringContaining('Основатель')])
+    expect(within(list).getByText('Не на сайте')).toBeTruthy()
+
+    await user.click(screen.getByRole('button', { name: 'Добавить' }))
+    const dialog = await screen.findByRole('dialog', { name: 'Люди' })
+    await user.click(await within(dialog).findByRole('button', { name: 'Выбрать «Инженер»' }))
+    await user.click(within(dialog).getByRole('button', { name: 'Выбрать (1)' }))
     await submit()
-    expect(onSubmit.mock.calls[0]?.[0].person_ids).toEqual(ids)
+    expect(onSubmit.mock.calls[0]?.[0].person_ids).toEqual(['p2', 'p1', 'p3'])
   })
 })
 

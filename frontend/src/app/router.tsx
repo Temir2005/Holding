@@ -17,43 +17,52 @@ const prefetch = (load: (args: LoaderFunctionArgs) => void) => (args: LoaderFunc
   return null
 }
 
-export const router = createBrowserRouter([
-  { path: '/', element: <Navigate to={`/${DEFAULT_LOCALE}`} replace /> },
-  // The admin is a separate lazy chunk: its code, styles and strings stay out of the site bundle.
-  { path: '/admin/*', lazy: () => import('@/admin/route'), hydrateFallbackElement: <></> },
+export const router = createBrowserRouter(
+  [
+    { path: '/', element: <Navigate to={`/${DEFAULT_LOCALE}`} replace /> },
+    // The admin is a separate lazy chunk: its code, styles and strings stay out of the site bundle.
+    { path: '/admin/*', lazy: () => import('@/admin/route'), hydrateFallbackElement: <></> },
+    {
+      path: '/:locale',
+      element: <SiteLayout />,
+      loader: prefetch((args) => void queryClient.prefetchQuery(settingsQuery(localeOf(args)))),
+      children: [
+        {
+          index: true,
+          element: <CmsPage slug="home" />,
+          loader: prefetch(
+            (args) => void queryClient.prefetchQuery(pageQuery('home', localeOf(args))),
+          ),
+        },
+        {
+          path: 'projects/:slug',
+          element: <ProjectPage />,
+          loader: prefetch(
+            (args) =>
+              void queryClient.prefetchQuery(projectQuery(args.params.slug ?? '', localeOf(args))),
+          ),
+        },
+        // Draft by a link from the admin; a separate chunk, the site does not load it.
+        { path: 'preview/:slug', lazy: () => import('@/pages/PreviewPage') },
+        {
+          path: ':slug',
+          element: <CmsPageRoute />,
+          loader: prefetch(
+            (args) =>
+              void queryClient.prefetchQuery(pageQuery(args.params.slug ?? '', localeOf(args))),
+          ),
+        },
+        { path: '*', element: <NotFoundPage /> },
+      ],
+    },
+  ],
   {
-    path: '/:locale',
-    element: <SiteLayout />,
-    loader: prefetch((args) => void queryClient.prefetchQuery(settingsQuery(localeOf(args)))),
-    children: [
-      {
-        index: true,
-        element: <CmsPage slug="home" />,
-        loader: prefetch((args) => void queryClient.prefetchQuery(pageQuery('home', localeOf(args)))),
-      },
-      {
-        path: 'projects/:slug',
-        element: <ProjectPage />,
-        loader: prefetch(
-          (args) => void queryClient.prefetchQuery(projectQuery(args.params.slug ?? '', localeOf(args))),
-        ),
-      },
-      {
-        path: ':slug',
-        element: <CmsPageRoute />,
-        loader: prefetch(
-          (args) => void queryClient.prefetchQuery(pageQuery(args.params.slug ?? '', localeOf(args))),
-        ),
-      },
-      { path: '*', element: <NotFoundPage /> },
-    ],
+    future: {
+      v7_relativeSplatPath: true,
+      v7_fetcherPersist: true,
+      v7_normalizeFormMethod: true,
+      v7_partialHydration: true,
+      v7_skipActionErrorRevalidation: true,
+    },
   },
-], {
-  future: {
-    v7_relativeSplatPath: true,
-    v7_fetcherPersist: true,
-    v7_normalizeFormMethod: true,
-    v7_partialHydration: true,
-    v7_skipActionErrorRevalidation: true,
-  },
-})
+)

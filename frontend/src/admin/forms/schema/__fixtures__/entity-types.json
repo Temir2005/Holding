@@ -100,5 +100,203 @@
       "title": "Файл",
       "type": "object"
     }
+  },
+  {
+    "type": "page",
+    "label": "Страница",
+    "schema": {
+      "$defs": {
+        "LocalizedText": {
+          "description": "A localized string inside section data and other JSONB documents.",
+          "properties": {
+            "ru": {
+              "title": "Русский",
+              "type": "string"
+            },
+            "kk": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Қазақша"
+            },
+            "en": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "English"
+            }
+          },
+          "required": ["ru"],
+          "title": "Текст на трёх языках",
+          "type": "object"
+        },
+        "RequiredText": {
+          "description": "Localized text of a required field (a title, a name): Russian must have text.\n\n`LocalizedText` itself accepts an empty string, because section data and settings\nalready stored with one must keep rendering on the public site.",
+          "properties": {
+            "ru": {
+              "minLength": 1,
+              "title": "Русский",
+              "type": "string"
+            },
+            "kk": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Қазақша"
+            },
+            "en": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "English"
+            }
+          },
+          "required": ["ru"],
+          "title": "Текст на трёх языках",
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "description": "The page's \"settings and SEO\" form (GET /admin/entity-types), saved with PageUpdate.",
+      "properties": {
+        "slug": {
+          "description": "Латиница, цифры и дефисы. Меняется на сайте сразу, без публикации",
+          "examples": ["smart-panels"],
+          "maxLength": 128,
+          "minLength": 1,
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+          "title": "Адрес",
+          "type": "string"
+        },
+        "title": {
+          "$ref": "#/$defs/RequiredText",
+          "title": "Название",
+          "x-widget": "localized-text"
+        },
+        "seo_title": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LocalizedText"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Заголовок во вкладке браузера и в поиске. Пусто — название страницы",
+          "title": "SEO-заголовок",
+          "x-widget": "localized-text"
+        },
+        "seo_description": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LocalizedText"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "SEO-описание",
+          "x-widget": "localized-textarea"
+        },
+        "og_image_id": {
+          "anyOf": [
+            {
+              "format": "uuid",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Картинка для соцсетей",
+          "x-ref": {
+            "accept": ["image"],
+            "kind": "media",
+            "many": false
+          }
+        }
+      },
+      "required": ["slug", "title"],
+      "title": "Страница",
+      "type": "object"
+    }
+  },
+  {
+    "type": "section",
+    "label": "Блок",
+    "schema": {
+      "$defs": {
+        "Tone": {
+          "enum": ["dark", "light", "accent"],
+          "title": "Tone",
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "description": "Settings of a block around its data (GET /admin/entity-types), saved with SectionUpdate.",
+      "properties": {
+        "anchor": {
+          "anyOf": [
+            {
+              "description": "For links like #contacts; unique within the page",
+              "maxLength": 64,
+              "pattern": "^[a-z][a-z0-9-]*$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Для ссылок вида #contacts; уникален на странице",
+          "title": "Якорь",
+          "x-widget": "anchor"
+        },
+        "tone": {
+          "$ref": "#/$defs/Tone",
+          "default": "dark",
+          "title": "Фон блока",
+          "x-enum-labels": {
+            "accent": "Акцентный",
+            "dark": "Тёмный",
+            "light": "Светлый"
+          }
+        },
+        "is_visible": {
+          "default": true,
+          "title": "Показывать на сайте",
+          "type": "boolean"
+        }
+      },
+      "title": "Блок",
+      "type": "object"
+    }
   }
 ]

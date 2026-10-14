@@ -19,13 +19,19 @@ export function ProjectPage() {
   const { data: p, error, isPending, refetch } = useProject(slug, locale)
 
   if (isPending) return <PageSkeleton />
-  if (error) return isNotFound(error) ? <NotFoundPage /> : <ErrorState onRetry={() => void refetch()} />
+  if (error)
+    return isNotFound(error) ? <NotFoundPage /> : <ErrorState onRetry={() => void refetch()} />
 
   const facts = [
     { label: t('project.status'), value: t(`status.${p.status}`) },
     { label: t('project.location'), value: p.location },
     p.year ? { label: t('project.year'), value: String(p.year) } : null,
-    p.area_m2 ? { label: t('project.area'), value: `${formatNumber(p.area_m2, locale)} ${t('project.sqm')}` } : null,
+    p.area_m2
+      ? {
+          label: t('project.area'),
+          value: `${formatNumber(p.area_m2, locale)} ${t('project.sqm')}`,
+        }
+      : null,
     p.division ? { label: t('project.division'), value: p.division.name } : null,
   ].filter((f): f is { label: string; value: string } => Boolean(f?.value))
 
@@ -35,7 +41,10 @@ export function ProjectPage() {
       <article>
         <header className="tone-dark pb-12 pt-[calc(var(--header-h)+2.5rem)]">
           <Container className="flex flex-col gap-8">
-            <Link to={`/${locale}/projects`} className="eyebrow inline-flex min-h-11 w-fit items-center gap-2 hover:underline">
+            <Link
+              to={`/${locale}/projects`}
+              className="eyebrow inline-flex min-h-11 w-fit items-center gap-2 hover:underline"
+            >
               ← {t('project.backToProjects')}
             </Link>
             <div className="flex flex-wrap gap-2">
@@ -51,7 +60,13 @@ export function ProjectPage() {
         </header>
         <div className="tone-dark">
           <Container>
-            <SmartImage media={p.cover} priority className="aspect-[16/9] rounded-tile md:aspect-[21/9]" crop sizes="100vw" />
+            <SmartImage
+              media={p.cover}
+              priority
+              className="aspect-[16/9] rounded-tile md:aspect-[21/9]"
+              crop
+              sizes="100vw"
+            />
           </Container>
         </div>
         <div className="tone-dark py-16 md:py-24">
@@ -72,11 +87,18 @@ export function ProjectPage() {
         {p.gallery.length > 0 && (
           <section className="tone-light py-16 md:py-24" aria-labelledby="gallery-title">
             <Container className="flex flex-col gap-10">
-              <h2 id="gallery-title" className="text-h2">{t('project.gallery')}</h2>
+              <h2 id="gallery-title" className="text-h2">
+                {t('project.gallery')}
+              </h2>
               <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
                 {p.gallery.map((m, i) => (
                   <Reveal as="li" key={m.id} delay={stagger(i % 2)}>
-                    <SmartImage media={m} className="aspect-[4/3] rounded-tile" crop sizes="(min-width: 640px) 50vw, 100vw" />
+                    <SmartImage
+                      media={m}
+                      className="aspect-[4/3] rounded-tile"
+                      crop
+                      sizes="(min-width: 640px) 50vw, 100vw"
+                    />
                   </Reveal>
                 ))}
               </ul>

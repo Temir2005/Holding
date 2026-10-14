@@ -13,7 +13,14 @@ from app.core.errors import AlreadyExists, Conflict, InUse, ValidationFailed
 from app.core.i18n import drop_empty_languages
 from app.models import Page, PageRevision
 from app.repositories.admin.pages import PageRepository, RevisionRepository
-from app.schemas.admin.pages import PageAdminRead, PageCreate, PageDetail, PageUpdate, RefCard
+from app.schemas.admin.pages import (
+    OG_IMAGE_ACCEPT,
+    PageAdminRead,
+    PageCreate,
+    PageDetail,
+    PageUpdate,
+    RefCard,
+)
 from app.schemas.refs import RefKind
 from app.services.admin.audit import AuditWriter
 from app.services.admin.base import Before, CrudService
@@ -140,6 +147,11 @@ class PageAdminService(CrudService[Page, PageCreate, PageUpdate, PageAdminRead])
                         }
                     ],
                 )
+            wrong_kind = await self.refs.accept_errors(
+                [(("body", "og_image_id"), OG_IMAGE_ACCEPT, obj.og_image_id)]
+            )
+            if wrong_kind:
+                raise ValidationFailed("Файл не подходит", details=wrong_kind)
 
     async def before_delete(self, obj: Page) -> None:
         if obj.slug == HOME_SLUG:

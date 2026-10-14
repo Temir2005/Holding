@@ -20,8 +20,9 @@ from app.schemas.admin.meta import (
     Option,
     SectionTypeInfo,
 )
+from app.schemas.admin.pages import TONE_LABELS, PageForm, SectionForm
 from app.schemas.refs import KeyKind, RefKind
-from app.schemas.sections import LEAD_TYPE_LABELS, SECTION_SCHEMAS, Tone
+from app.schemas.sections import LEAD_TYPE_LABELS, SECTION_SCHEMAS
 from app.services.admin.media_files import MEDIA_TYPES, MediaKind
 from app.services.admin.refs import RefService
 from app.storage.service import Storage
@@ -50,7 +51,6 @@ MEDIA_KIND_LABELS = {
     MediaKind.video: "Видео",
     MediaKind.document: "Документы",
 }
-TONE_LABELS = {Tone.dark: "Тёмный", Tone.light: "Светлый", Tone.accent: "Акцентный"}
 # Social link types the site knows how to show (validated when settings are saved).
 SOCIAL_TYPES = {
     "instagram": "Instagram",
@@ -106,6 +106,8 @@ async def load_meta(settings: Settings, session: AsyncSession, storage: Storage)
 # Forms of entities that are not section blocks; collections, pages and settings come next.
 ENTITY_FORMS: dict[str, tuple[str, type[BaseModel]]] = {
     "media": ("Файл медиатеки", MediaForm),
+    "page": ("Страница", PageForm),
+    "section": ("Блок", SectionForm),
 }
 
 

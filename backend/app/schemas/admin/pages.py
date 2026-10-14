@@ -2,11 +2,12 @@ import uuid
 from datetime import datetime
 from typing import Annotated, Any
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 from app.core.i18n import LocalizedText, RequiredText
 from app.schemas.admin.common import VersionedUpdate
-from app.schemas.refs import RefKind
+from app.schemas.fields import field
+from app.schemas.refs import MediaAccept, Ref, RefKind
 from app.schemas.sections import SectionType, Tone
 
 SLUG_PATTERN = r"^[a-z0-9]+(?:-[a-z0-9]+)*$"
@@ -40,6 +41,10 @@ class RefCard(BaseModel):
     subtitle: str | None = None
     thumb_url: str | None = None
     is_published: bool | None = None
+    slug: str | None = Field(
+        default=None,
+        description="Address key of pages, projects and divisions (for links and filters)",
+    )
 
 
 RefCards = dict[RefKind, dict[uuid.UUID, RefCard]]
@@ -95,7 +100,52 @@ class PageAdminRead(BaseModel):
     version: int
 
 
+# The picture shown when the page is shared in messengers and social networks.
+OG_IMAGE_ACCEPT: tuple[MediaAccept, ...] = ("image",)
+
+
+class PageForm(BaseModel):
+    """The page's "settings and SEO" form (GET /admin/entity-types), saved with PageUpdate."""
+
+    model_config = ConfigDict(extra="forbid", title="Страница")
+
+    slug: Slug = field(
+        "Адрес",
+        description="Латиница, цифры и дефисы. Меняется на сайте сразу, без публикации",
+    )
+    title: RequiredText = field("Название", widget="localized-text")
+    seo_title: LocalizedText | None = field(
+        "SEO-заголовок",
+        widget="localized-text",
+        description="Заголовок во вкладке браузера и в поиске. Пусто — название страницы",
+        default=None,
+    )
+    seo_description: LocalizedText | None = field(
+        "SEO-описание", widget="localized-textarea", default=None
+    )
+    og_image_id: Annotated[uuid.UUID | None, Ref(RefKind.media, "og_image", OG_IMAGE_ACCEPT)] = (
+        field("Картинка для соцсетей", default=None)
+    )
+
+
 # --- sections --------------------------------------------------------------------
+
+TONE_LABELS = {Tone.dark: "Тёмный", Tone.light: "Светлый", Tone.accent: "Акцентный"}
+
+
+class SectionForm(BaseModel):
+    """Settings of a block around its data (GET /admin/entity-types), saved with SectionUpdate."""
+
+    model_config = ConfigDict(extra="forbid", title="Блок")
+
+    anchor: Anchor | None = field(
+        "Якорь",
+        widget="anchor",
+        description="Для ссылок вида #contacts; уникален на странице",
+        default=None,
+    )
+    tone: Tone = field("Фон блока", labels=TONE_LABELS, default=Tone.dark)
+    is_visible: bool = field("Показывать на сайте", default=True)
 
 
 class SectionCreate(BaseModel):

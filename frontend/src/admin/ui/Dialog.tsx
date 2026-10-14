@@ -81,6 +81,8 @@ interface SheetProps {
   onOpenChange: (open: boolean) => void
   title: ReactNode
   side?: 'left' | 'right' | 'bottom'
+  /** Right panels: `wide` for editors with long forms. */
+  size?: 'md' | 'wide'
   children: ReactNode
   className?: string
 }
@@ -91,13 +93,17 @@ export function Sheet({
   onOpenChange,
   title,
   side = 'right',
+  size = 'md',
   children,
   className,
 }: SheetProps) {
   const t = useT()
   const position = {
     left: 'inset-y-0 left-0 w-[min(20rem,85vw)] border-r',
-    right: 'inset-y-0 right-0 w-[min(32rem,100vw)] border-l',
+    right: cn(
+      'inset-y-0 right-0 border-l',
+      size === 'wide' ? 'w-[min(44rem,100vw)]' : 'w-[min(32rem,100vw)]',
+    ),
     bottom:
       'inset-x-0 bottom-0 max-h-[85dvh] rounded-t-lg border-t pb-[env(safe-area-inset-bottom)]',
   }[side]

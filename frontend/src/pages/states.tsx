@@ -34,7 +34,15 @@ export function PageSkeleton() {
   )
 }
 
-function StateLayout({ title, text, action }: { title: string; text: string; action: React.ReactNode }) {
+function StateLayout({
+  title,
+  text,
+  action,
+}: {
+  title: string
+  text: string
+  action: React.ReactNode
+}) {
   return (
     <Container className="flex min-h-[70svh] flex-col items-start justify-center gap-6 pb-16 pt-[calc(var(--header-h)+3rem)]">
       <h1 className="text-h2">{title}</h1>
