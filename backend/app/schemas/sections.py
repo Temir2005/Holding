@@ -35,7 +35,7 @@ from app.schemas.entities import (
     VacancyRead,
 )
 from app.schemas.fields import HexColor, IconName, LinkHref, field
-from app.schemas.refs import KeyKind, KeyOf, Ref, RefKind
+from app.schemas.refs import KeyKind, KeyOf, MediaAccept, Ref, RefKind
 
 L = LocalizedText
 
@@ -47,8 +47,14 @@ LEAD_TYPE_LABELS = {
 }
 
 
-def _media(target: str) -> Ref:
-    return Ref(RefKind.media, target)
+# Which files fit a media field: photos only, any picture (SVG too), video.
+PHOTO: tuple[MediaAccept, ...] = ("image",)
+PICTURE: tuple[MediaAccept, ...] = ("image", "svg")
+VIDEO: tuple[MediaAccept, ...] = ("video",)
+
+
+def _media(target: str, accept: tuple[MediaAccept, ...]) -> Ref:
+    return Ref(RefKind.media, target, accept)
 
 
 class SectionType(StrEnum):
@@ -125,7 +131,7 @@ class IconItem(Stored):
     icon: IconName = field("Иконка")
     title: L = field("Заголовок", widget="localized-text")
     text: L = field("Текст", widget="localized-textarea")
-    media_id: Annotated[uuid.UUID | None, _media("media")] = field(
+    media_id: Annotated[uuid.UUID | None, _media("media", PICTURE)] = field(
         "Картинка вместо иконки", default=None
     )
 
@@ -164,10 +170,10 @@ class SwatchRead(BaseModel):
 
 class HeroData(SectionData):
     subtitle: L | None = field("Подзаголовок", widget="localized-textarea", default=None)
-    background_media_id: Annotated[uuid.UUID | None, _media("background")] = field(
+    background_media_id: Annotated[uuid.UUID | None, _media("background", PHOTO)] = field(
         "Фоновое изображение", default=None
     )
-    video_media_id: Annotated[uuid.UUID | None, _media("video")] = field(
+    video_media_id: Annotated[uuid.UUID | None, _media("video", VIDEO)] = field(
         "Фоновое видео", default=None
     )
     ctas: list[Cta] = field("Кнопки", default_factory=list)
@@ -204,7 +210,9 @@ class StatsDataRead(SectionDataRead):
 
 class AboutTextData(SectionData):
     body: L = field("Текст", widget="markdown")
-    media_id: Annotated[uuid.UUID | None, _media("media")] = field("Изображение", default=None)
+    media_id: Annotated[uuid.UUID | None, _media("media", PICTURE)] = field(
+        "Изображение", default=None
+    )
     layout: Literal["text_only", "media_left", "media_right"] = field(
         "Расположение",
         labels={
@@ -292,7 +300,9 @@ class ProcessStep(Stored):
 
     title: L = field("Название этапа", widget="localized-text")
     text: L = field("Описание", widget="localized-textarea")
-    media_id: Annotated[uuid.UUID | None, _media("media")] = field("Изображение", default=None)
+    media_id: Annotated[uuid.UUID | None, _media("media", PICTURE)] = field(
+        "Изображение", default=None
+    )
     division_id: Annotated[uuid.UUID | None, Ref(RefKind.division, "division")] = field(
         "Ссылка на направление", default=None
     )
@@ -330,7 +340,7 @@ class FactRead(BaseModel):
 class ProductionData(SectionData):
     body: L = field("Текст", widget="localized-textarea")
     facts: list[Fact] = field("Факты", default_factory=list)
-    gallery_media_ids: Annotated[list[uuid.UUID], _media("gallery")] = field(
+    gallery_media_ids: Annotated[list[uuid.UUID], _media("gallery", PHOTO)] = field(
         "Галерея", default_factory=list
     )
 
@@ -425,7 +435,7 @@ class QuoteData(SectionData):
     person_id: Annotated[uuid.UUID | None, Ref(RefKind.person, "person")] = field(
         "Автор", default=None
     )
-    media_id: Annotated[uuid.UUID | None, _media("media")] = field(
+    media_id: Annotated[uuid.UUID | None, _media("media", PHOTO)] = field(
         "Фото", description="Пусто — фото автора", default=None
     )
 
@@ -439,7 +449,9 @@ class QuoteDataRead(SectionDataRead):
 class CtaData(SectionData):
     text: L | None = field("Текст", widget="localized-textarea", default=None)
     ctas: list[Cta] = field("Кнопки", default_factory=list)
-    media_id: Annotated[uuid.UUID | None, _media("media")] = field("Изображение", default=None)
+    media_id: Annotated[uuid.UUID | None, _media("media", PHOTO)] = field(
+        "Изображение", default=None
+    )
 
 
 class CtaDataRead(SectionDataRead):
@@ -471,7 +483,7 @@ class ContactFormDataRead(SectionDataRead):
 
 
 class MediaGalleryData(SectionData):
-    media_ids: Annotated[list[uuid.UUID], _media("items")] = field(
+    media_ids: Annotated[list[uuid.UUID], _media("items", PICTURE)] = field(
         "Изображения", default_factory=list
     )
     layout: Literal["grid", "strip"] = field(
@@ -491,8 +503,12 @@ class VideoData(SectionData):
         max_length=500,
         default=None,
     )
-    video_media_id: Annotated[uuid.UUID | None, _media("video")] = field("Видеофайл", default=None)
-    poster_media_id: Annotated[uuid.UUID | None, _media("poster")] = field("Обложка", default=None)
+    video_media_id: Annotated[uuid.UUID | None, _media("video", VIDEO)] = field(
+        "Видеофайл", default=None
+    )
+    poster_media_id: Annotated[uuid.UUID | None, _media("poster", PHOTO)] = field(
+        "Обложка", default=None
+    )
 
 
 class VideoDataRead(SectionDataRead):

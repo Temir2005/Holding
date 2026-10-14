@@ -15,10 +15,10 @@ interface DialogProps {
   children?: ReactNode
   /** `alertdialog` semantics: no close on outside click (destructive confirmations). */
   modalOnly?: boolean
-  size?: 'sm' | 'md' | 'lg'
+  size?: 'sm' | 'md' | 'lg' | 'xl'
 }
 
-const WIDTH = { sm: 'md:max-w-sm', md: 'md:max-w-lg', lg: 'md:max-w-3xl' }
+const WIDTH = { sm: 'md:max-w-sm', md: 'md:max-w-lg', lg: 'md:max-w-3xl', xl: 'md:max-w-5xl' }
 
 /** Centered dialog on tablet and up, a bottom sheet on phones. */
 export function Dialog({

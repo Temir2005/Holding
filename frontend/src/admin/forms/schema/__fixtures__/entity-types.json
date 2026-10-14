@@ -1,0 +1,104 @@
+[
+  {
+    "type": "media",
+    "label": "Файл медиатеки",
+    "schema": {
+      "$defs": {
+        "LocalizedText": {
+          "description": "A localized string inside section data and other JSONB documents.",
+          "properties": {
+            "ru": {
+              "title": "Русский",
+              "type": "string"
+            },
+            "kk": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Қазақша"
+            },
+            "en": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "English"
+            }
+          },
+          "required": ["ru"],
+          "title": "Текст на трёх языках",
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "description": "Editable fields of a media file, as the admin card shows them (GET /admin/entity-types).\n\nSaved with PATCH /admin/media/{id} (`MediaUpdate`); a test keeps the two in step.",
+      "properties": {
+        "alt": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/LocalizedText"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Что изображено: её читают незрячие посетители и поисковики",
+          "title": "Подпись (alt)",
+          "x-widget": "localized-text"
+        },
+        "original_filename": {
+          "anyOf": [
+            {
+              "maxLength": 255,
+              "minLength": 1,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Имя файла"
+        },
+        "folder": {
+          "anyOf": [
+            {
+              "maxLength": 128,
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Папка",
+          "x-options": "media_folders",
+          "x-widget": "combobox"
+        },
+        "tags": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 30,
+          "title": "Теги",
+          "type": "array",
+          "x-widget": "tags"
+        }
+      },
+      "title": "Файл",
+      "type": "object"
+    }
+  }
+]

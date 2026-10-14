@@ -8,6 +8,8 @@ export type JsonType = 'object' | 'array' | 'string' | 'integer' | 'number' | 'b
 export interface RefHint {
   kind: string
   many: boolean
+  /** Media fields: kinds of files that fit (`image`, `svg`, `video`, `document`). */
+  accept?: string[]
 }
 
 export interface JsonSchema {
@@ -47,6 +49,8 @@ export type FieldKind =
   | 'icon'
   | 'link'
   | 'color'
+  | 'tags'
+  | 'combobox'
   | 'enum'
   | 'enum-list'
   | 'array'

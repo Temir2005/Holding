@@ -35,6 +35,7 @@ export function emptyValue(node: ResolvedNode, root: JsonSchema, required = true
     }
     case 'array':
     case 'enum-list':
+    case 'tags':
       return []
     case 'enum':
       return schema.enum?.[0] ?? null

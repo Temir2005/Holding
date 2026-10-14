@@ -16,6 +16,7 @@ from pydantic import BaseModel, ValidationError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.errors import AlreadyExists, NotFound, ValidationFailed
+from app.core.validation_messages import ru_message
 from app.models import Page, Section
 from app.repositories.admin.pages import PageRepository, SectionRepository
 from app.schemas.admin.pages import SectionAdminRead, SectionCreate, SectionUpdate
@@ -42,7 +43,7 @@ def parse_data(section_type: SectionType, data: dict[str, Any], loc: Loc = DATA_
     except ValidationError as exc:
         raise ValidationFailed(
             "Проверьте заполнение блока",
-            details=[{"loc": [*loc, *err["loc"]], "msg": err["msg"]} for err in exc.errors()],
+            details=[{"loc": [*loc, *err["loc"]], "msg": ru_message(err)} for err in exc.errors()],
         ) from exc
 
 

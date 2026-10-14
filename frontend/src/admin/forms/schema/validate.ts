@@ -83,7 +83,8 @@ function validateNode(
       return
     }
     case 'array':
-    case 'enum-list': {
+    case 'enum-list':
+    case 'tags': {
       if (!Array.isArray(value)) return
       if (schema.minItems !== undefined && value.length < schema.minItems) {
         issues.push({ path, code: 'minItems', params: { min: schema.minItems } })
@@ -119,7 +120,8 @@ function validateNode(
     case 'link':
     case 'color':
     case 'icon':
-    case 'options': {
+    case 'options':
+    case 'combobox': {
       if (typeof value !== 'string') return
       if (value === '') {
         if (required && !nullable) issues.push({ path, code: 'required' })

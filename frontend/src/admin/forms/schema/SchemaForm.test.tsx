@@ -1,6 +1,6 @@
 import { act, screen, within } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
-import { renderForm, schemaOf } from '../../test/renderForm'
+import { entitySchema, renderForm, schemaOf } from '../../test/renderForm'
 import { applyServerErrors } from './errors'
 import type { JsonSchema } from './types'
 import { emptyForm } from './values'
@@ -222,13 +222,13 @@ describe('lists and objects', () => {
     expect(getForm().getValues('link')).toBeNull()
   })
 
-  it('keeps references untouched until their pickers exist', async () => {
-    const schema = schemaOf('media_gallery')
+  it('keeps non-media references untouched until their pickers exist', async () => {
+    const schema = schemaOf('team_grid')
     const ids = ['3f3c1f8e-0000-4000-8000-000000000001', '3f3c1f8e-0000-4000-8000-000000000002']
-    const { submit, onSubmit } = renderForm(schema, { ...emptyForm(schema), media_ids: ids })
+    const { submit, onSubmit } = renderForm(schema, { ...emptyForm(schema), person_ids: ids })
     expect(screen.getByText('Выбрано 2 объекта')).toBeTruthy()
     await submit()
-    expect(onSubmit.mock.calls[0]?.[0].media_ids).toEqual(ids)
+    expect(onSubmit.mock.calls[0]?.[0].person_ids).toEqual(ids)
   })
 })
 
@@ -298,5 +298,42 @@ describe('server errors (422)', () => {
   it('shows problems without a field above the form', () => {
     renderForm(schemaOf('hero'), undefined, { formErrors: ['Якорь занят'] })
     expect(screen.getByRole('alert').textContent).toContain('Якорь занят')
+  })
+})
+
+describe('media card form (entity schema)', () => {
+  it('edits tags as chips: Enter adds, Backspace removes the last, × removes one', async () => {
+    const schema = entitySchema('media')
+    const { user, getForm } = renderForm(schema, {
+      alt: null,
+      original_filename: 'facade.jpg',
+      folder: null,
+      tags: ['фасад'],
+    })
+    const input = screen.getByRole('textbox', { name: 'Теги' })
+    await user.type(input, 'зима{Enter}лето,')
+    expect(getForm().getValues('tags')).toEqual(['фасад', 'зима', 'лето'])
+    await user.type(input, '{Backspace}')
+    expect(getForm().getValues('tags')).toEqual(['фасад', 'зима'])
+    await user.click(screen.getByRole('button', { name: 'Убрать тег фасад' }))
+    expect(getForm().getValues('tags')).toEqual(['зима'])
+  })
+
+  it('suggests existing folders and accepts a new one', async () => {
+    const schema = entitySchema('media')
+    const { user, getForm, container } = renderForm(schema, {
+      alt: null,
+      original_filename: 'facade.jpg',
+      folder: null,
+      tags: [],
+    })
+    const folder = screen.getByRole('combobox', { name: 'Папка' })
+    const listId = folder.getAttribute('list')
+    const options = container.querySelectorAll(`datalist[id="${listId}"] option`)
+    expect([...options].map((o) => o.getAttribute('value'))).toEqual(['projects'])
+    await user.type(folder, 'hero')
+    expect(getForm().getValues('folder')).toBe('hero')
+    await user.clear(folder)
+    expect(getForm().getValues('folder')).toBeNull()
   })
 })

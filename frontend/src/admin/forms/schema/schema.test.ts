@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { allSectionTypes, schemaOf } from '../../test/renderForm'
+import { allSectionTypes, entitySchema, schemaOf } from '../../test/renderForm'
 import { findLocales } from './context'
 import { fieldKind, hasPath, itemNode, resolveNode } from './resolve'
 import type { FieldKind, JsonSchema, ResolvedNode } from './types'
@@ -58,6 +58,14 @@ describe('schema resolution on the real section types', () => {
     expect(kindOf(schemaOf('projects_showcase'), 'featured')).toBe('boolean')
     expect(kindOf(schemaOf('capabilities'), 'columns')).toBe('enum')
     expect(kindOf(schemaOf('video'), 'embed_url')).toBe('string')
+  })
+
+  it('maps entity form hints (tags, combobox) and media accept', () => {
+    const media = entitySchema('media')
+    expect(kindOf(media, 'tags')).toBe('tags')
+    expect(kindOf(media, 'folder')).toBe('combobox')
+    expect(kindOf(media, 'alt')).toBe('localized')
+    expect(prop(schemaOf('video'), 'video_media_id').schema['x-ref']?.accept).toEqual(['video'])
   })
 
   it('lets list items inherit the list widget (a list of texts)', () => {

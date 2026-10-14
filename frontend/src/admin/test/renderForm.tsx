@@ -5,6 +5,7 @@ import type { ReactElement } from 'react'
 import { MemoryRouter } from 'react-router-dom'
 import { vi } from 'vitest'
 import { adminKey, type Meta } from '../api/queries'
+import entityTypesFixture from '../forms/schema/__fixtures__/entity-types.json'
 import sectionTypes from '../forms/schema/__fixtures__/section-types.json'
 import { SchemaForm } from '../forms/schema/SchemaForm'
 import type { JsonSchema } from '../forms/schema/types'
@@ -42,14 +43,47 @@ export const testMeta = {
     { value: 'home', label: 'home' },
     { value: 'development', label: 'development' },
   ],
+  media: {
+    image_mb: 20,
+    video_mb: 200,
+    types: [
+      'application/pdf',
+      'image/jpeg',
+      'image/png',
+      'image/svg+xml',
+      'image/webp',
+      'video/mp4',
+    ],
+  },
+  media_kinds: [
+    { value: 'image', label: 'Изображения' },
+    { value: 'svg', label: 'SVG' },
+    { value: 'video', label: 'Видео' },
+    { value: 'document', label: 'Документы' },
+  ],
+  media_folders: [{ value: 'projects', label: 'projects' }],
 } as unknown as Meta
 
-export function withProviders(ui: ReactElement) {
+/** Real form schemas of non-block entities (`GET /admin/entity-types`). */
+export const entityTypes = entityTypesFixture as unknown as {
+  type: string
+  label: string
+  schema: JsonSchema
+}[]
+
+export function entitySchema(type: string): JsonSchema {
+  const info = entityTypes.find((e) => e.type === type)
+  if (!info) throw new Error(`No entity type ${type} in the fixture`)
+  return info.schema
+}
+
+export function withProviders(ui: ReactElement, initialPath = '/') {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   queryClient.setQueryData([...adminKey, 'meta'], testMeta)
+  queryClient.setQueryData([...adminKey, 'entity-types'], entityTypes)
   return (
     <QueryClientProvider client={queryClient}>
-      <MemoryRouter>
+      <MemoryRouter initialEntries={[initialPath]}>
         <TooltipProvider>
           <ToastProvider>
             <ConfirmProvider>{ui}</ConfirmProvider>
