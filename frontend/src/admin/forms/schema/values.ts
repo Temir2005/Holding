@@ -112,7 +112,10 @@ export function previewText(node: ResolvedNode, value: unknown, root: JsonSchema
     const ru = value.ru
     return typeof ru === 'string' ? ru : ''
   }
-  if ((kind === 'string' || kind === 'link' || kind === 'icon') && typeof value === 'string') {
+  if (
+    (kind === 'string' || kind === 'link' || kind === 'page' || kind === 'icon') &&
+    typeof value === 'string'
+  ) {
     return value
   }
   if (kind === 'object' && isRecord(value)) {

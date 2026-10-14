@@ -21,6 +21,7 @@ const LOCALIZED_WIDGETS: Record<string, LocalizedVariant> = {
 const WIDGET_KINDS: Record<string, FieldKind> = {
   icon: 'icon',
   link: 'link',
+  page: 'page',
   color: 'color',
   select: 'options',
   combobox: 'combobox',
@@ -28,7 +29,7 @@ const WIDGET_KINDS: Record<string, FieldKind> = {
 }
 
 /** Widgets whose value is a plain string: rendered as a text field until they get an editor. */
-const PLAIN_WIDGETS = new Set(['anchor', 'page'])
+const PLAIN_WIDGETS = new Set(['anchor'])
 
 function annotationsOf(node: JsonSchema): Partial<JsonSchema> {
   const out: Partial<JsonSchema> = {}

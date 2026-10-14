@@ -1,13 +1,15 @@
 import * as Tabs from '@radix-ui/react-tabs'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { ArrowLeft, Eye, History, MoreVertical, RotateCcw, Send, Undo2 } from 'lucide-react'
+import { ArrowLeft, Eye, History, MoreVertical, RotateCcw, Send, Trash2, Undo2 } from 'lucide-react'
 import { useCallback, useEffect, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { api } from '../../api/client'
-import { AdminApiError, type FieldIssue } from '../../api/errors'
+import { AdminApiError, ErrorCode, type FieldIssue } from '../../api/errors'
+import type { Usage } from '../../api/media'
 import {
   blockTitle,
   canPublish,
+  HOME_SLUG,
   pageDetailQuery,
   pagesKey,
   pageTitle,
@@ -15,6 +17,8 @@ import {
 } from '../../api/pages'
 import { sectionTypesQuery } from '../../api/queries'
 import { rememberRefs } from '../../api/refCards'
+import { InUseDialog } from '../../forms/conflicts'
+import { BLOCK_PARAM, usagesFromDetails } from '../../forms/usage'
 import { useT } from '../../i18n'
 import { BREAKPOINTS, useMediaQuery } from '../../layout/useMediaQuery'
 import { Button } from '../../ui/Button'
@@ -50,7 +54,9 @@ function PageActions({
   const t = useT()
   const toast = useToast()
   const confirm = useConfirm()
+  const navigate = useNavigate()
   const queryClient = useQueryClient()
+  const [inUse, setInUse] = useState<{ usages: Usage[]; text: string } | null>(null)
 
   const refresh = () => {
     void queryClient.invalidateQueries({ queryKey: pageDetailQuery(page.id).queryKey })
@@ -77,6 +83,38 @@ function PageActions({
       toast.error(error)
     },
   })
+
+  const remove = useMutation({
+    mutationFn: () =>
+      api.delete('/api/v1/admin/pages/{page_id}', {
+        path: { page_id: page.id },
+        query: { version: page.version },
+      }),
+    onSuccess: () => {
+      queryClient.removeQueries({ queryKey: pageDetailQuery(page.id).queryKey })
+      void queryClient.invalidateQueries({ queryKey: [...pagesKey, 'list'] })
+      toast.success(t('pages.deleted'))
+      navigate('/admin/pages', { replace: true })
+    },
+    onError: (error) => {
+      if (error instanceof AdminApiError && error.code === ErrorCode.inUse) {
+        setInUse({ usages: usagesFromDetails(error.details), text: error.message })
+        return
+      }
+      if (error instanceof AdminApiError) refresh()
+      toast.error(error)
+    },
+  })
+
+  const askDelete = async () => {
+    const ok = await confirm({
+      title: t('pages.deleteTitle', { name: pageTitle(page) }),
+      description: t('pages.deleteText'),
+      confirmLabel: t('pages.delete'),
+      danger: true,
+    })
+    if (ok) remove.mutate()
+  }
 
   const ask = async (kind: 'discard' | 'unpublish') => {
     const ok = await confirm({
@@ -119,8 +157,19 @@ function PageActions({
               {t('publish.unpublish')}
             </MenuItem>
           )}
+          {page.slug !== HOME_SLUG && (
+            <MenuItem icon={<Trash2 size={16} />} onSelect={() => void askDelete()} danger>
+              {t('pages.delete')}
+            </MenuItem>
+          )}
         </MenuContent>
       </Menu>
+      <InUseDialog
+        usages={inUse?.usages ?? null}
+        onClose={() => setInUse(null)}
+        title={t('pages.cannotDelete')}
+        text={inUse?.text}
+      />
     </div>
   )
 }
@@ -138,6 +187,26 @@ function Editor({ page }: { page: PageDetail }) {
   const [preview, setPreview] = useState(false)
   const [settingsIssues, setSettingsIssues] = useState<FieldIssue[] | undefined>()
   const [blockDirty, setBlockDirty] = useState(false)
+
+  // A link to one block (`?block=<id>`, from "where it is used") opens it.
+  const [params, setParams] = useSearchParams()
+  const blockParam = params.get(BLOCK_PARAM)
+  useEffect(() => {
+    if (!blockParam) return
+    const section = page.sections.find((s) => s.id === blockParam)
+    if (section) {
+      setTab('blocks')
+      setTarget({ mode: 'edit', section })
+    }
+    setParams(
+      (prev) => {
+        const next = new URLSearchParams(prev)
+        next.delete(BLOCK_PARAM)
+        return next
+      },
+      { replace: true },
+    )
+  }, [blockParam, page.sections, setParams])
 
   // Cards of everything the blocks reference: reference fields show names at once.
   useEffect(() => {

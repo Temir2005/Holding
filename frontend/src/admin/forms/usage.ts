@@ -11,14 +11,21 @@ const COLLECTION_OF: Record<string, string> = {
   vacancy: 'vacancies',
 }
 
+/** Query parameter of the page editor that opens one of its blocks. */
+export const BLOCK_PARAM = 'block'
+
 /**
- * Where a usage can be opened in the admin, or null. Blocks and published versions carry
- * no page id in the API response, so they show only their label.
+ * Where a usage can be opened in the admin, or null. A block opens in its page's editor;
+ * a published version opens its page.
  */
 export function usageHref(usage: Usage): string | null {
   const collection = COLLECTION_OF[usage.entity_type]
   if (collection) return `/admin/collections/${collection}/${usage.entity_id}`
   if (usage.entity_type === 'page') return `/admin/pages/${usage.entity_id}`
+  if (usage.entity_type === 'section' && usage.page_id) {
+    return `/admin/pages/${usage.page_id}?${BLOCK_PARAM}=${usage.entity_id}`
+  }
+  if (usage.entity_type === 'page_revision' && usage.page_id) return `/admin/pages/${usage.page_id}`
   if (usage.entity_type === 'site_settings') return '/admin/settings'
   return null
 }

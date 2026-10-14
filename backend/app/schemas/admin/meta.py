@@ -46,6 +46,10 @@ class Meta(BaseModel):
     media_folders: list[Option] = Field(
         description="Media folders in use, for fields with x-options: media_folders"
     )
+    client_industries: list[Option] = Field(
+        description="Client industry keys in use (label: the Russian name), for fields with "
+        "x-options: client_industries"
+    )
 
 
 class EntityTypeInfo(BaseModel):
