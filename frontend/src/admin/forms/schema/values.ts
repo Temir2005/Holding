@@ -100,6 +100,26 @@ export function formToStored(root: JsonSchema, values: Values): Values {
   return toStored({ schema: root, nullable: false }, values, root) as Values
 }
 
+/**
+ * Form values of a stored record (a collection row, the site settings): the fields of the
+ * form schema, taken from the record. Localized texts are stored as `{}` when empty; an
+ * optional one shows as "not set". Fields the record lacks get empty values.
+ */
+export function valuesFromRecord(root: JsonSchema, record: Record<string, unknown>): Values {
+  const required = new Set(root.required ?? [])
+  return Object.fromEntries(
+    Object.entries(root.properties ?? {}).map(([key, prop]) => {
+      const node = resolveNode(prop, root)
+      const value = record[key]
+      if (value === undefined) return [key, emptyValue(node, root, required.has(key))]
+      if (node.nullable && fieldKind(node, root) === 'localized' && isRecord(value)) {
+        if (Object.keys(value).length === 0) return [key, null]
+      }
+      return [key, value]
+    }),
+  )
+}
+
 /** Default values for a new block of this type. */
 export function emptyForm(root: JsonSchema): Values {
   return emptyValue({ schema: root, nullable: false }, root) as Values

@@ -33,3 +33,9 @@ class SettingsAdminRead(BaseModel):
     )
     updated_at: datetime
     version: int
+
+
+class SettingsForm(SiteSettingsDoc):
+    """The settings form (GET /admin/entity-types), saved whole with SettingsUpdate."""
+
+    model_config = ConfigDict(extra="forbid", title="Настройки сайта")

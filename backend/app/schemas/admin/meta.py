@@ -46,6 +46,11 @@ class Meta(BaseModel):
     media_folders: list[Option] = Field(
         description="Media folders in use, for fields with x-options: media_folders"
     )
+    user_roles: list[Option] = Field(description="Roles of admin users")
+    audit_actions: list[Option] = Field(description="Actions in the audit log (filter, labels)")
+    audit_entity_types: list[Option] = Field(
+        description="What the audit log records changes of (filter, labels)"
+    )
     client_industries: list[Option] = Field(
         description="Client industry keys in use (label: the Russian name), for fields with "
         "x-options: client_industries"

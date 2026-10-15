@@ -1,9 +1,15 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { api } from '../../api/client'
 import { AdminApiError, ErrorCode, type FieldIssue } from '../../api/errors'
 import type { Usage } from '../../api/media'
-import { pageDetailQuery, pagesKey, type PageDetail, type PageUpdate } from '../../api/pages'
+import {
+  pageDetailQuery,
+  pagesKey,
+  type PageDetail,
+  type PageSummary,
+  type PageUpdate,
+} from '../../api/pages'
 import { entityTypesQuery } from '../../api/queries'
 import { rememberCards } from '../../api/refCards'
 import { InUseDialog, VersionConflictDialog } from '../../forms/conflicts'
@@ -23,7 +29,7 @@ const FORM_ID = 'page-settings-form'
 
 const hasText = (v: unknown) => typeof v === 'object' && v !== null && Object.keys(v).length > 0
 
-function pageValues(page: PageDetail, schema: JsonSchema): Values {
+function pageValues(page: PageSummary, schema: JsonSchema): Values {
   const all: Values = {
     slug: page.slug,
     title: page.title,
@@ -46,12 +52,29 @@ function SettingsForm({
   const t = useT()
   const toast = useToast()
   const queryClient = useQueryClient()
-  const form = useSchemaForm(schema, pageValues(page, schema))
+  // The version being edited: the loaded page, then each saved one.
+  const [edited, setEdited] = useState<PageSummary>(page)
+  const [initial] = useState(() => pageValues(page, schema))
+  const form = useSchemaForm(schema, initial)
   const [formErrors, setFormErrors] = useState<string[]>([])
   const [conflict, setConflict] = useState<Values | null>(null)
   const [inUse, setInUse] = useState<Usage[] | null>(null)
 
   useUnsavedGuard(form.formState.isDirty)
+
+  const adopt = useCallback(
+    (fresh: PageSummary) => {
+      setEdited(fresh)
+      form.reset(pageValues(fresh, schema))
+    },
+    [form, schema],
+  )
+
+  // A newer version arrived (published, someone else saved): shown at once unless there are
+  // edits; with edits, saving stops with the version conflict dialog instead of losing them.
+  useEffect(() => {
+    if (page.version > edited.version && !form.formState.isDirty) adopt(page)
+  }, [page, edited.version, form, adopt])
   // Problems found when publishing (the share picture…) show on the fields.
   useEffect(() => {
     if (issues?.length) setFormErrors(applyServerErrors(form, schema, issues))
@@ -65,9 +88,10 @@ function SettingsForm({
     mutationFn: (values: Values) =>
       api.patch('/api/v1/admin/pages/{page_id}', {
         path: { page_id: page.id },
-        body: { ...values, version: page.version } as PageUpdate,
+        body: { ...values, version: edited.version } as PageUpdate,
       }),
-    onSuccess: () => {
+    onSuccess: (saved) => {
+      adopt(saved)
       void queryClient.invalidateQueries({ queryKey: pageDetailQuery(page.id).queryKey })
       void queryClient.invalidateQueries({ queryKey: [...pagesKey, 'list'] })
       setFormErrors([])
@@ -112,7 +136,9 @@ function SettingsForm({
         edits={conflict}
         onReload={() => {
           setConflict(null)
-          void queryClient.invalidateQueries({ queryKey: pageDetailQuery(page.id).queryKey })
+          void queryClient
+            .fetchQuery({ ...pageDetailQuery(page.id), staleTime: 0 })
+            .then(adopt, (error: unknown) => toast.error(error))
         }}
         onKeep={() => setConflict(null)}
       />
@@ -130,6 +156,5 @@ export function PageSettingsForm({ page, issues }: { page: PageDetail; issues?: 
     if (page.og_image) rememberCards(queryClient, 'media', [page.og_image])
   }, [page.og_image, queryClient])
   if (!schema) return <Skeleton className="h-64" />
-  // A fresh form for every saved version, so it never shows stale values.
-  return <SettingsForm key={page.version} page={page} schema={schema} issues={issues} />
+  return <SettingsForm key={page.id} page={page} schema={schema} issues={issues} />
 }

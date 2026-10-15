@@ -194,3 +194,53 @@ describe('collection record', () => {
     })
   })
 })
+
+describe('client industry', () => {
+  beforeEach(() => {
+    vi.unstubAllGlobals()
+    signedIn()
+  })
+
+  const client = {
+    id: 'c1',
+    is_published: true,
+    sort_order: 0,
+    created_at: '2026-10-01T10:00:00Z',
+    updated_at: '2026-10-01T10:00:00Z',
+    version: 1,
+    name: { ru: 'Банк' },
+    logo_id: null,
+    logo: null,
+    industry: 'finance',
+    industry_label: { ru: 'Финансы', en: 'Finance' },
+    description: {},
+    testimonial: null,
+    website_url: null,
+  }
+
+  it('takes the name of a suggested industry when the name is empty', async () => {
+    const { calls } = fakeFetch({
+      ...lookup,
+      'GET /api/v1/admin/clients': () => json(200, listOf([client])),
+    })
+    const user = renderItem('/admin/collections/clients/new')
+    await user.type(await screen.findByRole('combobox', { name: /Ключ отрасли/ }), 'finance')
+    const label = screen.getByRole('textbox', { name: /^Отрасль/ })
+    await waitFor(() => expect(label).toHaveProperty('value', 'Финансы'))
+    expect(calls.some((c) => c.includes('/clients?') && c.includes('industry=finance'))).toBe(true)
+    await user.click(screen.getByRole('button', { name: 'EN' }))
+    expect(screen.getByRole('textbox', { name: /^Отрасль/ })).toHaveProperty('value', 'Finance')
+  })
+
+  it('keeps a name the editor typed', async () => {
+    const { calls } = fakeFetch({
+      ...lookup,
+      'GET /api/v1/admin/clients': () => json(200, listOf([client])),
+    })
+    const user = renderItem('/admin/collections/clients/new')
+    await user.type(await screen.findByRole('textbox', { name: /^Отрасль/ }), 'Банки')
+    await user.type(screen.getByRole('combobox', { name: /Ключ отрасли/ }), 'finance')
+    expect(screen.getByRole('textbox', { name: /^Отрасль/ })).toHaveProperty('value', 'Банки')
+    expect(calls.some((c) => c.includes('/clients?'))).toBe(false)
+  })
+})

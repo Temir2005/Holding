@@ -2319,6 +2319,21 @@ export interface components {
        */
       media_folders: components['schemas']['Option'][]
       /**
+       * User Roles
+       * @description Roles of admin users
+       */
+      user_roles: components['schemas']['Option'][]
+      /**
+       * Audit Actions
+       * @description Actions in the audit log (filter, labels)
+       */
+      audit_actions: components['schemas']['Option'][]
+      /**
+       * Audit Entity Types
+       * @description What the audit log records changes of (filter, labels)
+       */
+      audit_entity_types: components['schemas']['Option'][]
+      /**
        * Client Industries
        * @description Client industry keys in use (label: the Russian name), for fields with x-options: client_industries
        */
@@ -2331,13 +2346,19 @@ export interface components {
     NavItem: {
       /** Текст пункта */
       label: components['schemas']['LocalizedText']
-      /** Страница */
+      /**
+       * Страница
+       * @description Пусто — текущая страница
+       */
       page_slug?: string | null
-      /** Якорь */
+      /**
+       * Якорь
+       * @description Раздел страницы, например contacts
+       */
       anchor?: string | null
       /**
        * Внешняя ссылка
-       * @description https://…
+       * @description https://… — вместо страницы и якоря
        */
       url?: string | null
     }

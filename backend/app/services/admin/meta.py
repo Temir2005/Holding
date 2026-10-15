@@ -10,7 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import Settings
 from app.core.i18n import DEFAULT_LOCALE, Locale
 from app.core.icons import ICON_NAMES
-from app.models import Client, LeadStatus
+from app.models import Client, LeadStatus, UserRole
 from app.repositories.admin.media import MediaRepository
 from app.schemas.admin.collection_forms import (
     COLLECTION_FORMS,
@@ -27,6 +27,7 @@ from app.schemas.admin.meta import (
     SectionTypeInfo,
 )
 from app.schemas.admin.pages import TONE_LABELS, PageForm, SectionForm
+from app.schemas.admin.settings import SettingsForm
 from app.schemas.refs import KeyKind, RefKind
 from app.schemas.sections import LEAD_TYPE_LABELS, SECTION_SCHEMAS
 from app.services.admin.media_files import MEDIA_TYPES, MediaKind
@@ -45,6 +46,38 @@ MEDIA_KIND_LABELS = {
     MediaKind.svg: "SVG",
     MediaKind.video: "Видео",
     MediaKind.document: "Документы",
+}
+USER_ROLE_LABELS = {UserRole.admin: "Администратор", UserRole.editor: "Редактор"}
+# Every action the admin services write to the audit log (a test keeps the list complete).
+AUDIT_ACTION_LABELS = {
+    "create": "Создание",
+    "update": "Изменение",
+    "delete": "Удаление",
+    "reorder": "Новый порядок",
+    "publish": "Публикация",
+    "unpublish": "Снятие с сайта",
+    "discard_draft": "Сброс черновика",
+    "restore": "Восстановление версии",
+    "export": "Выгрузка CSV",
+    "login": "Вход",
+    "password_change": "Смена своего пароля",
+    "password_reset": "Новый пароль от администратора",
+}
+# Every entity type in the audit log (a test keeps the list complete).
+AUDIT_ENTITY_LABELS = {
+    "page": "Страница",
+    "section": "Блок",
+    "media": "Файл",
+    "division": "Направление",
+    "project": "Проект",
+    "person": "Сотрудник",
+    "client": "Клиент",
+    "timeline_event": "Событие истории",
+    "stat": "Цифра",
+    "vacancy": "Вакансия",
+    "lead": "Заявка",
+    "site_settings": "Настройки сайта",
+    "admin_user": "Пользователь",
 }
 # Social link types the site knows how to show (validated when settings are saved).
 SOCIAL_TYPES = {
@@ -93,6 +126,9 @@ def build_meta(
         media_kinds=options(MEDIA_KIND_LABELS),
         media_folders=[Option(value=f, label=f) for f in folders],
         client_industries=industries,
+        user_roles=options(USER_ROLE_LABELS),
+        audit_actions=options(AUDIT_ACTION_LABELS),
+        audit_entity_types=options(AUDIT_ENTITY_LABELS),
     )
 
 
@@ -116,12 +152,13 @@ async def client_industries(session: AsyncSession) -> list[Option]:
     return [Option(value=k, label=v) for k, v in labels.items()]
 
 
-# Forms of entities that are not section blocks; site settings come next.
+# Forms of entities that are not section blocks.
 ENTITY_FORMS: dict[str, tuple[str, type[BaseModel]]] = {
     "media": ("Файл медиатеки", MediaForm),
     "page": ("Страница", PageForm),
     "section": ("Блок", SectionForm),
     **COLLECTION_FORMS,
+    "site_settings": ("Настройки сайта", SettingsForm),
 }
 
 

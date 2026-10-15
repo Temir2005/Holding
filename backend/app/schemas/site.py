@@ -21,9 +21,17 @@ class NavItem(BaseModel):
 
     model_config = ConfigDict(extra="forbid", title="Пункт меню")
     label: L = field("Текст пункта", widget="localized-text")
-    page_slug: str | None = field("Страница", widget="page", default=None)
-    anchor: str | None = field("Якорь", widget="anchor", default=None)
-    url: str | None = field("Внешняя ссылка", description="https://…", default=None)
+    page_slug: str | None = field(
+        "Страница", widget="page", description="Пусто — текущая страница", default=None
+    )
+    anchor: str | None = field(
+        "Якорь", widget="anchor", description="Раздел страницы, например contacts", default=None
+    )
+    url: str | None = field(
+        "Внешняя ссылка",
+        description="https://… — вместо страницы и якоря",
+        default=None,
+    )
 
 
 class Coordinates(BaseModel):

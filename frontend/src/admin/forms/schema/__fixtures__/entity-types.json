@@ -1609,5 +1609,314 @@
       "title": "Вакансия",
       "type": "object"
     }
+  },
+  {
+    "type": "site_settings",
+    "label": "Настройки сайта",
+    "schema": {
+      "$defs": {
+        "Contacts": {
+          "additionalProperties": false,
+          "properties": {
+            "address": {
+              "$ref": "#/$defs/LocalizedText",
+              "title": "Адрес",
+              "x-widget": "localized-textarea"
+            },
+            "phones": {
+              "items": {
+                "type": "string"
+              },
+              "title": "Телефоны",
+              "type": "array"
+            },
+            "email": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Email"
+            },
+            "whatsapp": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Номер в международном формате",
+              "title": "WhatsApp"
+            },
+            "hours": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/LocalizedText"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Часы работы",
+              "x-widget": "localized-text"
+            },
+            "coordinates": {
+              "anyOf": [
+                {
+                  "$ref": "#/$defs/Coordinates"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Точка на карте"
+            }
+          },
+          "required": ["address"],
+          "title": "Контакты",
+          "type": "object"
+        },
+        "Coordinates": {
+          "properties": {
+            "lat": {
+              "title": "Широта",
+              "type": "number"
+            },
+            "lng": {
+              "title": "Долгота",
+              "type": "number"
+            }
+          },
+          "required": ["lat", "lng"],
+          "title": "Координаты",
+          "type": "object"
+        },
+        "DefaultSeo": {
+          "additionalProperties": false,
+          "properties": {
+            "title": {
+              "$ref": "#/$defs/LocalizedText",
+              "title": "Заголовок",
+              "x-widget": "localized-text"
+            },
+            "description": {
+              "$ref": "#/$defs/LocalizedText",
+              "title": "Описание",
+              "x-widget": "localized-textarea"
+            },
+            "og_image_id": {
+              "anyOf": [
+                {
+                  "format": "uuid",
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Картинка для соцсетей",
+              "x-ref": {
+                "accept": ["image"],
+                "kind": "media",
+                "many": false
+              }
+            }
+          },
+          "required": ["title", "description"],
+          "title": "SEO по умолчанию",
+          "type": "object"
+        },
+        "Footer": {
+          "additionalProperties": false,
+          "properties": {
+            "text": {
+              "$ref": "#/$defs/LocalizedText",
+              "title": "Текст",
+              "x-widget": "localized-textarea"
+            },
+            "legal": {
+              "$ref": "#/$defs/LocalizedText",
+              "title": "Юридическая строка",
+              "x-widget": "localized-text"
+            }
+          },
+          "required": ["text", "legal"],
+          "title": "Подвал",
+          "type": "object"
+        },
+        "LocalizedText": {
+          "description": "A localized string inside section data and other JSONB documents.",
+          "properties": {
+            "ru": {
+              "title": "Русский",
+              "type": "string"
+            },
+            "kk": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "Қазақша"
+            },
+            "en": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "title": "English"
+            }
+          },
+          "required": ["ru"],
+          "title": "Текст на трёх языках",
+          "type": "object"
+        },
+        "NavItem": {
+          "additionalProperties": false,
+          "description": "A menu item: a page, an anchor (on that page or the current one) or an external URL.",
+          "properties": {
+            "label": {
+              "$ref": "#/$defs/LocalizedText",
+              "title": "Текст пункта",
+              "x-widget": "localized-text"
+            },
+            "page_slug": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Пусто — текущая страница",
+              "title": "Страница",
+              "x-widget": "page"
+            },
+            "anchor": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Раздел страницы, например contacts",
+              "title": "Якорь",
+              "x-widget": "anchor"
+            },
+            "url": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "https://… — вместо страницы и якоря",
+              "title": "Внешняя ссылка"
+            }
+          },
+          "required": ["label"],
+          "title": "Пункт меню",
+          "type": "object"
+        },
+        "Social": {
+          "properties": {
+            "type": {
+              "title": "Соцсеть",
+              "type": "string",
+              "x-options": "social_types",
+              "x-widget": "select"
+            },
+            "url": {
+              "description": "https://…",
+              "title": "Ссылка",
+              "type": "string"
+            }
+          },
+          "required": ["type", "url"],
+          "title": "Соцсеть",
+          "type": "object"
+        }
+      },
+      "additionalProperties": false,
+      "description": "The settings form (GET /admin/entity-types), saved whole with SettingsUpdate.",
+      "properties": {
+        "site_name": {
+          "$ref": "#/$defs/LocalizedText",
+          "title": "Название сайта",
+          "x-widget": "localized-text"
+        },
+        "logo_id": {
+          "anyOf": [
+            {
+              "format": "uuid",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Логотип",
+          "x-ref": {
+            "accept": ["image", "svg"],
+            "kind": "media",
+            "many": false
+          }
+        },
+        "navigation": {
+          "items": {
+            "$ref": "#/$defs/NavItem"
+          },
+          "title": "Меню",
+          "type": "array"
+        },
+        "contacts": {
+          "$ref": "#/$defs/Contacts"
+        },
+        "socials": {
+          "items": {
+            "$ref": "#/$defs/Social"
+          },
+          "title": "Соцсети",
+          "type": "array"
+        },
+        "footer": {
+          "$ref": "#/$defs/Footer"
+        },
+        "default_seo": {
+          "$ref": "#/$defs/DefaultSeo"
+        }
+      },
+      "required": ["site_name", "navigation", "contacts", "socials", "footer", "default_seo"],
+      "title": "Настройки сайта",
+      "type": "object"
+    }
   }
 ]

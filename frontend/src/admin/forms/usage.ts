@@ -19,14 +19,23 @@ export const BLOCK_PARAM = 'block'
  * a published version opens its page.
  */
 export function usageHref(usage: Usage): string | null {
-  const collection = COLLECTION_OF[usage.entity_type]
-  if (collection) return `/admin/collections/${collection}/${usage.entity_id}`
-  if (usage.entity_type === 'page') return `/admin/pages/${usage.entity_id}`
+  const direct = entityHref(usage.entity_type, usage.entity_id)
+  if (direct) return direct
   if (usage.entity_type === 'section' && usage.page_id) {
     return `/admin/pages/${usage.page_id}?${BLOCK_PARAM}=${usage.entity_id}`
   }
   if (usage.entity_type === 'page_revision' && usage.page_id) return `/admin/pages/${usage.page_id}`
-  if (usage.entity_type === 'site_settings') return '/admin/settings'
+  return null
+}
+
+/** Where a record of this type opens in the admin (audit log, usages), or null. */
+export function entityHref(entityType: string, id: string | null | undefined): string | null {
+  const collection = COLLECTION_OF[entityType]
+  if (collection && id) return `/admin/collections/${collection}/${id}`
+  if (entityType === 'page' && id) return `/admin/pages/${id}`
+  if (entityType === 'lead' && id) return `/admin/leads?lead=${id}`
+  if (entityType === 'site_settings') return '/admin/settings'
+  if (entityType === 'admin_user') return '/admin/users'
   return null
 }
 
