@@ -69,6 +69,28 @@ export const testMeta = {
   ],
   employment_types: [{ value: 'full_time', label: 'Полная занятость' }],
   client_industries: [{ value: 'finance', label: 'Финансы' }],
+  lead_types: [
+    { value: 'investor', label: 'Инвестиции' },
+    { value: 'partner', label: 'Партнёрство' },
+  ],
+  lead_statuses: [
+    { value: 'new', label: 'Новая' },
+    { value: 'in_progress', label: 'В работе' },
+    { value: 'done', label: 'Обработана' },
+    { value: 'spam', label: 'Спам' },
+  ],
+  user_roles: [
+    { value: 'admin', label: 'Администратор' },
+    { value: 'editor', label: 'Редактор' },
+  ],
+  audit_actions: [
+    { value: 'update', label: 'Изменение' },
+    { value: 'publish', label: 'Публикация' },
+  ],
+  audit_entity_types: [
+    { value: 'project', label: 'Проект' },
+    { value: 'page', label: 'Страница' },
+  ],
 } as unknown as Meta
 
 /** Real form schemas of non-block entities (`GET /admin/entity-types`). */

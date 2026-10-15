@@ -28,6 +28,7 @@ import { Menu, MenuContent, MenuItem, MenuTrigger } from '../../ui/Menu'
 import { useToast } from '../../ui/toast-context'
 import { AdminNotFound } from '../Placeholder'
 import { collectionConfig, itemTitle, type CollectionConfig } from './config'
+import { usePrefill } from './usePrefill'
 import {
   itemValues,
   newItemValues,
@@ -82,6 +83,7 @@ function ItemEditor({ config, schema, item: loaded }: EditorProps) {
   const listPath = `/admin/collections/${config.slug}`
 
   useUnsavedGuard(dirty && leaveTo === null)
+  usePrefill(config, form)
   useSaveShortcut(() => {
     const element = document.getElementById(FORM_ID)
     if (element instanceof HTMLFormElement) element.requestSubmit()

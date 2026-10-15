@@ -4,37 +4,19 @@ import type { CollectionItem } from '../../api/collections'
 import type { RefCard } from '../../api/queries'
 import { rememberCards } from '../../api/refCards'
 import { tAdmin } from '../../i18n'
-import { fieldKind, resolveNode } from '../../forms/schema/resolve'
 import type { JsonSchema } from '../../forms/schema/types'
-import { emptyForm, emptyValue, type Values } from '../../forms/schema/values'
+import { emptyForm, valuesFromRecord, type Values } from '../../forms/schema/values'
 import type { CollectionConfig } from './config'
 
-const isEmptyObject = (value: unknown) =>
-  typeof value === 'object' && value !== null && Object.keys(value).length === 0
-
-/**
- * Form values of a record: the fields of its form schema, taken from the read model.
- * Localized texts are stored as `{}` when empty; an optional one shows as "not set".
- */
+/** Form values of a record; the separately saved field (the gallery) from the record too. */
 export function itemValues(
   config: CollectionConfig,
   schema: JsonSchema,
   item: CollectionItem,
 ): Values {
-  const record = item as unknown as Record<string, unknown>
-  const required = new Set(schema.required ?? [])
-  return Object.fromEntries(
-    Object.entries(schema.properties ?? {}).map(([key, prop]) => {
-      if (config.separate?.field === key) return [key, config.separate.value(item)]
-      const node = resolveNode(prop, schema)
-      const value = record[key]
-      if (value === undefined) return [key, emptyValue(node, schema, required.has(key))]
-      if (node.nullable && fieldKind(node, schema) === 'localized' && isEmptyObject(value)) {
-        return [key, null]
-      }
-      return [key, value]
-    }),
-  )
+  const values = valuesFromRecord(schema, item as unknown as Record<string, unknown>)
+  if (config.separate) values[config.separate.field] = config.separate.value(item)
+  return values
 }
 
 export function newItemValues(schema: JsonSchema): Values {

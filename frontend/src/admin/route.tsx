@@ -8,12 +8,16 @@ import { lazy, Suspense, useState } from 'react'
 import { Helmet } from 'react-helmet-async'
 import { Route, Routes } from 'react-router-dom'
 import { createAdminQueryClient } from './api/queries'
+import { LeadsPage } from './features/leads/LeadsPage'
 import { MediaLibraryPage } from './features/media/MediaLibraryPage'
 import { PageEditorPage } from './features/pages/PageEditorPage'
 import { PagesListPage } from './features/pages/PagesListPage'
+import { AuditPage } from './features/audit/AuditPage'
 import { CollectionItemPage } from './features/collections/CollectionItemPage'
 import { CollectionListPage } from './features/collections/CollectionListPage'
 import { AdminNotFound, SectionPlaceholder } from './features/Placeholder'
+import { SettingsPage } from './features/settings/SettingsPage'
+import { UsersPage } from './features/users/UsersPage'
 import { useT } from './i18n'
 import { AdminLayout } from './layout/AdminLayout'
 import { useAdminBody, useThemeChoice } from './layout/theme'
@@ -48,22 +52,22 @@ function AdminRoutes() {
         <Route path="pages" element={<PagesListPage />} />
         <Route path="pages/:pageId" element={<PageEditorPage />} />
         <Route path="media" element={<MediaLibraryPage />} />
-        <Route path="leads/*" element={<SectionPlaceholder title="nav.leads" />} />
+        <Route path="leads" element={<LeadsPage />} />
         <Route path="collections/:collection" element={<CollectionListPage />} />
         <Route path="collections/:collection/:itemId" element={<CollectionItemPage />} />
         <Route
           path="settings"
           element={
             <RequireRole role="admin">
-              <SectionPlaceholder title="nav.settings" />
+              <SettingsPage />
             </RequireRole>
           }
         />
         <Route
-          path="users/*"
+          path="users"
           element={
             <RequireRole role="admin">
-              <SectionPlaceholder title="nav.users" />
+              <UsersPage />
             </RequireRole>
           }
         />
@@ -71,7 +75,7 @@ function AdminRoutes() {
           path="audit"
           element={
             <RequireRole role="admin">
-              <SectionPlaceholder title="nav.audit" />
+              <AuditPage />
             </RequireRole>
           }
         />

@@ -7,15 +7,16 @@
  */
 import type { ReactNode } from 'react'
 import { api } from '../../api/client'
-import type {
-  ClientItem,
-  CollectionItem,
-  DivisionItem,
-  PersonItem,
-  ProjectItem,
-  StatItem,
-  TimelineEventItem,
-  VacancyItem,
+import {
+  collectionApi,
+  type ClientItem,
+  type CollectionItem,
+  type DivisionItem,
+  type PersonItem,
+  type ProjectItem,
+  type StatItem,
+  type TimelineEventItem,
+  type VacancyItem,
 } from '../../api/collections'
 import { metaOptions, type LookupKind, type Meta, type RefCard } from '../../api/queries'
 import { tAdmin } from '../../i18n'
@@ -58,6 +59,11 @@ export interface CollectionConfig<T extends CollectionItem = CollectionItem> {
   reorder: false | { group?: (item: T) => string; groupHint?: string }
   /** The record's own page on the site, if it has one. */
   siteHref?: (item: T) => string | null
+  /**
+   * When `from` takes one of the suggested values (`x-options` list `list`), an empty `to`
+   * gets the value `value(key)` returns (the client industry name from a client with it).
+   */
+  prefill?: { from: string; list: string; to: string; value: (key: string) => Promise<unknown> }
   /** A form field saved by its own request after the record (the project gallery). */
   separate?: {
     field: string
@@ -238,6 +244,19 @@ export const COLLECTION_CONFIGS: Record<CollectionSlug, CollectionConfig> = {
     ],
     sorts: [ORDER, { value: 'industry', label: 'collection.sort.industry' }],
     reorder: {},
+    prefill: {
+      from: 'industry',
+      list: 'client_industries',
+      to: 'industry_label',
+      value: async (industry) => {
+        const page = await collectionApi.list<ClientItem>('clients', {
+          q: '',
+          sort: null,
+          filters: { industry },
+        })
+        return page.items[0]?.industry_label ?? null
+      },
+    },
   }),
   'timeline-events': define<TimelineEventItem>({
     slug: 'timeline-events',

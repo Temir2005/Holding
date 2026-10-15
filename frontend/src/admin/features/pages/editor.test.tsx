@@ -1,4 +1,5 @@
-import { render, screen, waitFor, within } from '@testing-library/react'
+import { focusManager } from '@tanstack/react-query'
+import { act, render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { apiError, fakeFetch, json, signedIn } from '../../test/fakeApi'
@@ -272,5 +273,91 @@ describe('a link to a block', () => {
     render(withProviders(<PageEditorPage />, '/admin/pages/p1?block=s1', '/admin/pages/:pageId'))
     const editor = await screen.findByRole('dialog', { name: /Цитата/ })
     expect(within(editor).getByRole('textbox', { name: 'Цитата' })).toBeTruthy()
+  })
+})
+
+describe('page settings', () => {
+  beforeEach(() => {
+    vi.unstubAllGlobals()
+    signedIn()
+  })
+
+  /** The page as the server has it now; `refetch()` makes the editor load it again. */
+  function serverPage() {
+    const state = { page: pageDetail() }
+    const refetch = () =>
+      act(async () => {
+        focusManager.setFocused(false)
+        focusManager.setFocused(true)
+      })
+    return { state, refetch }
+  }
+
+  async function openSettings(user: ReturnType<typeof userEvent.setup>) {
+    await user.click(await screen.findByRole('tab', { name: 'Настройки и SEO' }))
+    return screen.findByRole('textbox', { name: /^Название/ })
+  }
+
+  it('keep unsaved edits when someone saves the page meanwhile', async () => {
+    const { state, refetch } = serverPage()
+    const patches: unknown[] = []
+    fakeFetch({
+      'GET /api/v1/admin/pages/{id}': () => json(200, state.page),
+      'PATCH /api/v1/admin/pages/{id}': ({ body }) => {
+        patches.push(body)
+        return apiError(409, 'VERSION_CONFLICT', 'Запись изменилась')
+      },
+    })
+    const user = renderEditor()
+    const title = await openSettings(user)
+    await user.type(title, '!')
+
+    state.page = pageDetail({ version: 5, title: { ru: 'О компании' } })
+    await refetch()
+    expect(await screen.findByRole('heading', { level: 1, name: 'О компании' })).toBeTruthy()
+    expect(title).toHaveProperty('value', 'О нас!')
+
+    await user.click(screen.getByRole('button', { name: 'Сохранить' }))
+    await waitFor(() => expect(patches).toMatchObject([{ version: 4, title: { ru: 'О нас!' } }]))
+    expect(
+      await screen.findByRole('alertdialog', { name: 'Запись изменили, пока вы её редактировали' }),
+    ).toBeTruthy()
+  })
+
+  it('show a newer version at once when there are no edits', async () => {
+    const { state, refetch } = serverPage()
+    fakeFetch({ 'GET /api/v1/admin/pages/{id}': () => json(200, state.page) })
+    const user = renderEditor()
+    await openSettings(user)
+
+    state.page = pageDetail({ version: 5, title: { ru: 'О компании' } })
+    await refetch()
+    await waitFor(() =>
+      expect(screen.getByRole('textbox', { name: /^Название/ })).toHaveProperty(
+        'value',
+        'О компании',
+      ),
+    )
+  })
+
+  it('save with the version the form shows, then continue from the saved one', async () => {
+    const versions: unknown[] = []
+    fakeFetch({
+      'GET /api/v1/admin/pages/{id}': () => json(200, pageDetail()),
+      'PATCH /api/v1/admin/pages/{id}': ({ body }) => {
+        const { version, ...rest } = body as { version: number }
+        versions.push(version)
+        return json(200, { ...pageDetail(), ...rest, version: version + 1 })
+      },
+      'GET /api/v1/admin/pages': () => json(200, { items: [], total: 0, page: 1, page_size: 100 }),
+    })
+    const user = renderEditor()
+    const title = await openSettings(user)
+    await user.type(title, '!')
+    await user.click(screen.getByRole('button', { name: 'Сохранить' }))
+    expect(await screen.findByText('Настройки страницы сохранены')).toBeTruthy()
+    await user.type(title, '?')
+    await user.click(screen.getByRole('button', { name: 'Сохранить' }))
+    await waitFor(() => expect(versions).toEqual([4, 5]))
   })
 })

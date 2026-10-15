@@ -68,17 +68,7 @@ export const collectionListQuery = <T extends CollectionItem>(
 ) =>
   infiniteQueryOptions({
     queryKey: [...collectionKey(slug), 'list', query],
-    queryFn: ({ pageParam, signal }) =>
-      call<Paginated<T>>(base(slug), 'GET', {
-        query: {
-          ...query.filters,
-          page: pageParam,
-          page_size: COLLECTION_PAGE_SIZE,
-          q: query.q || null,
-          sort: query.sort,
-        },
-        signal,
-      }),
+    queryFn: ({ pageParam, signal }) => collectionApi.list<T>(slug, query, pageParam, signal),
     initialPageParam: 1,
     getNextPageParam: (last: Paginated<T>) =>
       last.page * last.page_size < last.total ? last.page + 1 : undefined,
@@ -92,6 +82,17 @@ export const collectionItemQuery = <T extends CollectionItem>(slug: CollectionSl
   })
 
 export const collectionApi = {
+  list: <T>(slug: CollectionSlug, query: ListQuery, page = 1, signal?: AbortSignal) =>
+    call<Paginated<T>>(base(slug), 'GET', {
+      query: {
+        ...query.filters,
+        page,
+        page_size: COLLECTION_PAGE_SIZE,
+        q: query.q || null,
+        sort: query.sort,
+      },
+      signal,
+    }),
   create: <T>(slug: CollectionSlug, body: Record<string, unknown>) =>
     call<T>(base(slug), 'POST', { body }),
   update: <T>(slug: CollectionSlug, id: string, body: Record<string, unknown>) =>
