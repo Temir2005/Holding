@@ -1,6 +1,8 @@
-import { AlertCircle, CheckCircle2, Info, TriangleAlert } from 'lucide-react'
+import { AlertCircle, CheckCircle2, Info, RotateCw, TriangleAlert } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { cn } from '@/lib/cn'
+import { useT } from '../i18n'
+import { Button } from './Button'
 
 export type Tone = 'neutral' | 'info' | 'success' | 'warning' | 'danger'
 
@@ -85,6 +87,44 @@ export function EmptyState({
       <h2 className="text-base">{title}</h2>
       {text && <p className="max-w-md text-sm text-mute">{text}</p>}
       {action}
+    </div>
+  )
+}
+
+/**
+ * A list or a block that failed to load: says so (instead of looking empty) and offers a
+ * retry. `compact` fits inside a card.
+ */
+export function ErrorState({
+  onRetry,
+  compact = false,
+}: {
+  onRetry: () => void
+  compact?: boolean
+}) {
+  const t = useT()
+  const retry = (
+    <Button size="sm" icon={<RotateCw size={14} aria-hidden="true" />} onClick={onRetry}>
+      {t('common.retry')}
+    </Button>
+  )
+  if (compact) {
+    return (
+      <div role="alert" className="flex flex-wrap items-center gap-3 text-sm">
+        <AlertCircle size={16} aria-hidden="true" className="text-danger" />
+        <span className="flex-1">{t('errors.loadFailed')}</span>
+        {retry}
+      </div>
+    )
+  }
+  return (
+    <div role="alert">
+      <EmptyState
+        icon={<AlertCircle size={28} aria-hidden="true" className="text-danger" />}
+        title={t('errors.loadFailed')}
+        text={t('errors.loadFailedText')}
+        action={retry}
+      />
     </div>
   )
 }

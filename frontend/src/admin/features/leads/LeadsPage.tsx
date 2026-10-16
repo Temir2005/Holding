@@ -16,7 +16,7 @@ import { metaOptions, metaQuery } from '../../api/queries'
 import { useT } from '../../i18n'
 import { Button } from '../../ui/Button'
 import { Sheet } from '../../ui/Dialog'
-import { EmptyState, Skeleton } from '../../ui/feedback'
+import { EmptyState, ErrorState, Skeleton } from '../../ui/feedback'
 import { controlClass } from '../../ui/styles'
 import { useToast } from '../../ui/toast-context'
 import { formatDate } from '../media/format'
@@ -241,6 +241,8 @@ export function LeadsPage() {
             <Skeleton key={i} className="h-16" />
           ))}
         </div>
+      ) : list.isError ? (
+        <ErrorState onRetry={() => void list.refetch()} />
       ) : leads.length === 0 ? (
         filtered ? (
           <EmptyState

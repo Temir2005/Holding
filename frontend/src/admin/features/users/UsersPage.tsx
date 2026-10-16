@@ -6,7 +6,7 @@ import { usersQuery, type AdminUser } from '../../api/users'
 import { useT } from '../../i18n'
 import { useCurrentUser } from '../../session/context'
 import { Button } from '../../ui/Button'
-import { Badge, EmptyState, Skeleton } from '../../ui/feedback'
+import { Badge, ErrorState, Skeleton } from '../../ui/feedback'
 import { IconButton } from '../../ui/IconButton'
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '../../ui/Menu'
 import { optionLabel } from '../leads/leadUpdate'
@@ -79,7 +79,7 @@ function UserRow({
 export function UsersPage() {
   const t = useT()
   const me = useCurrentUser()
-  const { data, isPending } = useQuery(usersQuery())
+  const { data, isPending, isError, refetch } = useQuery(usersQuery())
   const users = data?.items ?? []
   // undefined: closed; null: a new user.
   const [editing, setEditing] = useState<AdminUser | null | undefined>(undefined)
@@ -103,8 +103,8 @@ export function UsersPage() {
             <Skeleton key={i} className="h-16" />
           ))}
         </div>
-      ) : users.length === 0 ? (
-        <EmptyState title={t('errors.loadFailed')} />
+      ) : isError || users.length === 0 ? (
+        <ErrorState onRetry={() => void refetch()} />
       ) : (
         <ul className="flex flex-col gap-2" aria-label={t('nav.users')}>
           {users.map((user) => (

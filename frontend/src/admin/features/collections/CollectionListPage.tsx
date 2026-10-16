@@ -44,7 +44,7 @@ import { useT } from '../../i18n'
 import { COLLECTIONS } from '../../layout/nav'
 import { Button, ButtonLink } from '../../ui/Button'
 import { useConfirm } from '../../ui/confirm-context'
-import { EmptyState, Skeleton } from '../../ui/feedback'
+import { EmptyState, ErrorState, Skeleton } from '../../ui/feedback'
 import { IconButton } from '../../ui/IconButton'
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '../../ui/Menu'
 import { controlClass } from '../../ui/styles'
@@ -412,6 +412,8 @@ function CollectionList({ config }: { config: CollectionConfig }) {
             <Skeleton key={i} className="h-14" />
           ))}
         </div>
+      ) : list.isError ? (
+        <ErrorState onRetry={() => void list.refetch()} />
       ) : items.length === 0 ? (
         filtered ? (
           <EmptyState

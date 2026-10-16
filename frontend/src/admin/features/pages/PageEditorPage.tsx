@@ -24,11 +24,11 @@ import { BREAKPOINTS, useMediaQuery } from '../../layout/useMediaQuery'
 import { Button } from '../../ui/Button'
 import { useConfirm } from '../../ui/confirm-context'
 import { Sheet } from '../../ui/Dialog'
-import { EmptyState, Skeleton } from '../../ui/feedback'
+import { ErrorState, Skeleton } from '../../ui/feedback'
 import { IconButton } from '../../ui/IconButton'
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '../../ui/Menu'
 import { useToast } from '../../ui/toast-context'
-import { AdminNotFound } from '../Placeholder'
+import { AdminNotFound, DocumentTitle } from '../Placeholder'
 import { AddBlockDialog } from './AddBlockDialog'
 import { BlockEditor, type BlockTarget } from './BlockEditor'
 import { BlocksPanel } from './BlocksPanel'
@@ -229,6 +229,7 @@ function Editor({ page }: { page: PageDetail }) {
 
   return (
     <div className="flex flex-col gap-4">
+      <DocumentTitle title={pageTitle(page)} />
       <div className="flex flex-col gap-3">
         <Link
           to="/admin/pages"
@@ -346,8 +347,7 @@ function Editor({ page }: { page: PageDetail }) {
 /** One page: its blocks, settings and SEO, publishing, history and preview. */
 export function PageEditorPage() {
   const { pageId = '' } = useParams()
-  const t = useT()
-  const { data: page, isPending, error } = useQuery(pageDetailQuery(pageId))
+  const { data: page, isPending, error, refetch } = useQuery(pageDetailQuery(pageId))
   if (isPending) {
     return (
       <div className="flex flex-col gap-3">
@@ -358,6 +358,6 @@ export function PageEditorPage() {
     )
   }
   if (error instanceof AdminApiError && error.status === 404) return <AdminNotFound />
-  if (!page) return <EmptyState title={t('errors.loadFailed')} />
+  if (!page) return <ErrorState onRetry={() => void refetch()} />
   return <Editor page={page} />
 }

@@ -14,7 +14,7 @@ import { useSchemaForm } from '../../forms/schema/useSchemaForm'
 import { valuesFromRecord, type Values } from '../../forms/schema/values'
 import { useT } from '../../i18n'
 import { Button } from '../../ui/Button'
-import { EmptyState, Skeleton } from '../../ui/feedback'
+import { ErrorState, Skeleton } from '../../ui/feedback'
 import { useToast } from '../../ui/toast-context'
 import { PageTitle } from '../Placeholder'
 
@@ -118,7 +118,7 @@ function SettingsForm({ settings, schema }: { settings: SiteSettings; schema: Js
 export function SettingsPage() {
   const t = useT()
   const { data: entities } = useQuery(entityTypesQuery())
-  const { data: settings, isPending } = useQuery(settingsQuery())
+  const { data: settings, isPending, refetch } = useQuery(settingsQuery())
   const schema = entities?.find((e) => e.type === 'site_settings')?.schema as JsonSchema | undefined
 
   return (
@@ -130,7 +130,7 @@ export function SettingsPage() {
       ) : settings ? (
         <SettingsForm settings={settings} schema={schema} />
       ) : (
-        <EmptyState title={t('errors.loadFailed')} />
+        <ErrorState onRetry={() => void refetch()} />
       )}
     </div>
   )

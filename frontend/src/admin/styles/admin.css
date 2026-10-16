@@ -68,6 +68,12 @@ body.admin {
   text-wrap: pretty;
 }
 
+/* A fieldset is at least as wide as its content by default: a long URL in a collapsed list
+   item would widen the whole form past a phone screen instead of being truncated. */
+.admin fieldset {
+  min-width: 0;
+}
+
 .admin :focus-visible {
   outline: 2px solid rgb(var(--a-ring));
   outline-offset: 2px;

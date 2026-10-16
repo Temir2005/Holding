@@ -22,11 +22,11 @@ import { usagesFromDetails } from '../../forms/usage'
 import { useT } from '../../i18n'
 import { Button } from '../../ui/Button'
 import { useConfirm } from '../../ui/confirm-context'
-import { Badge, EmptyState, Skeleton } from '../../ui/feedback'
+import { Badge, ErrorState, Skeleton } from '../../ui/feedback'
 import { IconButton } from '../../ui/IconButton'
 import { Menu, MenuContent, MenuItem, MenuTrigger } from '../../ui/Menu'
 import { useToast } from '../../ui/toast-context'
-import { AdminNotFound } from '../Placeholder'
+import { AdminNotFound, DocumentTitle } from '../Placeholder'
 import { collectionConfig, itemTitle, type CollectionConfig } from './config'
 import { usePrefill } from './usePrefill'
 import {
@@ -208,6 +208,7 @@ function ItemEditor({ config, schema, item: loaded }: EditorProps) {
 
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-4">
+      <DocumentTitle title={title} />
       <div className="flex flex-col gap-3">
         <Link
           to={listPath}
@@ -304,15 +305,15 @@ function ExistingItem({
   schema: JsonSchema
   id: string
 }) {
-  const t = useT()
   const {
     data: item,
     isPending,
     error,
+    refetch,
   } = useQuery(collectionItemQuery<CollectionItem>(config.slug, id))
   if (isPending) return <Skeleton className="mx-auto h-96 max-w-3xl" />
   if (error instanceof AdminApiError && error.status === 404) return <AdminNotFound />
-  if (!item) return <EmptyState title={t('errors.loadFailed')} />
+  if (!item) return <ErrorState onRetry={() => void refetch()} />
   return <ItemEditor key={item.id} config={config} schema={schema} item={item} />
 }
 
