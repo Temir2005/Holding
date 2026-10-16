@@ -50,9 +50,10 @@ test.describe('collections', () => {
     const dialog = page.getByRole('dialog', { name: 'Не получилось удалить' })
     await expect(dialog).toBeVisible()
     await dialog.getByRole('link').first().click()
-    // The page editor opens with the block that shows the project.
-    await expect(page.getByRole('tab', { name: 'Блоки' })).toBeVisible()
-    await expect(page.getByRole('dialog')).toBeVisible()
+    // The page editor opens with the block that shows the project (the modal panel hides
+    // the editor behind it from the accessibility tree, so the URL tells where we are).
+    await expect(page).toHaveURL(/\/admin\/pages\/[0-9a-f-]+$/)
+    await expect(page.getByRole('dialog', { name: /Токенизация/ })).toBeVisible()
   })
 
   test('works on a phone: create a person, put on the site, delete', async ({ page }) => {

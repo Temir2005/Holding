@@ -1,12 +1,12 @@
 # MegaSmart — правила проекта
 
-Корпоративный сайт-лендинг холдинга MegaSmart (Шымкент). Сейчас этап прототипа на тестовом контенте, но архитектура сразу production-grade: следующим шагом добавится админка (CMS) без переписывания фронта и модели данных.
+Корпоративный сайт-лендинг холдинга MegaSmart (Шымкент). Сейчас этап прототипа на тестовом контенте, но архитектура сразу production-grade. Админка (CMS) живёт во фронтенде по адресу `/admin` (`frontend/src/admin`) и работает через админское API.
 
-Исходное ТЗ: `megasmart_claude_code_prompt.md`. Модель контента: `docs/content-model.md`. Дизайн: `docs/design.md`. Архитектура и этапы: `docs/architecture.md`.
+Исходное ТЗ: `megasmart_claude_code_prompt.md` (сайт), `megasmart_backend_cms_prompt.md` (API CMS), `megasmart_admin_ui_prompt.md` (интерфейс админки). Модель контента: `docs/content-model.md`. Дизайн: `docs/design.md`. Архитектура и этапы: `docs/architecture.md`. Админское API: `docs/admin-api.md`. Интерфейс админки: `docs/admin-ui.md`.
 
 ## Главное правило
 
-**Во фронтенде нет контентных текстов и картинок.** Все тексты приходят из PostgreSQL через API, все изображения лежат в S3 (локально MinIO) и приходят как объекты `Media`. Во фронте допустимы только UI-строки (кнопки, aria-label), и они лежат в i18n-файлах (`frontend/src/i18n/`), а не в JSX.
+**Во фронтенде нет контентных текстов и картинок.** Все тексты приходят из PostgreSQL через API, все изображения лежат в S3 (локально MinIO) и приходят как объекты `Media`. Во фронте допустимы только UI-строки (кнопки, aria-label), и они лежат в i18n-файлах (`frontend/src/i18n/` для сайта, `frontend/src/admin/i18n/ru.json` для админки), а не в JSX.
 
 Если сомневаешься между «быстро» и «правильно для будущей CMS», выбирай второе и коротко объясни почему.
 
@@ -14,7 +14,8 @@
 
 - **Frontend:** Vite, React 18, TypeScript strict, Tailwind (токены через CSS-переменные), Framer Motion, React Router v6 (data routers), TanStack Query, react-i18next, react-helmet-async, openapi-typescript, ESLint + Prettier. Шрифты self-hosted через `@fontsource`.
 - **Backend:** Python 3.12, FastAPI, Pydantic v2, SQLAlchemy 2.0 async + asyncpg, Alembic, aioboto3, pydantic-settings, ruff, mypy, pytest + httpx. Зависимости через uv.
-- **Infra:** docker-compose (postgres, minio, minio-init, backend, frontend), `.env` и `.env.example`, Makefile.
+- **Админка (внутри frontend):** react-hook-form, @dnd-kit (core, sortable), примитивы Radix UI, lucide-react. Тесты фронта: vitest, Testing Library, jsdom; e2e: Playwright и @axe-core/playwright.
+- **Infra:** docker-compose (postgres, minio, minio-init, backend, frontend; сервис `e2e` только для `make e2e`), `.env` и `.env.example`, Makefile.
 
 Node.js локально не установлен, весь фронтенд-тулинг запускается в контейнере `frontend`.
 
@@ -28,6 +29,7 @@ Node.js локально не установлен, весь фронтенд-т
 - Фронт: `sectionRegistry` + `<PageRenderer>`. Неизвестный тип секции не роняет страницу, в dev выводится предупреждение.
 - Картинки выводятся только через `<SmartImage>` (ширина и высота из API, placeholder, lazy, `alt` из CMS). URL строится через `buildImageUrl()`, это задел под image-proxy.
 - Типы ответов API генерируются из OpenAPI (`make gen-types`). Руками не дублировать.
+- Админка загружается лениво (`/admin/*`) и в бандл сайта не попадает; каждый её раздел — отдельный чанк. Формы блоков, коллекций, страниц, медиа и настроек строятся `SchemaForm` по JSON Schema из `GET /admin/section-types` и `/admin/entity-types`: не хватает подсказки — добавить её на бэкенде (`field(..., widget=...)`), а не писать форму руками. Подробно — `docs/admin-ui.md`.
 
 ## Команды
 
@@ -38,7 +40,8 @@ make migrate    # alembic upgrade head
 make seed       # картинки в MinIO + тестовый контент (только в пустую базу)
 make seed-force # перезаписать стартовый контент (только APP_ENV=dev)
 make lint       # ruff + mypy + eslint + tsc
-make test       # pytest (+ тесты фронта, когда появятся)
+make test       # pytest + vitest
+make e2e        # Playwright в отдельном compose-проекте megasmart-e2e (своя база, удаляется после прогона)
 make gen-types  # OpenAPI → frontend/src/api/schema.d.ts
 ```
 
