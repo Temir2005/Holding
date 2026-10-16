@@ -9,7 +9,7 @@ import type { JsonSchema } from '../../forms/schema/types'
 import { entityHref } from '../../forms/usage'
 import { useT } from '../../i18n'
 import { Button } from '../../ui/Button'
-import { EmptyState, Skeleton } from '../../ui/feedback'
+import { EmptyState, ErrorState, Skeleton } from '../../ui/feedback'
 import { controlClass } from '../../ui/styles'
 import { optionLabel } from '../leads/leadUpdate'
 import { formatDate } from '../media/format'
@@ -266,6 +266,8 @@ export function AuditPage() {
         ))}
       </div>
     )
+  } else if (list.isError) {
+    body = <ErrorState onRetry={() => void list.refetch()} />
   } else if (entries.length === 0) {
     body = filtered ? (
       <EmptyState

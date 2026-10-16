@@ -1,23 +1,24 @@
-import { Construction, SearchX } from 'lucide-react'
+import { SearchX } from 'lucide-react'
+import { Helmet } from 'react-helmet-async'
 import { useT } from '../i18n'
 import { ButtonLink } from '../ui/Button'
 import { EmptyState } from '../ui/feedback'
 
-export function PageTitle({ children }: { children: string }) {
-  return <h1 className="mb-4 text-xl md:mb-6 md:text-2xl">{children}</h1>
-}
-
-/** Stand-in for sections built in later stages; keeps navigation testable now. */
-export function SectionPlaceholder({ title }: { title: string }) {
+/** The browser tab says which section is open (and screen readers announce it). */
+export function DocumentTitle({ title }: { title: string }) {
   const t = useT()
   return (
+    <Helmet>
+      <title>{`${title} — ${t('app.title')}`}</title>
+    </Helmet>
+  )
+}
+
+export function PageTitle({ children }: { children: string }) {
+  return (
     <>
-      <PageTitle>{t(title)}</PageTitle>
-      <EmptyState
-        icon={<Construction size={28} aria-hidden="true" />}
-        title={t('placeholder.title')}
-        text={t('placeholder.text')}
-      />
+      <DocumentTitle title={children} />
+      <h1 className="mb-4 text-xl md:mb-6 md:text-2xl">{children}</h1>
     </>
   )
 }

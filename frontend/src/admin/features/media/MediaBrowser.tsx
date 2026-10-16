@@ -7,7 +7,7 @@ import { mediaFoldersQuery, mediaListQuery, metaQuery } from '../../api/queries'
 import { useT } from '../../i18n'
 import { BREAKPOINTS, useMediaQuery } from '../../layout/useMediaQuery'
 import { Button } from '../../ui/Button'
-import { EmptyState, Skeleton } from '../../ui/feedback'
+import { EmptyState, ErrorState, Skeleton } from '../../ui/feedback'
 import { controlClass } from '../../ui/styles'
 import { Dropzone } from './Dropzone'
 import { displayName, formatBytes, formatDate } from './format'
@@ -205,11 +205,7 @@ export function MediaBrowser({
             ))}
           </div>
         ) : list.isError ? (
-          <EmptyState
-            icon={<ImageOff size={28} aria-hidden="true" />}
-            title={t('errors.loadFailed')}
-            action={<Button onClick={() => void list.refetch()}>{t('common.retry')}</Button>}
-          />
+          <ErrorState onRetry={() => void list.refetch()} />
         ) : items.length === 0 ? (
           <EmptyState
             icon={<ImageOff size={28} aria-hidden="true" />}

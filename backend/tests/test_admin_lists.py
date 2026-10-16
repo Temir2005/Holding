@@ -7,6 +7,7 @@ from pathlib import Path
 from httpx import AsyncClient
 
 import app.services.admin as services
+import seed
 from app.models import AdminUser, UserRole
 from app.schemas.admin.settings import SettingsForm, SettingsUpdate
 from app.services.admin.base import CrudService
@@ -16,12 +17,13 @@ from tests.conftest import auth_header
 
 ADMIN = "/api/v1/admin"
 SERVICES = Path(services.__file__).parent
+SEED = Path(seed.__file__).parent
 
 
 def audit_calls() -> list[str]:
-    """Source of every `audit.record(...)` call of the admin services."""
+    """Source of every `.record(...)` call of the admin services and the seeds."""
     calls: list[str] = []
-    for path in SERVICES.glob("*.py"):
+    for path in [*SERVICES.glob("*.py"), *SEED.glob("*.py")]:
         calls += re.findall(r"\.record\((.*?)\)\n", path.read_text(), flags=re.S)
     return calls
 

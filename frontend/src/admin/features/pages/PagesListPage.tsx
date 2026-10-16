@@ -23,7 +23,7 @@ import { AdminApiError } from '../../api/errors'
 import { pagesListQuery, pageTitle, type PageSummary } from '../../api/pages'
 import { useT } from '../../i18n'
 import { Button } from '../../ui/Button'
-import { EmptyState, Skeleton } from '../../ui/feedback'
+import { EmptyState, ErrorState, Skeleton } from '../../ui/feedback'
 import { useToast } from '../../ui/toast-context'
 import { formatDate } from '../media/format'
 import { PageTitle } from '../Placeholder'
@@ -142,6 +142,8 @@ export function PagesListPage() {
             <Skeleton key={i} className="h-16" />
           ))}
         </div>
+      ) : list.isError ? (
+        <ErrorState onRetry={() => void list.refetch()} />
       ) : pages.length === 0 ? (
         <EmptyState
           icon={<FileText size={28} aria-hidden="true" />}

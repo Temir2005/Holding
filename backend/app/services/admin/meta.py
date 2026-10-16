@@ -48,7 +48,8 @@ MEDIA_KIND_LABELS = {
     MediaKind.document: "Документы",
 }
 USER_ROLE_LABELS = {UserRole.admin: "Администратор", UserRole.editor: "Редактор"}
-# Every action the admin services write to the audit log (a test keeps the list complete).
+# Every action written to the audit log by the admin services and the seeds (a test keeps
+# the list complete).
 AUDIT_ACTION_LABELS = {
     "create": "Создание",
     "update": "Изменение",
@@ -62,6 +63,7 @@ AUDIT_ACTION_LABELS = {
     "login": "Вход",
     "password_change": "Смена своего пароля",
     "password_reset": "Новый пароль от администратора",
+    "seed": "Стартовый контент",
 }
 # Every entity type in the audit log (a test keeps the list complete).
 AUDIT_ENTITY_LABELS = {
@@ -78,6 +80,7 @@ AUDIT_ENTITY_LABELS = {
     "lead": "Заявка",
     "site_settings": "Настройки сайта",
     "admin_user": "Пользователь",
+    "site": "Сайт",
 }
 # Social link types the site knows how to show (validated when settings are saved).
 SOCIAL_TYPES = {

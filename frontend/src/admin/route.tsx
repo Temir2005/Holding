@@ -4,24 +4,27 @@
  */
 import './styles/admin.css'
 import { QueryClientProvider } from '@tanstack/react-query'
-import { lazy, Suspense, useState } from 'react'
+import { lazy, useState } from 'react'
 import { Helmet } from 'react-helmet-async'
 import { Route, Routes } from 'react-router-dom'
 import { createAdminQueryClient } from './api/queries'
-import { LeadsPage } from './features/leads/LeadsPage'
-import { MediaLibraryPage } from './features/media/MediaLibraryPage'
-import { PageEditorPage } from './features/pages/PageEditorPage'
-import { PagesListPage } from './features/pages/PagesListPage'
-import { AuditPage } from './features/audit/AuditPage'
-import { CollectionItemPage } from './features/collections/CollectionItemPage'
-import { CollectionListPage } from './features/collections/CollectionListPage'
-import { AdminNotFound, SectionPlaceholder } from './features/Placeholder'
-import { SettingsPage } from './features/settings/SettingsPage'
-import { UsersPage } from './features/users/UsersPage'
+import { AdminNotFound } from './features/Placeholder'
 import { useT } from './i18n'
 import { AdminLayout } from './layout/AdminLayout'
 import { useAdminBody, useThemeChoice } from './layout/theme'
 import { RequireAuth, RequireRole } from './session/guards'
+import {
+  AuditPage,
+  CollectionItemPage,
+  CollectionListPage,
+  DashboardPage,
+  LeadsPage,
+  MediaLibraryPage,
+  PageEditorPage,
+  PagesListPage,
+  SettingsPage,
+  UsersPage,
+} from './sections'
 import { LoginPage } from './session/LoginPage'
 import { SessionProvider } from './session/SessionProvider'
 import { ConfirmProvider } from './ui/Confirm'
@@ -48,7 +51,7 @@ function AdminRoutes() {
           </RequireAuth>
         }
       >
-        <Route index element={<SectionPlaceholder title="nav.dashboard" />} />
+        <Route index element={<DashboardPage />} />
         <Route path="pages" element={<PagesListPage />} />
         <Route path="pages/:pageId" element={<PageEditorPage />} />
         <Route path="media" element={<MediaLibraryPage />} />
@@ -79,16 +82,7 @@ function AdminRoutes() {
             </RequireRole>
           }
         />
-        {FormsPlayground && (
-          <Route
-            path="dev/forms"
-            element={
-              <Suspense fallback={null}>
-                <FormsPlayground />
-              </Suspense>
-            }
-          />
-        )}
+        {FormsPlayground && <Route path="dev/forms" element={<FormsPlayground />} />}
         <Route path="*" element={<AdminNotFound />} />
       </Route>
     </Routes>
