@@ -1,3 +1,4 @@
+import AxeBuilder from '@axe-core/playwright'
 import { expect, test, type Page } from '@playwright/test'
 import { signIn, VIEWPORTS } from './helpers'
 
@@ -34,6 +35,48 @@ async function open(page: Page, path: string) {
   } else {
     await page.goto(path)
   }
+}
+
+/**
+ * WCAG 2.1 A/AA problems (contrast, ARIA, labels) found by axe, one line each. The preview
+ * iframe shows the public site, which has its own checks.
+ */
+async function axeProblems(page: Page): Promise<string[]> {
+  const { violations } = await new AxeBuilder({ page })
+    .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
+    .exclude('iframe')
+    .analyze()
+  return violations.flatMap((v) =>
+    v.nodes.map(
+      (n) => `${v.id}: ${n.target.join(' ')} — ${n.failureSummary?.split('\n')[1] ?? ''}`,
+    ),
+  )
+}
+
+for (const theme of ['light', 'dark'] as const) {
+  test(`every section passes axe in the ${theme} theme`, async ({ page }) => {
+    test.setTimeout(240_000)
+    await page.emulateMedia({ colorScheme: theme, reducedMotion: 'reduce' })
+    await page.setViewportSize({ width: 1280, height: 900 })
+    await signIn(page)
+    const found: string[] = []
+    for (const section of SECTIONS) {
+      await open(page, section.path)
+      await expect(page.getByRole('heading', { level: 1, name: section.heading })).toBeVisible()
+      await expect(page.locator('.animate-pulse')).toHaveCount(0)
+      found.push(...(await axeProblems(page)).map((p) => `${section.name}: ${p}`))
+    }
+    // Panels and dialogs on top of a screen.
+    await open(page, 'home-editor')
+    await page.getByRole('button', { name: /^1\s/ }).click()
+    await expect(page.getByRole('dialog')).toBeVisible()
+    found.push(...(await axeProblems(page)).map((p) => `block editor: ${p}`))
+    await page.goto('/admin/pages')
+    await page.getByRole('button', { name: 'Новая страница' }).click()
+    await expect(page.getByRole('dialog', { name: 'Новая страница' })).toBeVisible()
+    found.push(...(await axeProblems(page)).map((p) => `new page dialog: ${p}`))
+    expect(found).toEqual([])
+  })
 }
 
 for (const viewport of VIEWPORTS) {
