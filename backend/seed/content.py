@@ -99,6 +99,15 @@ async def seed_all(s: Seeder) -> None:
         await s.media(f"site-{i}", img.construction(f"site-{i}"), "Ход строительства")
         for i in range(4)
     ]
+    # The history has slots of its own, so that a photo can show each year's scene;
+    # drawn, they repeat the images of the office, the shop floor and a project.
+    history_media = [
+        await s.media("timeline-2004", img.office("office"), "Мастерская в гараже"),
+        await s.media("timeline-2007", img.production("p0"), "Мебельный магазин"),
+        await s.media("timeline-2015", img.production("sp"), "Завод МДФ-плит"),
+        await s.media("timeline-2017", img.skyline("render-2"), "Грузовики с продукцией"),
+        m_hero_alatau,
+    ]
 
     # -------------------------------------------------------------- divisions
     d_dev = await s.upsert(
@@ -403,7 +412,7 @@ async def seed_all(s: Seeder) -> None:
             year=year,
             title=L(title),
             description=L(text),
-            image_id=[m_office, prod[0], m_hero_sp, renders[2], m_hero_alatau][i],
+            image_id=history_media[i],
             sort_order=i * 10,
         )  # TODO: подтвердить у Романа (все даты)
 

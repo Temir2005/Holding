@@ -3,13 +3,15 @@
 Real photos are not available yet, so the seed draws neutral scenes (skyline,
 construction site, panel production, panel swatches, portraits) and SVG logos.
 Every image is deterministic for a given name, so re-seeding produces identical files.
+`photo()` reads a real photo instead, for the local demo override in `seed/photos/`.
 """
 
 import io
 import random
 from dataclasses import dataclass
+from pathlib import Path
 
-from PIL import Image, ImageDraw, ImageFilter
+from PIL import Image, ImageDraw, ImageFilter, ImageOps
 
 GRAPHITE = (29, 30, 31)
 PANEL = (38, 40, 42)
@@ -52,6 +54,19 @@ def _finish(img: Image.Image, quality: int = 82) -> Rendered:
     buf = io.BytesIO()
     img.save(buf, "JPEG", quality=quality, optimize=True, progressive=True)
     return Rendered(buf.getvalue(), "image/jpeg", img.width, img.height, _hex(dominant[:3]))
+
+
+def photo(path: Path) -> Rendered:
+    """A real photo from disk. A JPEG is kept byte for byte; size and color come from the file."""
+    body = path.read_bytes()
+    with Image.open(path) as source:
+        is_jpeg = source.format == "JPEG"
+        img = ImageOps.exif_transpose(source).convert("RGB")
+    if not is_jpeg:
+        return _finish(img, quality=85)
+    dominant = img.resize((1, 1), Image.Resampling.BOX).getpixel((0, 0))
+    assert isinstance(dominant, tuple)
+    return Rendered(body, "image/jpeg", img.width, img.height, _hex(dominant[:3]))
 
 
 def _windows(

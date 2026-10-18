@@ -9,6 +9,7 @@ The log records these as written by the system.
 """
 
 import uuid
+from pathlib import Path
 from typing import Any, TypeVar
 
 from sqlalchemy import delete
@@ -20,9 +21,15 @@ from app.schemas.sections import SECTION_SCHEMAS, SectionType
 from app.services.admin.audit import DbAuditWriter
 from app.services.admin.publishing import PublishingService
 from app.storage.service import Storage
-from seed.images import Rendered
+from seed.images import Rendered, photo
 
 NAMESPACE = uuid.UUID("8f0b1c52-6a3e-4c1e-9b8e-6d5f2a1c0e77")
+
+# Local demo photos (`make demo-photos`, not in git): `<slot>.jpg` here replaces the drawn
+# image of that slot. Logos (SVG) are never replaced.
+PHOTOS_DIR = Path(__file__).parent / "photos"
+# A real person: a stranger's stock face must not appear under his name, even in a demo.
+NO_OVERRIDE = frozenset({"person-founder"})
 
 M = TypeVar("M", bound=Base)
 
@@ -37,9 +44,12 @@ def L(ru: str) -> dict[str, str]:
 
 
 class Seeder:
-    def __init__(self, session: AsyncSession, storage: Storage) -> None:
+    def __init__(
+        self, session: AsyncSession, storage: Storage, photos_dir: Path = PHOTOS_DIR
+    ) -> None:
         self.session = session
         self.storage = storage
+        self.photos_dir = photos_dir
         self.publisher = PublishingService(
             session,
             DbAuditWriter(session, user_id=None),
@@ -54,6 +64,9 @@ class Seeder:
         return row_id
 
     async def media(self, key: str, image: Rendered, alt: str) -> uuid.UUID:
+        override = self.photos_dir / f"{key}.jpg"
+        if image.mime_type != "image/svg+xml" and key not in NO_OVERRIDE and override.is_file():
+            image = photo(override)
         ext = "svg" if image.mime_type == "image/svg+xml" else "jpg"
         s3_key = f"seed/{key}.{ext}"
         await self.storage.upload(s3_key, image.body, image.mime_type)

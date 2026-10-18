@@ -27,3 +27,6 @@ frontend/e2e/screenshots/
 .idea/
 .vscode/*
 !.vscode/extensions.json
+
+# Local demo stock photos (make demo-photos): never committed
+backend/seed/photos/

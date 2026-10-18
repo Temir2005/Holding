@@ -2,7 +2,7 @@ COMPOSE := docker compose -f infra/docker-compose.yml --env-file .env
 BACKEND := $(COMPOSE) exec backend
 FRONTEND := $(COMPOSE) exec frontend
 
-.PHONY: env up down logs migrate seed seed-force lint test e2e gen-types fmt reset
+.PHONY: env up down logs migrate seed seed-force demo-photos lint test e2e gen-types fmt reset
 
 env:
 	@test -f .env || (cp .env.example .env && echo "created .env from .env.example")
@@ -30,6 +30,12 @@ seed:
 # values back, and sections added by editors on seeded pages are DELETED.
 seed-force:
 	$(BACKEND) python -m seed.run --force
+
+# Local demo only: free stock photos into backend/seed/photos (not in git), which the seeds
+# take instead of the drawn images on the next seed-force. Needs PEXELS_API_KEY or
+# UNSPLASH_ACCESS_KEY in .env. Another photo for a slot: make demo-photos ARGS="--replace office"
+demo-photos:
+	$(BACKEND) python -m seed.fetch_photos $(ARGS)
 
 lint:
 	$(BACKEND) ruff check .
