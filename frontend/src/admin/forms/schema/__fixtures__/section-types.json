@@ -2,7 +2,7 @@
   {
     "type": "hero",
     "label": "Главный экран",
-    "description": "Крупный заголовок, кнопки и фото; с образцами панелей — сетка образцов",
+    "description": "Крупный заголовок, кнопки, фото и цифры",
     "schema": {
       "$defs": {
         "Cta": {
@@ -193,12 +193,25 @@
           "type": "array"
         },
         "swatches": {
-          "description": "Если заполнены, фото показывается в сетке с образцами",
+          "description": "В новом дизайне не выводится: образцы задаются в блоке „Производство“",
           "items": {
             "$ref": "#/$defs/Swatch"
           },
           "title": "Образцы панелей",
           "type": "array"
+        },
+        "stat_ids": {
+          "description": "0–3 цифры. Пусто — hero без цифр",
+          "items": {
+            "format": "uuid",
+            "type": "string"
+          },
+          "title": "Цифры рядом с заголовком",
+          "type": "array",
+          "x-ref": {
+            "kind": "stat",
+            "many": true
+          }
         }
       },
       "title": "HeroData",
@@ -301,6 +314,16 @@
           "x-ref": {
             "kind": "stat",
             "many": true
+          }
+        },
+        "layout": {
+          "default": "chain",
+          "enum": ["chain", "row"],
+          "title": "Раскладка",
+          "type": "string",
+          "x-enum-labels": {
+            "chain": "Главная цифра и размерная цепочка",
+            "row": "Строка"
           }
         }
       },
@@ -727,6 +750,16 @@
           ],
           "default": null,
           "title": "Ссылка «Все проекты»"
+        },
+        "layout": {
+          "default": "register",
+          "enum": ["register", "sheet"],
+          "title": "Раскладка",
+          "type": "string",
+          "x-enum-labels": {
+            "register": "Реестр с превью",
+            "sheet": "Лист проекта"
+          }
         }
       },
       "title": "ProjectsShowcaseData",
@@ -1166,7 +1199,7 @@
   {
     "type": "production",
     "label": "Производство",
-    "description": "Текст, факты и галерея производства",
+    "description": "Текст, факты, галерея производства и образцы панелей",
     "schema": {
       "$defs": {
         "Fact": {
@@ -1222,6 +1255,41 @@
           "required": ["ru"],
           "title": "Текст на трёх языках",
           "type": "object"
+        },
+        "Swatch": {
+          "additionalProperties": false,
+          "properties": {
+            "code": {
+              "maxLength": 32,
+              "title": "Код (RAL, LAB…)",
+              "type": "string"
+            },
+            "label": {
+              "$ref": "#/$defs/LocalizedText",
+              "title": "Название",
+              "x-widget": "localized-text"
+            },
+            "color": {
+              "pattern": "^#[0-9a-fA-F]{6}$",
+              "title": "Цвет",
+              "type": "string",
+              "x-widget": "color"
+            },
+            "finish": {
+              "default": "matte",
+              "enum": ["matte", "gloss", "texture"],
+              "title": "Покрытие",
+              "type": "string",
+              "x-enum-labels": {
+                "gloss": "Глянец",
+                "matte": "Матовое",
+                "texture": "Текстура"
+              }
+            }
+          },
+          "required": ["code", "label", "color"],
+          "title": "Образец панели",
+          "type": "object"
         }
       },
       "additionalProperties": false,
@@ -1276,6 +1344,14 @@
             "kind": "media",
             "many": true
           }
+        },
+        "swatches": {
+          "description": "Условные обозначения материалов: код RAL/LAB, название, цвет, финиш",
+          "items": {
+            "$ref": "#/$defs/Swatch"
+          },
+          "title": "Образцы панелей",
+          "type": "array"
         }
       },
       "required": ["body"],

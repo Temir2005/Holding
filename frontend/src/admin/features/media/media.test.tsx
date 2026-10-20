@@ -130,6 +130,41 @@ describe('media card', () => {
     )
   })
 
+  it('shows the saved focal point and keeps it when another field is saved', async () => {
+    const patches: unknown[] = []
+    const stored = mediaItem({ focal_point_x: 0.25, focal_point_y: 0.75 })
+    fakeFetch({
+      'GET /api/v1/admin/media': () => json(200, page([stored])),
+      'GET /api/v1/admin/media/folders': () => json(200, [{ folder: 'projects', count: 1 }]),
+      'GET /api/v1/admin/media/{id}': () => json(200, stored),
+      'GET /api/v1/admin/media/{id}/usages': () => json(200, []),
+      'PATCH /api/v1/admin/media/{id}': ({ body }) => {
+        patches.push(body)
+        return json(200, { ...stored, alt: { ru: 'Фасад зимой' }, version: 2 })
+      },
+    })
+    const user = renderLibrary('/admin/media?file=m1')
+    const x = await screen.findByRole('spinbutton', { name: 'Фокус по горизонтали (0–1)' })
+    expect(x).toHaveProperty('value', '0.25')
+    expect(screen.getByRole('spinbutton', { name: 'Фокус по вертикали (0–1)' })).toHaveProperty(
+      'value',
+      '0.75',
+    )
+
+    const caption = screen.getByRole('textbox', { name: 'Подпись (alt)' })
+    await user.clear(caption)
+    await user.type(caption, 'Фасад зимой')
+    await user.click(screen.getByRole('button', { name: 'Сохранить' }))
+
+    await waitFor(() => expect(patches).toHaveLength(1))
+    expect(patches[0]).toMatchObject({
+      version: 1,
+      alt: { ru: 'Фасад зимой' },
+      focal_point_x: 0.25,
+      focal_point_y: 0.75,
+    })
+  })
+
   it('lists the places that use a file when deletion is refused', async () => {
     fakeFetch({
       'GET /api/v1/admin/media': () => json(200, page([mediaItem()])),

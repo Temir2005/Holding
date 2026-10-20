@@ -1,93 +1,130 @@
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useLocation } from 'react-router-dom'
 import type { SiteSettings } from '@/api/types'
-import { Container } from '@/components/ui/Container'
+import { CmsLink } from '@/components/ui/Button'
 import { cn } from '@/lib/cn'
+import { DUR, EASE_OUT } from '@/lib/motion'
 import { LangSwitch } from './LangSwitch'
 import { Logo } from './Logo'
+import { MobileMenu } from './MobileMenu'
 import { NavLinks } from './NavLinks'
 
-/** Transparent over the hero; gains a blurred background once the page scrolls. */
+/**
+ * Site header: a solid graphite strip that hides while scrolling down and comes back on the way
+ * up (and whenever something inside it has keyboard focus). Below 1080px the navigation moves
+ * into a full-screen menu. Reduced motion: the header simply stays.
+ */
 export function Header({ settings }: { settings: SiteSettings | undefined }) {
   const { t } = useTranslation()
-  const [scrolled, setScrolled] = useState(false)
   const [open, setOpen] = useState(false)
+  const { scrolled, hidden } = useHideOnScroll(open)
   const { pathname } = useLocation()
   const reduce = useReducedMotion()
+  const menuButton = useRef<HTMLButtonElement>(null)
   const items = settings?.navigation ?? []
 
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24)
-    onScroll()
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => window.removeEventListener('scroll', onScroll)
-  }, [])
-
   useEffect(() => setOpen(false), [pathname])
-
-  useEffect(() => {
-    if (!open) return
-    document.body.style.overflow = 'hidden'
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setOpen(false)
-    window.addEventListener('keydown', onKey)
-    return () => {
-      document.body.style.overflow = ''
-      window.removeEventListener('keydown', onKey)
-    }
-  }, [open])
 
   return (
     <header
       className={cn(
-        'tone-dark fixed inset-x-0 top-0 z-40 transition-[background-color,border-color] duration-300',
-        scrolled || open
-          ? 'border-b border-line bg-surface/85 backdrop-blur-md'
-          : 'border-b border-transparent !bg-transparent',
+        'tone-dark fixed inset-x-0 top-0 z-header border-b transition-[transform,border-color] duration-3 ease-out focus-within:translate-y-0',
+        scrolled || open ? 'border-line-strong' : 'border-transparent',
+        hidden && !reduce && '-translate-y-[101%]',
       )}
     >
-      <Container className="flex h-[var(--header-h)] items-center justify-between gap-6">
+      <div className="mx-auto flex h-header max-w-sheet items-center gap-[clamp(16px,2.4vw,40px)] pl-pad-l pr-pad-r">
         <Logo settings={settings} />
-        <nav aria-label="primary" className="hidden lg:block">
-          <NavLinks items={items} className="flex items-center gap-6 text-sm" linkClassName="transition-colors" />
+        <nav aria-label="primary" className="ml-auto hidden min-[1081px]:block">
+          <NavLinks
+            items={items}
+            className="flex items-center gap-[clamp(16px,1.7vw,32px)]"
+            linkClassName="block pb-1 pt-1.5 text-sm font-medium"
+          />
         </nav>
-        <div className="flex items-center gap-2">
-          <LangSwitch className="hidden sm:flex" />
-          <button
-            type="button"
-            className="flex min-h-11 items-center gap-2 rounded-full border border-line px-4 text-sm lg:hidden"
-            aria-expanded={open}
-            aria-controls="mobile-menu"
-            onClick={() => setOpen((v) => !v)}
+        <LangSwitch className="hidden min-[1081px]:flex" />
+        {settings?.header_cta && (
+          <CmsLink
+            href={settings.header_cta.href}
+            variant="secondary"
+            className="hidden min-h-10 py-1 min-[1081px]:inline-flex"
           >
-            {open ? t('nav.close') : t('nav.menu')}
-          </button>
-        </div>
-      </Container>
+            {settings.header_cta.label}
+          </CmsLink>
+        )}
+        <button
+          ref={menuButton}
+          type="button"
+          className="ml-auto inline-flex h-10 items-center gap-2.5 border border-line-strong px-4 font-mono text-caption font-medium uppercase min-[1081px]:hidden"
+          aria-expanded={open}
+          aria-controls="mobile-menu"
+          onClick={() => setOpen((v) => !v)}
+        >
+          <span aria-hidden="true" className="grid w-4 gap-1">
+            <i className="h-px bg-current" />
+            <i className="h-0.5 w-2.5 bg-trace" />
+          </span>
+          {open ? t('nav.close') : t('nav.menu')}
+        </button>
+      </div>
 
       <AnimatePresence>
         {open && (
           <motion.div
-            id="mobile-menu"
-            initial={reduce ? false : { opacity: 0 }}
+            key="menu"
+            initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            exit={reduce ? undefined : { opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="tone-dark fixed inset-x-0 bottom-0 top-[var(--header-h)] overflow-y-auto bg-surface lg:hidden"
+            exit={{ opacity: 0 }}
+            transition={{ duration: reduce ? 0 : DUR.base, ease: EASE_OUT }}
           >
-            <Container className="flex min-h-full flex-col justify-between gap-10 py-10">
-              <NavLinks
-                items={items}
-                onNavigate={() => setOpen(false)}
-                className="flex flex-col gap-2"
-                linkClassName="block py-2 font-display text-3xl font-extrabold tracking-tight"
-              />
-              <LangSwitch className="text-sm" />
-            </Container>
+            <MobileMenu
+              settings={settings}
+              onClose={() => {
+                setOpen(false)
+                menuButton.current?.focus()
+              }}
+            />
           </motion.div>
         )}
       </AnimatePresence>
     </header>
   )
+}
+
+/** Hidden after scrolling down past the header, shown again on any scroll up. One rAF per event. */
+function useHideOnScroll(locked: boolean) {
+  const [state, setState] = useState({ scrolled: false, hidden: false })
+  useEffect(() => {
+    let last = window.scrollY
+    let frame = 0
+    const update = () => {
+      frame = 0
+      const y = window.scrollY
+      const delta = y - last
+      setState((prev) => {
+        const hidden = locked
+          ? false
+          : delta > 4 && y > 96
+            ? true
+            : delta < -4
+              ? false
+              : prev.hidden
+        const scrolled = y > 8
+        return prev.hidden === hidden && prev.scrolled === scrolled ? prev : { hidden, scrolled }
+      })
+      if (Math.abs(delta) > 4) last = y
+    }
+    const onScroll = () => {
+      if (!frame) frame = requestAnimationFrame(update)
+    }
+    update()
+    window.addEventListener('scroll', onScroll, { passive: true })
+    return () => {
+      window.removeEventListener('scroll', onScroll)
+      cancelAnimationFrame(frame)
+    }
+  }, [locked])
+  return state
 }

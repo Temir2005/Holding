@@ -1,12 +1,21 @@
-import { motion, useReducedMotion, useScroll, type MotionValue } from 'framer-motion'
+import {
+  motion,
+  motionValue,
+  useReducedMotion,
+  useScroll,
+  useTransform,
+  type MotionValue,
+} from 'framer-motion'
 import { useLayoutEffect, useRef, useState, type RefObject } from 'react'
 import { PEN_OFFSET } from '@/lib/motion'
-import { straight, type TraceBox, type TracePath } from './paths'
+import { straight, type TraceBox, type TraceBranches, type TracePath } from './paths'
 
 type Props = {
   /** The section element the segment belongs to; its scroll progress draws the line. */
   target: RefObject<HTMLElement>
   path?: TracePath
+  /** Side strokes, each drawn when the pen reaches its height. */
+  branches?: TraceBranches
 }
 
 /**
@@ -16,7 +25,7 @@ type Props = {
  * Progress is the section's own scroll through the pen height (PEN_OFFSET), so the drawing
  * continues across section borders without a pause. Reduced motion: drawn at once.
  */
-export function TraceSegment({ target, path = straight }: Props) {
+export function TraceSegment({ target, path = straight, branches }: Props) {
   const reduce = useReducedMotion()
   const probe = useRef<HTMLSpanElement>(null)
   const box = useBox(target, probe)
@@ -39,10 +48,37 @@ export function TraceSegment({ target, path = straight }: Props) {
           height={box.h}
         >
           <Path d={path(box)} progress={reduce ? null : scrollYProgress} />
+          {branches?.(box).map((b) => (
+            <Branch
+              key={b.d}
+              d={b.d}
+              at={box.h > 0 ? b.at / box.h : 0}
+              progress={reduce ? null : scrollYProgress}
+            />
+          ))}
         </svg>
       )}
     </>
   )
+}
+
+/** Stand-in progress for reduced motion: hooks must run either way, the stroke is just drawn. */
+const FULL = motionValue(1)
+
+/** A branch is drawn over the next ~6% of the section once the pen reaches its start. */
+function Branch({
+  d,
+  at,
+  progress,
+}: {
+  d: string
+  at: number
+  progress: MotionValue<number> | null
+}) {
+  // Never a zero-width range: a branch at the very bottom still gets the last 6% to draw.
+  const start = Math.min(Math.max(at, 0), 0.94)
+  const drawn = useTransform(progress ?? FULL, [start, start + 0.06], [0, 1], { clamp: true })
+  return <Path d={d} progress={progress ? drawn : null} />
 }
 
 function Path({ d, progress }: { d: string; progress: MotionValue<number> | null }) {
@@ -58,23 +94,62 @@ function Path({ d, progress }: { d: string; progress: MotionValue<number> | null
   )
 }
 
-/** Section size and line x, re-measured only when the section resizes. */
+/**
+ * Section size, line x and anchors, re-measured only when the section resizes (a reflow that
+ * moves anchors also changes the section height, so it is caught too). Never per frame.
+ */
 function useBox(target: RefObject<HTMLElement>, probe: RefObject<HTMLElement>): TraceBox | null {
   const [box, setBox] = useState<TraceBox | null>(null)
   useLayoutEffect(() => {
     const el = target.current
     if (!el) return
     const measure = () => {
-      const x = Math.round(probe.current?.offsetLeft ?? 0) + 0.5
-      const next = { w: el.offsetWidth, h: el.offsetHeight, x }
-      setBox((prev) =>
-        prev && prev.w === next.w && prev.h === next.h && prev.x === next.x ? prev : next,
-      )
+      const anchors: TraceBox['anchors'] = {}
+      el.querySelectorAll<HTMLElement>('[data-trace-anchor]').forEach((node) => {
+        const name = node.dataset.traceAnchor ?? ''
+        const p = layoutOffset(node, el)
+        ;(anchors[name] ??= []).push({
+          x: Math.round(p.x),
+          y: Math.round(p.y + node.offsetHeight / 2),
+        })
+      })
+      const next: TraceBox = {
+        w: el.offsetWidth,
+        h: el.offsetHeight,
+        x: Math.round(probe.current?.offsetLeft ?? 0) + 0.5,
+        anchors,
+      }
+      setBox((prev) => (prev && sameBox(prev, next) ? prev : next))
     }
     measure()
     const ro = new ResizeObserver(measure)
     ro.observe(el)
+    // Web fonts change line breaks without always resizing the section: measure once more.
+    void document.fonts?.ready.then(measure)
     return () => ro.disconnect()
   }, [target, probe])
   return box
 }
+
+/**
+ * Position of a node inside the section from layout offsets, not getBoundingClientRect: reveal
+ * animations move elements with transforms, and the line must follow where they land.
+ * The section is `position: relative` (.sheet), so the offsetParent chain reaches it.
+ */
+function layoutOffset(node: HTMLElement, root: HTMLElement) {
+  let x = 0
+  let y = 0
+  let current: HTMLElement | null = node
+  while (current && current !== root) {
+    x += current.offsetLeft
+    y += current.offsetTop
+    current = current.offsetParent as HTMLElement | null
+  }
+  return { x, y }
+}
+
+const sameBox = (a: TraceBox, b: TraceBox) =>
+  a.w === b.w &&
+  a.h === b.h &&
+  a.x === b.x &&
+  JSON.stringify(a.anchors) === JSON.stringify(b.anchors)

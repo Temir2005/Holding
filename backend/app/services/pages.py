@@ -15,6 +15,7 @@ from app.schemas.pages import PageRead, PageSeo
 from app.schemas.refs import RefIds, RefKind, collect_refs, expand
 from app.schemas.revisions import PageSnapshot, SnapshotSection
 from app.schemas.sections import (
+    HERO_MAX_STATS,
     SECTION_SCHEMAS,
     ClientsGridData,
     ClientsMarqueeData,
@@ -92,6 +93,14 @@ HOOKS: dict[SectionType, Hook] = {
     SectionType.clients_grid: _clients,
     SectionType.testimonials: _testimonials,
     SectionType.vacancies: _vacancies,
+}
+
+
+# Lists the site shows only in part: (read field, how many). The admin refuses longer
+# lists, but data saved before the rule must still render. Cut after expansion, so a
+# hidden or deleted entity does not take a place.
+LIMITS: dict[SectionType, tuple[str, int]] = {
+    SectionType.hero: ("stats", HERO_MAX_STATS),
 }
 
 
@@ -206,13 +215,17 @@ class PageService:
 
     @staticmethod
     def _render(item: Prepared, loaded: Loaded, locale: Locale) -> SectionBase:
+        data = expand(item.data, locale, loaded)
+        if limit := LIMITS.get(item.type):
+            name, most = limit
+            data[name] = data[name][:most]
         return SECTION_SCHEMAS[item.type].read.model_validate(
             {
                 "id": item.section.id,
                 "type": item.type.value,
                 "anchor": item.section.anchor,
                 "tone": item.section.tone,
-                "data": expand(item.data, locale, loaded),
+                "data": data,
             }
         )
 

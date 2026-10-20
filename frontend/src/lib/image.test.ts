@@ -37,6 +37,6 @@ describe('pinned scene height', () => {
 
 describe('line contract', () => {
   it('the default segment enters at the top and leaves at the bottom in the margin', () => {
-    expect(straight({ x: 20.5, w: 1440, h: 800 })).toBe('M 20.5 0 V 800')
+    expect(straight({ x: 20.5, w: 1440, h: 800, anchors: {} })).toBe('M 20.5 0 V 800')
   })
 })

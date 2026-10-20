@@ -2962,6 +2962,11 @@ export interface components {
        * @default []
        */
       gallery: components['schemas']['MediaRead'][]
+      /**
+       * Swatches
+       * @default []
+       */
+      swatches: components['schemas']['SwatchRead'][]
     }
     /** ProductionSection */
     ProductionSection: {

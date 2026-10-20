@@ -171,6 +171,19 @@
     }
   }
 
+  /*
+   * Size of the hero figure of the stats block: fitted to its length (--chars, set inline) so it
+   * never overflows — up to 29vw / 92% of the content on a phone, 24vw / 60% from tablets on.
+   */
+  .stat-hero {
+    --hs: max(4rem, min(29vw, calc((100vw - var(--pad-l) - var(--pad-r)) * 0.92 / var(--chars))));
+  }
+  @media (min-width: 768px) {
+    .stat-hero {
+      --hs: max(4rem, min(24vw, calc((100vw - var(--pad-l) - var(--pad-r)) * 0.6 / var(--chars))));
+    }
+  }
+
   /* Crop marks around a frame (components/ui/Frame). */
   .crop-mark {
     position: absolute;

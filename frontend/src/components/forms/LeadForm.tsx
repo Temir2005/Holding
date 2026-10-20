@@ -1,8 +1,9 @@
-import { type FormEvent, useId, useState } from 'react'
+import { type FormEvent, type ReactNode, useEffect, useId, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useLocation } from 'react-router-dom'
 import { useCreateLead } from '@/api/queries'
 import type { LeadType } from '@/api/types'
+import { DimArrow } from '@/components/ui/DimArrow'
 import { buttonClass } from '@/lib/button'
 import { cn } from '@/lib/cn'
 import { useLocale } from '@/lib/locale'
@@ -16,8 +17,16 @@ type Props = {
 
 type Errors = Partial<Record<'name' | 'contact', string>>
 
-const fieldClass =
-  'min-h-12 w-full rounded-tile border border-line bg-tile px-4 py-3 text-base text-fg placeholder:text-fg-mute/70 focus:border-fg focus:outline-none'
+/**
+ * Fields of a drawing form: no boxes, a hairline baseline that turns into a 2px pen stroke on
+ * focus (the focus indicator) and the accent colour on error. 48px+ tall for touch.
+ */
+const fieldClass = cn(
+  'block min-h-12 w-full rounded-none border-0 border-b border-line-strong bg-transparent px-0 py-3',
+  'text-lead text-fg placeholder:text-fg-mute/70 transition-[border-color,box-shadow] duration-1',
+  'hover:border-fg focus:border-trace focus:shadow-[inset_0_-1px_0_rgb(var(--trace))] focus:outline-none',
+  'aria-[invalid=true]:border-accent aria-[invalid=true]:shadow-[inset_0_-1px_0_rgb(var(--accent))]',
+)
 
 export function LeadForm({ leadTypes, defaultType, consentText, successText }: Props) {
   const { t } = useTranslation()
@@ -27,6 +36,12 @@ export function LeadForm({ leadTypes, defaultType, consentText, successText }: P
   const mutation = useCreateLead()
   const [type, setType] = useState<LeadType>(defaultType)
   const [errors, setErrors] = useState<Errors>({})
+  const successRef = useRef<HTMLDivElement>(null)
+
+  // The form is replaced by the confirmation: move focus there so keyboard users are not lost.
+  useEffect(() => {
+    if (mutation.isSuccess) successRef.current?.focus()
+  }, [mutation.isSuccess])
 
   function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -41,7 +56,9 @@ export function LeadForm({ leadTypes, defaultType, consentText, successText }: P
     if (!phone && !email) next.contact = t('form.contactRequired')
     setErrors(next)
     if (Object.keys(next).length) {
-      e.currentTarget.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus()
+      // aria-invalid is not rendered yet at this point: focus the first bad field by name.
+      const first = e.currentTarget.elements.namedItem(next.name ? 'name' : 'phone')
+      if (first instanceof HTMLElement) first.focus()
       return
     }
 
@@ -59,8 +76,16 @@ export function LeadForm({ leadTypes, defaultType, consentText, successText }: P
 
   if (mutation.isSuccess) {
     return (
-      <div role="status" className="flex flex-col items-start gap-6 rounded-tile bg-tile p-8">
-        <p className="font-display text-h3">{successText}</p>
+      <div
+        ref={successRef}
+        role="status"
+        tabIndex={-1}
+        className="flex flex-col items-start gap-8 border-t border-fg pt-8 focus:outline-none"
+      >
+        <p className="flex items-start gap-4 text-subtitle font-medium">
+          <span aria-hidden="true" className="mt-[0.4em] h-3 w-3 flex-none bg-trace" />
+          {successText}
+        </p>
         <button type="button" className={buttonClass('secondary')} onClick={() => mutation.reset()}>
           {t('form.again')}
         </button>
@@ -69,49 +94,99 @@ export function LeadForm({ leadTypes, defaultType, consentText, successText }: P
   }
 
   const id = (name: string) => `${uid}-${name}`
+  const contactError = errors.contact ? `${uid}-contact-error` : undefined
 
   return (
-    <form noValidate onSubmit={onSubmit} className="flex flex-col gap-5 rounded-tile bg-tile/60 p-5 md:p-8">
+    <form noValidate onSubmit={onSubmit} className="flex flex-col gap-8 border-t border-fg pt-5">
       {leadTypes.length > 1 && (
-        <fieldset className="flex flex-col gap-3">
-          <legend className="mb-3 font-mono text-xs uppercase tracking-[0.06em] text-fg-mute">{t('form.type')}</legend>
-          <div className="flex flex-wrap gap-2">
-            {leadTypes.map((lt) => (
-              <label
-                key={lt}
-                className={cn(
-                  'flex min-h-11 cursor-pointer items-center rounded-full border px-4 text-sm transition-colors has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2',
-                  type === lt ? 'border-fg bg-fg text-surface' : 'border-line text-fg-mute hover:border-fg/50',
-                )}
-              >
-                <input type="radio" name="type" value={lt} checked={type === lt} onChange={() => setType(lt)} className="sr-only" />
-                {t(`form.types.${lt}`)}
-              </label>
-            ))}
+        <fieldset>
+          <legend className="mono-label mb-3">{t('form.type')}</legend>
+          {/* Segments: hairline cells that close every row (the last row stretches). */}
+          <div className="flex flex-wrap border-l border-t border-line">
+            {leadTypes.map((lt) => {
+              const on = type === lt
+              return (
+                <label
+                  key={lt}
+                  className={cn(
+                    'relative flex min-h-14 flex-1 basis-[9rem] cursor-pointer items-center gap-3 border-b border-r border-line px-3 sm:basis-[10.5rem] sm:px-4',
+                    'font-mono text-caption font-medium uppercase transition-colors duration-1',
+                    'has-[:focus-visible]:z-10 has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:-outline-offset-2 has-[:focus-visible]:outline-[rgb(var(--accent-ink))]',
+                    on ? 'bg-surface-2 text-fg' : 'text-fg-mute hover:text-fg',
+                  )}
+                >
+                  <input
+                    type="radio"
+                    name="type"
+                    value={lt}
+                    checked={on}
+                    onChange={() => setType(lt)}
+                    className="sr-only"
+                  />
+                  {/* the legend square of the drawing: empty, or filled with the line colour */}
+                  <span
+                    aria-hidden="true"
+                    className={cn(
+                      'h-2.5 w-2.5 flex-none border transition-colors duration-1',
+                      on ? 'border-trace bg-trace' : 'border-current',
+                    )}
+                  />
+                  {t(`form.types.${lt}`)}
+                </label>
+              )
+            })}
           </div>
         </fieldset>
       )}
 
       <Field id={id('name')} label={t('form.name')} error={errors.name}>
-        <input id={id('name')} name="name" autoComplete="name" required aria-invalid={!!errors.name} aria-describedby={errors.name ? `${id('name')}-error` : undefined} className={fieldClass} />
+        <input
+          id={id('name')}
+          name="name"
+          autoComplete="name"
+          required
+          aria-invalid={!!errors.name}
+          aria-describedby={errors.name ? `${id('name')}-error` : undefined}
+          className={fieldClass}
+        />
       </Field>
 
-      <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-        <Field id={id('phone')} label={t('form.phone')}>
-          <input id={id('phone')} name="phone" type="tel" autoComplete="tel" inputMode="tel" aria-invalid={!!errors.contact} aria-describedby={errors.contact ? `${uid}-contact-error` : undefined} className={fieldClass} />
-        </Field>
-        <Field id={id('email')} label={t('form.email')}>
-          <input id={id('email')} name="email" type="email" autoComplete="email" aria-invalid={!!errors.contact} aria-describedby={errors.contact ? `${uid}-contact-error` : undefined} className={fieldClass} />
-        </Field>
+      <div className="flex flex-col gap-3">
+        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 sm:gap-x-gap">
+          <Field id={id('phone')} label={t('form.phone')}>
+            <input
+              id={id('phone')}
+              name="phone"
+              type="tel"
+              autoComplete="tel"
+              inputMode="tel"
+              aria-invalid={!!errors.contact}
+              aria-describedby={contactError}
+              className={cn(fieldClass, 'tabular')}
+            />
+          </Field>
+          <Field id={id('email')} label={t('form.email')}>
+            <input
+              id={id('email')}
+              name="email"
+              type="email"
+              autoComplete="email"
+              aria-invalid={!!errors.contact}
+              aria-describedby={contactError}
+              className={fieldClass}
+            />
+          </Field>
+        </div>
+        {errors.contact && <ErrorText id={contactError}>{errors.contact}</ErrorText>}
       </div>
-      {errors.contact && (
-        <p id={`${uid}-contact-error`} role="alert" className="-mt-2 text-sm text-accent-ink">
-          {errors.contact}
-        </p>
-      )}
 
       <Field id={id('message')} label={t('form.message')} hint={t('form.optional')}>
-        <textarea id={id('message')} name="message" rows={4} className={cn(fieldClass, 'resize-y')} />
+        <textarea
+          id={id('message')}
+          name="message"
+          rows={3}
+          className={cn(fieldClass, 'resize-y')}
+        />
       </Field>
 
       {/* Honeypot: invisible to people, tempting to bots. */}
@@ -122,34 +197,62 @@ export function LeadForm({ leadTypes, defaultType, consentText, successText }: P
         </label>
       </div>
 
-      <p className="text-xs leading-relaxed text-fg-mute">{consentText}</p>
-
-      {mutation.isError && (
-        <p role="alert" className="text-sm text-accent-ink">{t('form.error')}</p>
-      )}
-
-      <button type="submit" disabled={mutation.isPending} className={buttonClass('primary', 'self-start')}>
-        {mutation.isPending ? t('form.sending') : t('form.submit')}
-      </button>
+      <div className="flex flex-col gap-5">
+        <p className="max-w-[60ch] text-[0.8125rem] leading-relaxed text-fg-mute">{consentText}</p>
+        {mutation.isError && <ErrorText>{t('form.error')}</ErrorText>}
+        <button
+          type="submit"
+          disabled={mutation.isPending}
+          className={buttonClass('primary', 'w-full sm:w-auto sm:self-start')}
+        >
+          <span>{mutation.isPending ? t('form.sending') : t('form.submit')}</span>
+          <DimArrow />
+        </button>
+        <p aria-live="polite" className="sr-only">
+          {mutation.isPending ? t('form.sending') : ''}
+        </p>
+      </div>
     </form>
   )
 }
 
-type FieldProps = { id: string; label: string; hint?: string; error?: string; children: React.ReactNode }
+type FieldProps = { id: string; label: string; hint?: string; error?: string; children: ReactNode }
 
 function Field({ id, label, hint, error, children }: FieldProps) {
   return (
-    <div className="flex flex-col gap-2">
-      <label htmlFor={id} className="flex gap-2 text-sm">
-        {label}
-        {hint && <span className="text-fg-mute">({hint})</span>}
+    <div className="flex flex-col">
+      <label htmlFor={id} className="mono-label flex justify-between gap-4">
+        <span>{label}</span>
+        {hint && <span className="normal-case tracking-normal">{hint}</span>}
       </label>
       {children}
       {error && (
-        <p id={`${id}-error`} role="alert" className="text-sm text-accent-ink">
+        <ErrorText id={`${id}-error`} className="mt-3">
           {error}
-        </p>
+        </ErrorText>
       )}
     </div>
+  )
+}
+
+/** Error under a field: announced at once, marked with a square so it does not rely on colour. */
+function ErrorText({
+  id,
+  children,
+  className,
+}: {
+  id?: string
+  children: ReactNode
+  className?: string
+}) {
+  return (
+    <p
+      id={id}
+      role="alert"
+      className={cn('flex items-start gap-2 text-sm text-accent-ink', className)}
+    >
+      <span aria-hidden="true" className="mt-[0.45em] h-2 w-2 flex-none bg-current" />
+      {children}
+    </p>
   )
 }

@@ -22,8 +22,10 @@ from app.repositories.admin.pages import PageRepository, SectionRepository
 from app.schemas.admin.pages import SectionAdminRead, SectionCreate, SectionUpdate
 from app.schemas.refs import Loc
 from app.schemas.sections import (
+    HERO_MAX_STATS,
     SECTION_SCHEMAS,
     ContactFormData,
+    HeroData,
     SectionData,
     SectionType,
     Tone,
@@ -54,6 +56,10 @@ def consistency_errors(data: SectionData, loc: Loc = DATA_LOC) -> list[dict[str,
     public site must keep rendering it.
     """
     errors: list[dict[str, Any]] = []
+    if isinstance(data, HeroData) and len(data.stat_ids) > HERO_MAX_STATS:
+        errors.append(
+            {"loc": [*loc, "stat_ids"], "msg": "В hero можно выбрать не больше трёх цифр"}
+        )
     if isinstance(data, ContactFormData):
         if not data.lead_types:
             errors.append({"loc": [*loc, "lead_types"], "msg": "выберите хотя бы одну тему"})

@@ -1,6 +1,6 @@
 import { useRef, type ReactNode } from 'react'
 import type { Tone } from '@/api/types'
-import type { TracePath } from '@/components/trace/paths'
+import type { TraceBranches, TracePath } from '@/components/trace/paths'
 import { TraceSegment } from '@/components/trace/TraceSegment'
 import { cn } from '@/lib/cn'
 import { Container } from './Container'
@@ -15,6 +15,8 @@ type Props = {
   labelledBy?: string
   /** The section's part of the red line. Default: a straight pass through the margin. */
   trace?: TracePath | false
+  /** Side strokes off the line (branches, ticks), each drawn when the pen reaches it. */
+  branches?: TraceBranches
   /** Vertical rhythm: `default` for most blocks, `tight` for quiet ones, `none` for scenes. */
   space?: 'default' | 'tight' | 'none'
 }
@@ -31,6 +33,7 @@ export function Section({
   bleed,
   labelledBy,
   trace,
+  branches,
   space = 'default',
 }: Props) {
   const ref = useRef<HTMLElement>(null)
@@ -48,7 +51,7 @@ export function Section({
       )}
     >
       <SheetGuides />
-      {trace !== false && <TraceSegment target={ref} path={trace} />}
+      {trace !== false && <TraceSegment target={ref} path={trace} branches={branches} />}
       {bleed ? children : <Container>{children}</Container>}
     </section>
   )

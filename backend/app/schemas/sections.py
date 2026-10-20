@@ -168,6 +168,10 @@ class SwatchRead(BaseModel):
     finish: Literal["matte", "gloss", "texture"]
 
 
+# The admin refuses more; the public API shows at most this many (see services.pages).
+HERO_MAX_STATS = 3
+
+
 class HeroData(SectionData):
     subtitle: L | None = field("Подзаголовок", widget="localized-textarea", default=None)
     background_media_id: Annotated[uuid.UUID | None, _media("background", PHOTO)] = field(
@@ -179,7 +183,7 @@ class HeroData(SectionData):
     ctas: list[Cta] = field("Кнопки", default_factory=list)
     swatches: list[Swatch] = field(
         "Образцы панелей",
-        description="Если заполнены, фото показывается в сетке с образцами",
+        description="В новом дизайне не выводится: образцы задаются в блоке „Производство“",
         default_factory=list,
     )
     stat_ids: Annotated[list[uuid.UUID], Ref(RefKind.stat, "stats")] = field(
@@ -361,12 +365,18 @@ class ProductionData(SectionData):
     gallery_media_ids: Annotated[list[uuid.UUID], _media("gallery", PHOTO)] = field(
         "Галерея", default_factory=list
     )
+    swatches: list[Swatch] = field(
+        "Образцы панелей",
+        description="Условные обозначения материалов: код RAL/LAB, название, цвет, финиш",
+        default_factory=list,
+    )
 
 
 class ProductionDataRead(SectionDataRead):
     body: str
     facts: list[FactRead] = []
     gallery: list[MediaRead] = []
+    swatches: list[SwatchRead] = []
 
 
 class TokenizationData(SectionData):
@@ -741,7 +751,7 @@ SECTION_SCHEMAS: dict[SectionType, SectionSchema] = {
         stored=HeroData,
         read=HeroSection,
         label="Главный экран",
-        description="Крупный заголовок, кнопки и фото; с образцами панелей — сетка образцов",
+        description="Крупный заголовок, кнопки, фото и цифры",
     ),
     SectionType.stats: SectionSchema(
         stored=StatsData,
@@ -795,7 +805,7 @@ SECTION_SCHEMAS: dict[SectionType, SectionSchema] = {
         stored=ProductionData,
         read=ProductionSection,
         label="Производство",
-        description="Текст, факты и галерея производства",
+        description="Текст, факты, галерея производства и образцы панелей",
     ),
     SectionType.tokenization_explainer: SectionSchema(
         stored=TokenizationData,

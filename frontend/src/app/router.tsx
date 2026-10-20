@@ -46,7 +46,10 @@ export const router = createBrowserRouter(
         { path: 'preview/:slug', lazy: () => import('@/pages/PreviewPage') },
         // Design system bench. Dev builds only: production drops the branch and the chunk.
         ...(import.meta.env.DEV
-          ? [{ path: 'dev/design', lazy: () => import('@/dev/DesignPage') }]
+          ? [
+              { path: 'dev/design', lazy: () => import('@/dev/DesignPage') },
+              { path: 'dev/sections', lazy: () => import('@/dev/SectionsBench') },
+            ]
           : []),
         {
           path: ':slug',

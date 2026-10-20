@@ -2,7 +2,7 @@
 
 Корпоративный сайт-лендинг холдинга MegaSmart (Шымкент). Сейчас этап прототипа на тестовом контенте, но архитектура сразу production-grade. Админка (CMS) живёт во фронтенде по адресу `/admin` (`frontend/src/admin`) и работает через админское API.
 
-Исходное ТЗ: `megasmart_claude_code_prompt.md` (сайт), `megasmart_backend_cms_prompt.md` (API CMS), `megasmart_admin_ui_prompt.md` (интерфейс админки). Модель контента: `docs/content-model.md`. Дизайн: `docs/design.md`. Архитектура и этапы: `docs/architecture.md`. Админское API: `docs/admin-api.md`. Интерфейс админки: `docs/admin-ui.md`.
+Исходное ТЗ: `megasmart_claude_code_prompt.md` (сайт), `megasmart_backend_cms_prompt.md` (API CMS), `megasmart_admin_ui_prompt.md` (интерфейс админки). Модель контента: `docs/content-model.md`. Дизайн: `docs/design-system.md` (система «Чертёж»; `docs/design.md` — история до редизайна). Архитектура и этапы: `docs/architecture.md`. Админское API: `docs/admin-api.md`. Интерфейс админки: `docs/admin-ui.md`.
 
 ## Главное правило
 

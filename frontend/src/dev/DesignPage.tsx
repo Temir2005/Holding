@@ -21,6 +21,7 @@ import { SectionHeader } from '@/components/ui/SectionHeader'
 import { SmartImage } from '@/components/ui/SmartImage'
 import { StatusMark } from '@/components/ui/StatusMark'
 import { Tag } from '@/components/ui/Tag'
+import { formatNumber } from '@/lib/format'
 import { SectionNumberContext } from '@/sections/sectionNumber'
 import { LABELS, SAMPLE, SAMPLE_MEDIA, TONES } from './fixtures'
 
@@ -36,8 +37,7 @@ const SEMANTIC = [
   'accent',
   'on-accent',
 ]
-const nf = new Intl.NumberFormat('ru-RU')
-const fmt = (n: number) => nf.format(n).replace(/\s/g, ' ')
+const fmt = (n: number) => formatNumber(n, 'ru')
 
 export function Component() {
   return (
@@ -270,7 +270,9 @@ function PinnedDemo() {
             {Array.from({ length: count }, (_, i) => (
               <li
                 key={i}
-                className={i === active || !pinned ? 'text-title font-heading text-fg' : 'mono-label'}
+                className={
+                  i === active || !pinned ? 'text-title font-heading text-fg' : 'mono-label'
+                }
               >
                 {LABELS.step} {String(i + 1).padStart(2, '0')} / {String(count).padStart(2, '0')}
               </li>

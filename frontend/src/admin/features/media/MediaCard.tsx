@@ -11,7 +11,7 @@ import { applyServerErrors } from '../../forms/schema/errors'
 import { SchemaForm } from '../../forms/schema/SchemaForm'
 import type { JsonSchema } from '../../forms/schema/types'
 import { useSchemaForm } from '../../forms/schema/useSchemaForm'
-import type { Values } from '../../forms/schema/values'
+import { valuesFromRecord, type Values } from '../../forms/schema/values'
 import { usagesFromDetails } from '../../forms/usage'
 import { useT } from '../../i18n'
 import { Button } from '../../ui/Button'
@@ -22,15 +22,12 @@ import { displayName, formatBytes, formatDate, previewUrl } from './format'
 
 const FORM_ID = 'media-card-form'
 
-/** Values of the media form from a record: exactly the fields the form schema has. */
+/**
+ * Values of the media form from a record: exactly the fields the form schema has, so a
+ * field added on the backend (focal point…) is shown and saved back unchanged.
+ */
 function formValues(item: MediaItem, schema: JsonSchema): Values {
-  const all: Values = {
-    alt: Object.keys(item.alt).length ? item.alt : null,
-    original_filename: item.original_filename,
-    folder: item.folder,
-    tags: item.tags,
-  }
-  return Object.fromEntries(Object.keys(schema.properties ?? {}).map((k) => [k, all[k] ?? null]))
+  return valuesFromRecord(schema, item as unknown as Record<string, unknown>)
 }
 
 function Preview({ item }: { item: MediaItem }) {

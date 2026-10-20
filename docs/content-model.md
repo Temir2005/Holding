@@ -129,7 +129,7 @@ JSONB-части валидируются схемами `app/schemas/site.py`. 
 
 | type | Название в админке | Хранится в data | Разворачивается в |
 |---|---|---|---|
-| `hero` | Главный экран | `subtitle L`, `background_media_id`, `video_media_id`, `ctas` (список `{label L*, href*, variant}`), `swatches` (список `{code, label L, color, finish}`) | `background`, `video` |
+| `hero` | Главный экран | `subtitle L`, `background_media_id`, `video_media_id`, `ctas` (список `{label L*, href*, variant}`), `swatches` (устарело: в новом дизайне не выводится, образцы — в `production`), `stat_ids` (до 3, больше админка не сохранит, сайт покажет первые 3) | `background`, `video`, `stats` |
 | `stats` | Цифры | `stat_ids` или `context` (набор) | `stats` |
 | `about_text` | Текст | `body L*` (Markdown), `media_id`, `layout` | `media` |
 | `timeline` | История | `event_ids` | `events` |
@@ -138,7 +138,7 @@ JSONB-части валидируются схемами `app/schemas/site.py`. 
 | `project_list` | Список проектов | `project_ids` или `division_slug`, `show_filter` | `projects` |
 | `capabilities` | Преимущества | `intro L`, `items` (список `{icon*, title L*, text L*, media_id}`), `columns` | `media` у пунктов |
 | `process_steps` | Этапы | `intro L`, `steps` (список `{title L, text L, media_id, division_id}`) | `media`, `division` у шагов |
-| `production` | Производство | `body L*`, `facts` (список `{value, label L}`), `gallery_media_ids` | `gallery` |
+| `production` | Производство | `body L*`, `facts` (список `{value, label L}`), `gallery_media_ids`, `swatches` (список `{code, label L, color, finish}`) | `gallery` |
 | `tokenization_explainer` | Токенизация | `intro L*`, `steps`, `benefits`, `disclaimer L*`, `project_ids` | `projects` |
 | `team_grid` | Команда | `intro L`, `mode` (`founder` / `key` / `all`), `show_division_filter`, `person_ids` | `people` |
 | `clients_marquee` | Бегущая строка клиентов | `client_ids` | `clients` |

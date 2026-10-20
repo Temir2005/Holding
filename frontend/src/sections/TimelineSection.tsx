@@ -1,48 +1,59 @@
-import { motion, useReducedMotion } from 'framer-motion'
-import { Reveal } from '@/components/ui/Reveal'
-import { stagger } from '@/lib/motion'
+import { useTranslation } from 'react-i18next'
+import { DimensionLine } from '@/components/ui/DimensionLine'
 import { Section } from '@/components/ui/Section'
 import { SectionHeader } from '@/components/ui/SectionHeader'
-import { SmartImage } from '@/components/ui/SmartImage'
+import { formatNumber } from '@/lib/format'
+import { useLocale } from '@/lib/locale'
+import { Station } from './timeline/Station'
 import { headingId, type SectionProps } from './types'
 
+/**
+ * History as a drawing: the red line in the margin is the axis, every event is a station on it.
+ * Rows sit on the 12-column grid (year 1–4, text 5–8, frame 9–12); a vertical dimension between
+ * rows measures the years between events, and the frames widen from the first event to the last,
+ * so the growth reads without reading the text. The last event is the current one (ring mark).
+ */
 export function TimelineSection({ section }: SectionProps<'timeline'>) {
   const { data } = section
-  const reduce = useReducedMotion()
-  if (!data.events.length) return null
+  const { t } = useTranslation()
+  const locale = useLocale()
+  const events = data.events
+  if (!events.length && !data.title) return null
+
+  const id = headingId(section.id)
+  const years = (count: number) => t('timeline.years', { count, n: formatNumber(count, locale) })
+  const all = events.map((e) => e.year)
+  const from = Math.min(...all)
+  const to = Math.max(...all)
+
   return (
-    <Section tone={section.tone} anchor={section.anchor} labelledBy={headingId(section.id)}>
-      <SectionHeader id={headingId(section.id)} eyebrow={data.eyebrow} title={data.title} />
-      <div className="relative">
-        {/* The rail draws itself once, left to right, as the timeline enters the view. */}
-        <motion.div
-          aria-hidden="true"
-          className="absolute left-0 right-0 top-[0.4rem] hidden h-px origin-left bg-accent md:block"
-          initial={reduce ? false : { scaleX: 0 }}
-          whileInView={{ scaleX: 1 }}
-          viewport={{ once: true, margin: '0px 0px -20% 0px' }}
-          transition={{ duration: 1.6, ease: [0.2, 0.7, 0.2, 1] }}
-        />
-        <ol className="grid grid-cols-1 gap-2 md:grid-cols-[repeat(auto-fit,minmax(12rem,1fr))]">
-          {data.events.map((e, i) => (
-            <Reveal as="li" key={e.id} delay={stagger(i)} className="flex flex-col gap-4">
-              <span aria-hidden="true" className="relative z-10 hidden h-3.5 w-3.5 rounded-full border border-accent bg-surface md:block" />
-              <article className="flex h-full flex-col gap-4 rounded-tile bg-tile p-5">
-                <p className="tabular font-display text-[2.5rem] font-extrabold leading-none tracking-tight text-accent-ink">
-                  {e.year}
-                </p>
-                <div className="flex flex-col gap-2">
-                  <h3 className="text-h3">{e.title}</h3>
-                  <p className="text-sm leading-relaxed text-fg-mute">{e.description}</p>
-                </div>
-                {e.image && (
-                  <SmartImage media={e.image} className="mt-auto hidden aspect-[4/3] rounded-tile md:block" crop sizes="(min-width: 768px) 20vw, 100vw" />
-                )}
-              </article>
-            </Reveal>
-          ))}
+    <Section tone={section.tone} anchor={section.anchor} labelledBy={data.title ? id : undefined}>
+      <SectionHeader id={id} eyebrow={data.eyebrow} title={data.title} />
+      {events.length === 0 ? (
+        <p className="mono-label">{t('timeline.empty')}</p>
+      ) : (
+        <ol>
+          {events.map((event, i) => {
+            const next = events[i + 1]
+            const gap = next ? Math.abs(next.year - event.year) : 0
+            return (
+              <Station
+                key={event.id}
+                event={event}
+                index={i}
+                count={events.length}
+                interval={gap > 0 ? years(gap) : null}
+              />
+            )
+          })}
         </ol>
-      </div>
+      )}
+      {events.length > 1 && to > from && (
+        <DimensionLine
+          className="mt-16 md:mt-24"
+          label={t('timeline.span', { from, to, length: years(to - from) })}
+        />
+      )}
     </Section>
   )
 }

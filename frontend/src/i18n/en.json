@@ -1,5 +1,6 @@
 {
   "nav": { "menu": "Menu", "close": "Close", "home": "Home", "skip": "Skip to content", "language": "Language" },
+  "sheet": {"sheet": "Sheet", "sheets": "Sheets", "language": "Language", "year": "Year", "register": "Sheet register", "contacts": "Contacts", "datum": "±0.000", "noNumber": "—"},
   "common": { "more": "Learn more", "back": "Back", "all": "All", "visitSite": "Visit website", "close": "Close" },
   "status": { "completed": "Completed", "in_progress": "Under construction", "planned": "Planned" },
   "project": {
@@ -39,5 +40,10 @@
     "notFoundText": "The link may be outdated or the address may contain a typo."
   },
   "a11y": { "playVideo": "Play video", "prev": "Previous", "next": "Next" },
+  "timeline": { "years_one": "{{n}} year", "years_other": "{{n}} years", "span": "{{from}}–{{to}} · {{length}}", "empty": "The timeline is being filled in" },
+  "quote": { "open": "“", "close": "”" },
+  "divisions": { "empty": "The list of divisions is being filled in" },
+  "showcase": { "no": "No.", "empty": "The register of projects is being updated", "area": "S = {{value}} {{unit}}" },
+  "clients": { "empty": "The list of partners is being updated" },
   "preview": { "banner": "Preview — this is not the published version", "expiredTitle": "The preview link has expired", "expiredText": "Open the preview from the admin again: the link is valid for 30 minutes." }
 }

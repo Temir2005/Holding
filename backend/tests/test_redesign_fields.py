@@ -11,7 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import AdminUser, Page, Section, SiteSettings, Stat
 from app.schemas.admin.media import MediaForm, MediaUpdate
-from app.schemas.sections import HeroData, ProjectsShowcaseData, StatsData
+from app.schemas.sections import HeroData, ProductionData, ProjectsShowcaseData, StatsData
 from app.schemas.site import SiteSettingsDoc
 from tests.conftest import auth_header, publish
 from tests.test_pages_admin import make_page, ready_media
@@ -151,6 +151,110 @@ async def test_admin_refuses_missing_hero_stats(client: AsyncClient, editor: Adm
     assert res.status_code == 422, res.text
     locs = {tuple(e["loc"]) for e in res.json()["error"]["details"]}
     assert ("body", "data", "stat_ids", 0) in locs
+
+
+async def test_public_hero_shows_at_most_three_stats(
+    client: AsyncClient, session: AsyncSession
+) -> None:
+    """Data saved before the limit still renders: the site cuts it, a hidden stat
+    does not take a place."""
+    hidden = Stat(value=0, label={"ru": "скрыто"}, context="home", is_published=False)
+    stats = [Stat(value=i, label={"ru": f"цифра {i}"}, context="home") for i in range(1, 6)]
+    session.add_all([hidden, *stats])
+    await session.flush()
+    page = Page(slug="home", title={"ru": "Главная"})
+    page.sections = [
+        Section(
+            type="hero",
+            sort_order=0,
+            data={"stat_ids": [str(hidden.id), *(str(s.id) for s in stats)]},
+        )
+    ]
+    session.add(page)
+    await session.commit()
+    await publish(session, page)
+
+    res = await client.get("/api/v1/pages/home")
+    assert res.status_code == 200, res.text
+    hero = res.json()["sections"][0]["data"]
+    assert [s["label"] for s in hero["stats"]] == ["цифра 1", "цифра 2", "цифра 3"]
+
+
+HERO_LIMIT_MSG = "В hero можно выбрать не больше трёх цифр"
+
+
+async def test_admin_refuses_more_than_three_hero_stats(
+    client: AsyncClient, editor: AdminUser, session: AsyncSession
+) -> None:
+    stats = [Stat(value=i, label={"ru": f"цифра {i}"}, context="home") for i in range(4)]
+    session.add_all(stats)
+    await session.commit()
+    ids = [str(s.id) for s in stats]
+    h = auth_header(editor)
+    page = await make_page(client, h, "about")
+    sections = f"{ADMIN}/pages/{page['id']}/sections"
+
+    too_many = await client.post(
+        sections, headers=h, json={"type": "hero", "data": {"stat_ids": ids}}
+    )
+    assert too_many.status_code == 422, too_many.text
+    details = too_many.json()["error"]["details"]
+    assert {"loc": ["body", "data", "stat_ids"], "msg": HERO_LIMIT_MSG} in details
+
+    three = await client.post(
+        sections, headers=h, json={"type": "hero", "data": {"stat_ids": ids[:3]}}
+    )
+    assert three.status_code == 201, three.text
+    section = three.json()
+    res = await client.patch(
+        f"{ADMIN}/sections/{section['id']}",
+        headers=h,
+        json={"version": section["version"], "data": {**section["data"], "stat_ids": ids}},
+    )
+    assert res.status_code == 422, res.text
+    assert {"loc": ["body", "data", "stat_ids"], "msg": HERO_LIMIT_MSG} in res.json()["error"][
+        "details"
+    ]
+
+
+# --- production swatches -----------------------------------------------------------
+
+
+def test_production_swatches_field() -> None:
+    assert ProductionData.model_validate({"body": {"ru": "Текст"}}).swatches == []
+    prop = ProductionData.model_json_schema()["properties"]["swatches"]
+    assert prop["title"] == "Образцы панелей"
+    assert prop["description"] == (
+        "Условные обозначения материалов: код RAL/LAB, название, цвет, финиш"
+    )
+    hero = HeroData.model_json_schema()["properties"]["swatches"]
+    assert hero["description"].startswith("В новом дизайне не выводится")
+
+
+async def test_production_swatches_on_the_public_page(
+    client: AsyncClient, session: AsyncSession
+) -> None:
+    swatch = {"code": "RAL 9005", "label": {"ru": "Чёрный мат"}, "color": "#2A2B2D"}
+    page = Page(slug="smart-panels", title={"ru": "Панели"})
+    page.sections = [
+        Section(type="production", sort_order=0, data={"body": {"ru": "Завод"}}),
+        Section(
+            type="production",
+            sort_order=1,
+            data={"body": {"ru": "Завод"}, "swatches": [swatch]},
+        ),
+    ]
+    session.add(page)
+    await session.commit()
+    await publish(session, page)
+
+    res = await client.get("/api/v1/pages/smart-panels")
+    assert res.status_code == 200, res.text
+    bare, with_swatches = (s["data"] for s in res.json()["sections"])
+    assert bare["swatches"] == []
+    assert with_swatches["swatches"] == [
+        {"code": "RAL 9005", "label": "Чёрный мат", "color": "#2A2B2D", "finish": "matte"}
+    ]
 
 
 # --- header button -----------------------------------------------------------------

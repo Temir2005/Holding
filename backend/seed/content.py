@@ -541,7 +541,8 @@ async def seed_all(s: Seeder) -> None:
                     cta("Стать партнёром", "#contacts"),
                     cta("Смотреть проекты", "projects", "secondary"),
                 ],
-                "swatches": swatches,
+                # Panel swatches live in the smart-panels production block.
+                "swatches": [],
             },
             {"type": "stats", "tone": "light", "context": "home"},
             {
@@ -740,7 +741,7 @@ async def seed_all(s: Seeder) -> None:
                     cta("Стать дилером", "#contacts"),
                     cta("smartpanels.kz", "https://smartpanels.kz", "secondary"),
                 ],
-                "swatches": swatches,
+                "swatches": [],
             },
             {
                 "type": "capabilities",
@@ -801,6 +802,7 @@ async def seed_all(s: Seeder) -> None:
                     {"value": "2 дня", "label": L("отгрузка со склада")},
                 ],
                 "gallery_media_ids": ids(prod),
+                "swatches": swatches,
             },
             {"type": "stats", "tone": "light", "context": "smart-panels"},
             {

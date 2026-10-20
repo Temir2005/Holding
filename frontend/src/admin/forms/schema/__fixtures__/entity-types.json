@@ -95,6 +95,36 @@
           "title": "Теги",
           "type": "array",
           "x-widget": "tags"
+        },
+        "focal_point_x": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Точка, которая остаётся в кадре при обрезке. 0.5 — центр",
+          "title": "Фокус по горизонтали (0–1)"
+        },
+        "focal_point_y": {
+          "anyOf": [
+            {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Точка, которая остаётся в кадре при обрезке. 0.5 — центр",
+          "title": "Фокус по вертикали (0–1)"
         }
       },
       "title": "Файл",
@@ -1700,6 +1730,37 @@
           "title": "Координаты",
           "type": "object"
         },
+        "Cta": {
+          "additionalProperties": false,
+          "properties": {
+            "label": {
+              "$ref": "#/$defs/LocalizedText",
+              "title": "Текст кнопки",
+              "x-widget": "localized-text"
+            },
+            "href": {
+              "description": "https://…, #якорь на странице, slug страницы или projects/<slug>",
+              "maxLength": 500,
+              "minLength": 1,
+              "title": "Ссылка",
+              "type": "string",
+              "x-widget": "link"
+            },
+            "variant": {
+              "default": "primary",
+              "enum": ["primary", "secondary"],
+              "title": "Вид",
+              "type": "string",
+              "x-enum-labels": {
+                "primary": "Основная",
+                "secondary": "Второстепенная"
+              }
+            }
+          },
+          "required": ["label", "href"],
+          "title": "Кнопка",
+          "type": "object"
+        },
         "DefaultSeo": {
           "additionalProperties": false,
           "properties": {
@@ -1896,6 +1957,18 @@
           },
           "title": "Меню",
           "type": "array"
+        },
+        "header_cta": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Cta"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Кнопка в шапке"
         },
         "contacts": {
           "$ref": "#/$defs/Contacts"
