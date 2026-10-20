@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="kk">
+<head>
+<meta charset="utf-8">
+<title>Kazakh glyph check</title>
+<style>
+  body { font: 14px/1.4 system-ui, sans-serif; margin: 24px; background: #fff; color: #111; }
+  .row { display: grid; grid-template-columns: 260px 1fr; gap: 16px; padding: 14px 0; border-top: 1px solid #ddd; }
+  .name { font: 12px/1.4 monospace; }
+  .bad { color: #b00020; font-weight: 700; }
+  .ok { color: #0a7a2f; }
+  .spec { font-size: 34px; line-height: 1.15; }
+  .spec small { display: block; font-size: 18px; margin-top: 6px; }
+</style>
+</head>
+<body>
+<h1>Kazakh glyph check</h1>
+<p>Visual specimen only. The authoritative check is tools/cmap.cjs (reads each woff2 cmap table) → tools/cmap.json. The canvas width test below can give false positives when both fallbacks share a system font.</p>
+<div id="out"></div>
+<script>
+const CHARS = [...'әғқңөұүһіӘҒҚҢӨҰҮҺІёЁ']
+const SPECIMEN = 'Ғимарат · Қала · Өндіріс · Ұжым · Үй · Әріптес · Алатау шаһары · Жаңа'
+
+window.runCheck = async (fonts) => {
+  const out = document.getElementById('out')
+  const ctx = document.createElement('canvas').getContext('2d')
+  const results = []
+  for (const font of fonts) {
+    // Every subset file is registered under its own family, so each can be measured alone.
+    const families = []
+    for (const [subset, url] of Object.entries(font.subsets)) {
+      const fam = `${font.family}--${subset}`
+      const face = new FontFace(fam, `url(${url})`, { weight: '100 900' })
+      try { document.fonts.add(await face.load()); families.push(fam) } catch (e) { /* no file */ }
+    }
+    const has = (ch) => families.some((fam) => {
+      ctx.font = `64px "${fam}", monospace`; const a = ctx.measureText(ch).width
+      ctx.font = `64px "${fam}", serif`; const b = ctx.measureText(ch).width
+      return Math.abs(a - b) < 0.01
+    })
+    const missing = CHARS.filter((ch) => !has(ch))
+    results.push({ pkg: font.pkg, family: font.family, subsets: Object.keys(font.subsets), missing })
+    // Specimen uses the composite of all subsets for this font.
+    const all = families.map((f) => `'${f}'`).join(', ')
+    const row = document.createElement('div')
+    row.className = 'row'
+    row.innerHTML = `<div class="name">${font.pkg}<br>${Object.keys(font.subsets).join(' + ')}` +
+      `</div><div class="spec" style="font-family:${all}, serif;font-weight:700">${SPECIMEN}` +
+      `<small style="font-weight:400">${CHARS.join(' ')} · Мы делаем материалы · 2004 · 30 000 м²</small></div>`
+    out.append(row)
+  }
+  return results
+}
+</script>
+</body>
+</html>

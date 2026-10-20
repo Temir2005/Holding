@@ -1,0 +1,33 @@
+<!doctype html>
+<meta charset="utf-8">
+<style>body{margin:0;background:#333}iframe{display:block;border:0}</style>
+<body>
+<script>
+  // Dev-only probe. ?at=block:frac scrolls the block to a viewport fraction;
+  // ?full=1 renders the whole page settled (as after a scroll-through) in one tall frame.
+  const q = new URLSearchParams(location.search)
+  const w = +(q.get('w') || 1440), h = +(q.get('h') || 900)
+  const f = document.createElement('iframe')
+  f.width = w; f.height = h
+  f.src = '../index.html' + (q.get('q') ? '?' + q.get('q') : '')
+  f.onload = () => {
+    const d = f.contentDocument
+    if (q.get('full')) {
+      const st = d.createElement('style')
+      st.textContent = '*,*::before,*::after{transition:none!important}'
+      d.head.append(st)
+      d.querySelectorAll('[data-reveal], .stat').forEach((n) => n.classList.add('is-in'))
+      f.height = d.documentElement.scrollHeight
+      return
+    }
+    if (q.get('settle')) {
+      const st = d.createElement('style')
+      st.textContent = '*,*::before,*::after{transition:none!important}'
+      d.head.append(st)
+    }
+    const [blk, frac] = (q.get('at') || 'process:0').split(':')
+    const el = d.querySelector(`.${blk}`) || d.querySelector(`[data-block="${blk}"]`)
+    f.contentWindow.scrollTo(0, el.getBoundingClientRect().top + f.contentWindow.scrollY - h * +frac)
+  }
+  document.body.append(f)
+</script>

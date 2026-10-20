@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MegaSmart — концепции</title>
+<link rel="stylesheet" href="concepts/_shared/fonts.css">
+<style>
+  :root { --bg: #f4f4f2; --fg: #141516; --mute: #5d6066; --line: #d6d5d0; }
+  body { margin: 0; background: var(--bg); color: var(--fg); font: 16px/1.5 'Golos Text', system-ui, sans-serif; }
+  main { max-width: 960px; margin: 0 auto; padding: 48px 16px 96px; }
+  h1 { font-size: 32px; margin: 0 0 8px; }
+  p { color: var(--mute); margin: 0 0 32px; }
+  ol { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+  li { border-bottom: 1px solid var(--line); }
+  a.c { display: grid; grid-template-columns: 3ch 1fr; gap: 16px; padding: 24px 0; color: inherit; text-decoration: none; }
+  a.c:hover b, a.c:focus-visible b { text-decoration: underline; }
+  a:focus-visible { outline: 2px solid var(--fg); outline-offset: 4px; }
+  b { display: block; font-size: 24px; }
+  span { color: var(--mute); }
+  code { font: 14px 'IBM Plex Mono', monospace; }
+  .links { font: 14px 'IBM Plex Mono', monospace; margin-top: 32px; }
+  .links a { color: inherit; margin-right: 16px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>MegaSmart · этап 0 · три концепции</h1>
+  <p>Статичные прототипы: шапка и hero, stats, полный цикл, проекты, мобильное меню. Внизу справа у каждого прототипа есть панель stress: язык, число элементов, тон. Фото — плашки.</p>
+  <ol>
+    <li><a class="c" href="concepts/chertezh/index.html"><code>A</code><div><b>«Чертёж»</b><span>Сквозная линия полного цикла: точность архитектурного чертежа.</span></div></a></li>
+    <li><a class="c" href="concepts/monolit/index.html"><code>B</code><div><b>«Монолит»</b><span>Масса, бетон, цифры-герои.</span></div></a></li>
+    <li><a class="c" href="concepts/sistema/index.html"><code>C</code><div><b>«Система»</b><span>Холдинг как технологическая компания, которая строит.</span></div></a></li>
+  </ol>
+  <div class="links"><a href="tools/glyphs.png">глифы</a><a href="tools/specimen.png">specimen</a><a href="tools/specimen2.png">specimen B</a></div>
+</main>
+</body>
+</html>

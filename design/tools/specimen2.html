@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><title>Specimen B</title>
+<link rel="stylesheet" href="../concepts/_shared/fonts.css">
+<style>body{margin:0;background:#0f1011;color:#ece9e4;font:13px 'IBM Plex Mono',monospace}.row{padding:24px 40px;border-bottom:1px solid #2a2b2d}
+.lab{color:#8d8a85;margin-bottom:8px}p{margin:0}.big{font-size:84px;line-height:.92;text-transform:uppercase}.sm{font-size:30px;margin-top:10px}.num{font-size:180px;line-height:.85;margin-top:14px}</style></head><body>
+<script>
+const rows = [
+  ['Science Gothic 800 wdth 100 UPPER', "font-family:'Science Gothic';font-weight:800;font-stretch:100%;letter-spacing:-.01em"],
+  ['Science Gothic 700 wdth 125 UPPER', "font-family:'Science Gothic';font-weight:700;font-stretch:125%"],
+  ['Roboto Flex 1000 wdth 25 UPPER', "font-family:'Roboto Flex';font-weight:1000;font-stretch:25%;letter-spacing:-.01em"],
+  ['Roboto Flex 800 wdth 40 UPPER', "font-family:'Roboto Flex';font-weight:800;font-stretch:40%"],
+]
+for (const [l, s] of rows) document.write(`<div class="row"><div class="lab">${l}</div><p class="big" style="${s}">Мы делаем материалы, из которых строим</p>
+<p class="big" style="${s};font-size:56px;margin-top:10px">Біз құрылыс материалдарын өзіміз шығарамыз</p>
+<p class="sm" style="${s};text-transform:none">Двадцать лет назад начали с мебели. Сегодня производим МДФ-панели</p>
+<p class="num" style="${s}">20+ 30 000м² 2004</p></div>`)
+</script></body></html>

@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><title>Display specimen</title>
+<link rel="stylesheet" href="../concepts/_shared/fonts.css">
+<style>
+body{margin:0;background:#0f1011;color:#ece9e4;font:13px/1.4 'IBM Plex Mono',monospace}
+.row{padding:28px 40px;border-bottom:1px solid #2a2b2d}
+.lab{color:#8d8a85;margin-bottom:10px}
+.big{font-size:96px;line-height:.9;letter-spacing:-.02em;margin:0}
+.mid{font-size:44px;line-height:1;margin:14px 0 0}
+.num{font-size:150px;line-height:.85;margin:16px 0 0;font-variant-numeric:tabular-nums}
+.light{background:#ece9e4;color:#111}
+</style></head><body>
+<script>
+const rows = [
+  ['B · Science Gothic 800, wdth 60', "font-family:'Science Gothic';font-weight:800;font-stretch:60%"],
+  ['B · Science Gothic 700, wdth 140', "font-family:'Science Gothic';font-weight:700;font-stretch:140%"],
+  ['B · Tektur 800, wdth 75', "font-family:'Tektur';font-weight:800;font-stretch:75%"],
+  ['B · Roboto Flex 900, wdth 25', "font-family:'Roboto Flex';font-weight:900;font-stretch:25%"],
+  ['B · Fira Sans Extra Condensed 900', "font-family:'Fira Sans Extra Condensed';font-weight:900"],
+  ['A · Geologica 600, SHRP 0', "font-family:'Geologica';font-weight:600;font-variation-settings:'SHRP' 0"],
+  ['A · Geologica 600, SHRP 100', "font-family:'Geologica';font-weight:600;font-variation-settings:'SHRP' 100"],
+  ['A · Onest 600', "font-family:'Onest';font-weight:600"],
+  ['C · Inter 600, opsz 32 (display)', "font-family:'Inter';font-weight:600;font-variation-settings:'opsz' 32;letter-spacing:-.035em"],
+  ['C · Geist 600', "font-family:'Geist';font-weight:600;letter-spacing:-.04em"],
+]
+for (const [label, style] of rows) document.write(`<div class="row"><div class="lab">${label}</div>
+<p class="big" style="${style}">Мы делаем материалы, из которых строим</p>
+<p class="mid" style="${style}">Біз құрылыс материалдарын өзіміз шығарып · ӘҒҚҢӨҰҮҺІ</p>
+<p class="num" style="${style}">2004 · 30 000 м²</p></div>`)
+</script></body></html>

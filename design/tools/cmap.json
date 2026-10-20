@@ -1,0 +1,2237 @@
+[
+  {
+    "pkg": "fontsource-variable_advent-pro",
+    "style": "standard",
+    "subsets": [
+      "cyrillic-ext",
+      "cyrillic",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic-ext": 24824,
+      "cyrillic": 31180,
+      "latin": 50256
+    },
+    "kb": 103.8,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource-variable_advent-pro",
+    "style": "wdth",
+    "subsets": [
+      "cyrillic-ext",
+      "cyrillic",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic-ext": 24824,
+      "cyrillic": 31180,
+      "latin": 50256
+    },
+    "kb": 103.8,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource-variable_advent-pro",
+    "style": "wght",
+    "subsets": [
+      "cyrillic-ext",
+      "cyrillic",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic-ext": 14812,
+      "cyrillic": 18144,
+      "latin": 32208
+    },
+    "kb": 63.6,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource-variable_alumni-sans",
+    "style": "wght",
+    "subsets": [
+      "cyrillic-ext",
+      "cyrillic",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic-ext": 1800,
+      "cyrillic": 11792,
+      "latin": 22236
+    },
+    "kb": 35,
+    "missing": [
+      "ә",
+      "ғ",
+      "қ",
+      "ң",
+      "ө",
+      "ұ",
+      "ү",
+      "һ",
+      "Ә",
+      "Ғ",
+      "Қ",
+      "Ң",
+      "Ө",
+      "Ұ",
+      "Ү",
+      "Һ"
+    ]
+  },
+  {
+    "pkg": "fontsource-variable_archivo",
+    "style": "standard",
+    "subsets": [
+      "latin"
+    ],
+    "sizes": {
+      "latin": 90104
+    },
+    "kb": 88,
+    "missing": [
+      "ә",
+      "ғ",
+      "қ",
+      "ң",
+      "ө",
+      "ұ",
+      "ү",
+      "һ",
+      "і",
+      "Ә",
+      "Ғ",
+      "Қ",
+      "Ң",
+      "Ө",
+      "Ұ",
+      "Ү",
+      "Һ",
+      "І",
+      "ё",
+      "Ё",
+      "№"
+    ]
+  },
+  {
+    "pkg": "fontsource-variable_archivo",
+    "style": "wdth",
+    "subsets": [
+      "latin"
+    ],
+    "sizes": {
+      "latin": 90104
+    },
+    "kb": 88,
+    "missing": [
+      "ә",
+      "ғ",
+      "қ",
+      "ң",
+      "ө",
+      "ұ",
+      "ү",
+      "һ",
+      "і",
+      "Ә",
+      "Ғ",
+      "Қ",
+      "Ң",
+      "Ө",
+      "Ұ",
+      "Ү",
+      "Һ",
+      "І",
+      "ё",
+      "Ё",
+      "№"
+    ]
+  },
+  {
+    "pkg": "fontsource-variable_archivo",
+    "style": "wght",
+    "subsets": [
+      "latin"
+    ],
+    "sizes": {
+      "latin": 34928
+    },
+    "kb": 34.1,
+    "missing": [
+      "ә",
+      "ғ",
+      "қ",
+      "ң",
+      "ө",
+      "ұ",
+      "ү",
+      "һ",
+      "і",
+      "Ә",
+      "Ғ",
+      "Қ",
+      "Ң",
+      "Ө",
+      "Ұ",
+      "Ү",
+      "Һ",
+      "І",
+      "ё",
+      "Ё",
+      "№"
+    ]
+  },
+  {
+    "pkg": "fontsource-variable_commissioner",
+    "style": "flar",
+    "subsets": [
+      "cyrillic-ext",
+      "cyrillic",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic-ext": 38156,
+      "cyrillic": 35376,
+      "latin": 47588
+    },
+    "kb": 118.3,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource-variable_commissioner",
+    "style": "full",
+    "subsets": [
+      "cyrillic-ext",
+      "cyrillic",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic-ext": 79068,
+      "cyrillic": 72572,
+      "latin": 95144
+    },
+    "kb": 241,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource-variable_commissioner",
+    "style": "slnt",
+    "subsets": [
+      "cyrillic-ext",
+      "cyrillic",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic-ext": 45396,
+      "cyrillic": 42428,
+      "latin": 57708
+    },
+    "kb": 142.1,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource-variable_commissioner",
+    "style": "standard",
+    "subsets": [
+      "cyrillic-ext",
+      "cyrillic",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic-ext": 45396,
+      "cyrillic": 42428,
+      "latin": 57708
+    },
+    "kb": 142.1,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource-variable_commissioner",
+    "style": "volm",
+    "subsets": [
+      "cyrillic-ext",
+      "cyrillic",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic-ext": 28668,
+      "cyrillic": 26880,
+      "latin": 38088
+    },
+    "kb": 91.4,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource-variable_commissioner",
+    "style": "wght",
+    "subsets": [
+      "cyrillic-ext",
+      "cyrillic",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic-ext": 28068,
+      "cyrillic": 26188,
+      "latin": 36700
+    },
+    "kb": 88.8,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource-variable_exo-2",
+    "style": "wght",
+    "subsets": [
+      "cyrillic-ext",
+      "cyrillic",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic-ext": 25208,
+      "cyrillic": 19596,
+      "latin": 40896
+    },
+    "kb": 83.7,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource-variable_geist",
+    "style": "wght",
+    "subsets": [
+      "cyrillic-ext",
+      "cyrillic",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic-ext": 7420,
+      "cyrillic": 15084,
+      "latin": 29400
+    },
+    "kb": 50.7,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource-variable_geist-mono",
+    "style": "wght",
+    "subsets": [
+      "cyrillic-ext",
+      "cyrillic",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic-ext": 6176,
+      "cyrillic": 12940,
+      "latin": 23128
+    },
+    "kb": 41.3,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource-variable_geologica",
+    "style": "crsv",
+    "subsets": [
+      "cyrillic",
+      "cyrillic-ext",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic": 16776,
+      "cyrillic-ext": 11940,
+      "latin": 25880
+    },
+    "kb": 53.3,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource-variable_geologica",
+    "style": "full",
+    "subsets": [
+      "cyrillic-ext",
+      "cyrillic",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic-ext": 22096,
+      "cyrillic": 31824,
+      "latin": 48536
+    },
+    "kb": 100.1,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource-variable_geologica",
+    "style": "shrp",
+    "subsets": [
+      "cyrillic-ext",
+      "cyrillic",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic-ext": 13452,
+      "cyrillic": 19292,
+      "latin": 29328
+    },
+    "kb": 60.6,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource-variable_geologica",
+    "style": "slnt",
+    "subsets": [
+      "cyrillic-ext",
+      "cyrillic",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic-ext": 17572,
+      "cyrillic": 25732,
+      "latin": 38776
+    },
+    "kb": 80.2,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource-variable_geologica",
+    "style": "standard",
+    "subsets": [
+      "cyrillic-ext",
+      "cyrillic",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic-ext": 17572,
+      "cyrillic": 25732,
+      "latin": 38776
+    },
+    "kb": 80.2,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource-variable_geologica",
+    "style": "wght",
+    "subsets": [
+      "cyrillic-ext",
+      "cyrillic",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic-ext": 11488,
+      "cyrillic": 16428,
+      "latin": 24944
+    },
+    "kb": 51.6,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource-variable_golos-text",
+    "style": "wght",
+    "subsets": [
+      "cyrillic-ext",
+      "cyrillic",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic-ext": 17508,
+      "cyrillic": 22032,
+      "latin": 37916
+    },
+    "kb": 75.6,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource-variable_ibm-plex-sans",
+    "style": "standard",
+    "subsets": [
+      "cyrillic-ext",
+      "cyrillic",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic-ext": 36668,
+      "cyrillic": 46012,
+      "latin": 65488
+    },
+    "kb": 144.7,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource-variable_ibm-plex-sans",
+    "style": "wdth",
+    "subsets": [
+      "cyrillic-ext",
+      "cyrillic",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic-ext": 36668,
+      "cyrillic": 46012,
+      "latin": 65488
+    },
+    "kb": 144.7,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource-variable_ibm-plex-sans",
+    "style": "wght",
+    "subsets": [
+      "cyrillic-ext",
+      "cyrillic",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic-ext": 23568,
+      "cyrillic": 29512,
+      "latin": 45712
+    },
+    "kb": 96.5,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource-variable_inter",
+    "style": "opsz",
+    "subsets": [
+      "cyrillic-ext",
+      "cyrillic",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic-ext": 41520,
+      "cyrillic": 29636,
+      "latin": 72920
+    },
+    "kb": 140.7,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource-variable_inter",
+    "style": "standard",
+    "subsets": [
+      "cyrillic-ext",
+      "cyrillic",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic-ext": 41520,
+      "cyrillic": 29636,
+      "latin": 72920
+    },
+    "kb": 140.7,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource-variable_inter",
+    "style": "wght",
+    "subsets": [
+      "cyrillic-ext",
+      "cyrillic",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic-ext": 25960,
+      "cyrillic": 18748,
+      "latin": 48256
+    },
+    "kb": 90.8,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource-variable_inter-tight",
+    "style": "wght",
+    "subsets": [
+      "cyrillic-ext",
+      "cyrillic",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic-ext": 26660,
+      "cyrillic": 16996,
+      "latin": 44872
+    },
+    "kb": 86.5,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource-variable_jetbrains-mono",
+    "style": "wght",
+    "subsets": [
+      "cyrillic-ext",
+      "cyrillic",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic-ext": 2028,
+      "cyrillic": 12108,
+      "latin": 40404
+    },
+    "kb": 53.3,
+    "missing": [
+      "ә",
+      "ғ",
+      "қ",
+      "ң",
+      "ұ",
+      "һ",
+      "Ә",
+      "Ғ",
+      "Қ",
+      "Ң",
+      "Ұ",
+      "Һ"
+    ]
+  },
+  {
+    "pkg": "fontsource-variable_jura",
+    "style": "wght",
+    "subsets": [
+      "cyrillic-ext",
+      "cyrillic",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic-ext": 2100,
+      "cyrillic": 13212,
+      "latin": 24276
+    },
+    "kb": 38.7,
+    "missing": [
+      "ә",
+      "ғ",
+      "қ",
+      "ң",
+      "ө",
+      "ұ",
+      "ү",
+      "һ",
+      "Ә",
+      "Ғ",
+      "Қ",
+      "Ң",
+      "Ө",
+      "Ұ",
+      "Ү",
+      "Һ"
+    ]
+  },
+  {
+    "pkg": "fontsource-variable_literata",
+    "style": "opsz",
+    "subsets": [
+      "cyrillic-ext",
+      "cyrillic",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic-ext": 21172,
+      "cyrillic": 61688,
+      "latin": 110080
+    },
+    "kb": 188.4,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource-variable_literata",
+    "style": "standard",
+    "subsets": [
+      "cyrillic-ext",
+      "cyrillic",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic-ext": 21172,
+      "cyrillic": 61688,
+      "latin": 110080
+    },
+    "kb": 188.4,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource-variable_literata",
+    "style": "wght",
+    "subsets": [
+      "cyrillic-ext",
+      "cyrillic",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic-ext": 9728,
+      "cyrillic": 28068,
+      "latin": 52496
+    },
+    "kb": 88.2,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource-variable_manrope",
+    "style": "wght",
+    "subsets": [
+      "cyrillic-ext",
+      "cyrillic",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic-ext": 2552,
+      "cyrillic": 14500,
+      "latin": 24836
+    },
+    "kb": 40.9,
+    "missing": [
+      "ә",
+      "ғ",
+      "қ",
+      "ң",
+      "ұ",
+      "Ә",
+      "Ғ",
+      "Қ",
+      "Ң",
+      "Ұ"
+    ]
+  },
+  {
+    "pkg": "fontsource-variable_martian-mono",
+    "style": "standard",
+    "subsets": [
+      "cyrillic-ext",
+      "cyrillic",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic-ext": 4816,
+      "cyrillic": 17200,
+      "latin": 38492
+    },
+    "kb": 59.1,
+    "missing": [
+      "ә",
+      "ғ",
+      "қ",
+      "ң",
+      "ө",
+      "ұ",
+      "ү",
+      "һ",
+      "Ә",
+      "Ғ",
+      "Қ",
+      "Ң",
+      "Ө",
+      "Ұ",
+      "Ү",
+      "Һ"
+    ]
+  },
+  {
+    "pkg": "fontsource-variable_martian-mono",
+    "style": "wdth",
+    "subsets": [
+      "cyrillic-ext",
+      "cyrillic",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic-ext": 4816,
+      "cyrillic": 17200,
+      "latin": 38492
+    },
+    "kb": 59.1,
+    "missing": [
+      "ә",
+      "ғ",
+      "қ",
+      "ң",
+      "ө",
+      "ұ",
+      "ү",
+      "һ",
+      "Ә",
+      "Ғ",
+      "Қ",
+      "Ң",
+      "Ө",
+      "Ұ",
+      "Ү",
+      "Һ"
+    ]
+  },
+  {
+    "pkg": "fontsource-variable_martian-mono",
+    "style": "wght",
+    "subsets": [
+      "cyrillic-ext",
+      "cyrillic",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic-ext": 3172,
+      "cyrillic": 10560,
+      "latin": 23556
+    },
+    "kb": 36.4,
+    "missing": [
+      "ә",
+      "ғ",
+      "қ",
+      "ң",
+      "ө",
+      "ұ",
+      "ү",
+      "һ",
+      "Ә",
+      "Ғ",
+      "Қ",
+      "Ң",
+      "Ө",
+      "Ұ",
+      "Ү",
+      "Һ"
+    ]
+  },
+  {
+    "pkg": "fontsource-variable_montserrat",
+    "style": "wght",
+    "subsets": [
+      "cyrillic-ext",
+      "cyrillic",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic-ext": 26368,
+      "cyrillic": 23828,
+      "latin": 37956
+    },
+    "kb": 86.1,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource-variable_mulish",
+    "style": "wght",
+    "subsets": [
+      "cyrillic-ext",
+      "cyrillic",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic-ext": 21252,
+      "cyrillic": 15948,
+      "latin": 29968
+    },
+    "kb": 65.6,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource-variable_onest",
+    "style": "wght",
+    "subsets": [
+      "cyrillic-ext",
+      "cyrillic",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic-ext": 10540,
+      "cyrillic": 15860,
+      "latin": 33760
+    },
+    "kb": 58.8,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource-variable_pathway-extreme",
+    "style": "opsz",
+    "subsets": [
+      "latin"
+    ],
+    "sizes": {
+      "latin": 58740
+    },
+    "kb": 57.4,
+    "missing": [
+      "ә",
+      "ғ",
+      "қ",
+      "ң",
+      "ө",
+      "ұ",
+      "ү",
+      "һ",
+      "і",
+      "Ә",
+      "Ғ",
+      "Қ",
+      "Ң",
+      "Ө",
+      "Ұ",
+      "Ү",
+      "Һ",
+      "І",
+      "ё",
+      "Ё",
+      "№"
+    ]
+  },
+  {
+    "pkg": "fontsource-variable_pathway-extreme",
+    "style": "standard",
+    "subsets": [
+      "latin"
+    ],
+    "sizes": {
+      "latin": 97496
+    },
+    "kb": 95.2,
+    "missing": [
+      "ә",
+      "ғ",
+      "қ",
+      "ң",
+      "ө",
+      "ұ",
+      "ү",
+      "һ",
+      "і",
+      "Ә",
+      "Ғ",
+      "Қ",
+      "Ң",
+      "Ө",
+      "Ұ",
+      "Ү",
+      "Һ",
+      "І",
+      "ё",
+      "Ё",
+      "№"
+    ]
+  },
+  {
+    "pkg": "fontsource-variable_pathway-extreme",
+    "style": "wdth",
+    "subsets": [
+      "latin"
+    ],
+    "sizes": {
+      "latin": 58392
+    },
+    "kb": 57,
+    "missing": [
+      "ә",
+      "ғ",
+      "қ",
+      "ң",
+      "ө",
+      "ұ",
+      "ү",
+      "һ",
+      "і",
+      "Ә",
+      "Ғ",
+      "Қ",
+      "Ң",
+      "Ө",
+      "Ұ",
+      "Ү",
+      "Һ",
+      "І",
+      "ё",
+      "Ё",
+      "№"
+    ]
+  },
+  {
+    "pkg": "fontsource-variable_pathway-extreme",
+    "style": "wght",
+    "subsets": [
+      "latin"
+    ],
+    "sizes": {
+      "latin": 31880
+    },
+    "kb": 31.1,
+    "missing": [
+      "ә",
+      "ғ",
+      "қ",
+      "ң",
+      "ө",
+      "ұ",
+      "ү",
+      "һ",
+      "і",
+      "Ә",
+      "Ғ",
+      "Қ",
+      "Ң",
+      "Ө",
+      "Ұ",
+      "Ү",
+      "Һ",
+      "І",
+      "ё",
+      "Ё",
+      "№"
+    ]
+  },
+  {
+    "pkg": "fontsource-variable_playfair-display",
+    "style": "wght",
+    "subsets": [
+      "cyrillic",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic": 21152,
+      "latin": 38404
+    },
+    "kb": 58.2,
+    "missing": [
+      "ә",
+      "ғ",
+      "қ",
+      "ң",
+      "ө",
+      "ү",
+      "һ",
+      "Ә",
+      "Ғ",
+      "Қ",
+      "Ң",
+      "Ө",
+      "Ү",
+      "Һ"
+    ]
+  },
+  {
+    "pkg": "fontsource-variable_roboto-flex",
+    "style": "full",
+    "subsets": [
+      "cyrillic-ext",
+      "cyrillic",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic-ext": 116344,
+      "cyrillic": 180204,
+      "latin": 326404
+    },
+    "kb": 608.4,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource-variable_roboto-flex",
+    "style": "grad",
+    "subsets": [
+      "cyrillic-ext",
+      "cyrillic",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic-ext": 18324,
+      "cyrillic": 28468,
+      "latin": 57048
+    },
+    "kb": 101.4,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource-variable_roboto-flex",
+    "style": "opsz",
+    "subsets": [
+      "cyrillic-ext",
+      "cyrillic",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic-ext": 26636,
+      "cyrillic": 41732,
+      "latin": 84304
+    },
+    "kb": 149.1,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource-variable_roboto-flex",
+    "style": "slnt",
+    "subsets": [
+      "cyrillic-ext",
+      "cyrillic",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic-ext": 14188,
+      "cyrillic": 21076,
+      "latin": 44092
+    },
+    "kb": 77.5,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource-variable_roboto-flex",
+    "style": "standard",
+    "subsets": [
+      "cyrillic-ext",
+      "cyrillic",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic-ext": 88700,
+      "cyrillic": 136008,
+      "latin": 249700
+    },
+    "kb": 463.3,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource-variable_roboto-flex",
+    "style": "wdth",
+    "subsets": [
+      "cyrillic-ext",
+      "cyrillic",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic-ext": 21328,
+      "cyrillic": 32052,
+      "latin": 59560
+    },
+    "kb": 110.3,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource-variable_roboto-flex",
+    "style": "wght",
+    "subsets": [
+      "cyrillic-ext",
+      "cyrillic",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic-ext": 10392,
+      "cyrillic": 15652,
+      "latin": 34320
+    },
+    "kb": 58.9,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource-variable_roboto-flex",
+    "style": "xopq",
+    "subsets": [
+      "cyrillic-ext",
+      "cyrillic",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic-ext": 14068,
+      "cyrillic": 20812,
+      "latin": 45092
+    },
+    "kb": 78.1,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource-variable_roboto-flex",
+    "style": "xtra",
+    "subsets": [
+      "cyrillic-ext",
+      "cyrillic",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic-ext": 13384,
+      "cyrillic": 20252,
+      "latin": 42648
+    },
+    "kb": 74.5,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource-variable_roboto-flex",
+    "style": "yopq",
+    "subsets": [
+      "cyrillic-ext",
+      "cyrillic",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic-ext": 12884,
+      "cyrillic": 19356,
+      "latin": 42092
+    },
+    "kb": 72.6,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource-variable_roboto-flex",
+    "style": "ytas",
+    "subsets": [
+      "cyrillic-ext",
+      "cyrillic",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic-ext": 10580,
+      "cyrillic": 15668,
+      "latin": 34756
+    },
+    "kb": 59.6,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource-variable_roboto-flex",
+    "style": "ytde",
+    "subsets": [
+      "cyrillic-ext",
+      "cyrillic",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic-ext": 10716,
+      "cyrillic": 15880,
+      "latin": 34704
+    },
+    "kb": 59.9,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource-variable_roboto-flex",
+    "style": "ytfi",
+    "subsets": [
+      "cyrillic-ext",
+      "cyrillic",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic-ext": 10720,
+      "cyrillic": 15716,
+      "latin": 35756
+    },
+    "kb": 60.7,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource-variable_roboto-flex",
+    "style": "ytlc",
+    "subsets": [
+      "cyrillic-ext",
+      "cyrillic",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic-ext": 11568,
+      "cyrillic": 17492,
+      "latin": 36160
+    },
+    "kb": 63.7,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource-variable_roboto-flex",
+    "style": "ytuc",
+    "subsets": [
+      "cyrillic-ext",
+      "cyrillic",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic-ext": 11636,
+      "cyrillic": 17564,
+      "latin": 36160
+    },
+    "kb": 63.8,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource-variable_roboto-mono",
+    "style": "wght",
+    "subsets": [
+      "cyrillic-ext",
+      "cyrillic",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic-ext": 35912,
+      "cyrillic": 18592,
+      "latin": 32796
+    },
+    "kb": 85.3,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource-variable_rubik",
+    "style": "wght",
+    "subsets": [
+      "cyrillic-ext",
+      "cyrillic",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic-ext": 12388,
+      "cyrillic": 15112,
+      "latin": 35348
+    },
+    "kb": 61.4,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource-variable_science-gothic",
+    "style": "ctrs",
+    "subsets": [
+      "cyrillic",
+      "cyrillic-ext",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic": 30836,
+      "cyrillic-ext": 25588,
+      "latin": 63312
+    },
+    "kb": 116.9,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource-variable_science-gothic",
+    "style": "full",
+    "subsets": [
+      "cyrillic-ext",
+      "cyrillic",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic-ext": 95840,
+      "cyrillic": 112000,
+      "latin": 240036
+    },
+    "kb": 437.4,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource-variable_science-gothic",
+    "style": "slnt",
+    "subsets": [
+      "cyrillic-ext",
+      "cyrillic",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic-ext": 23272,
+      "cyrillic": 28004,
+      "latin": 59956
+    },
+    "kb": 108.6,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource-variable_science-gothic",
+    "style": "standard",
+    "subsets": [
+      "cyrillic-ext",
+      "cyrillic",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic-ext": 54536,
+      "cyrillic": 64484,
+      "latin": 140032
+    },
+    "kb": 253,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource-variable_science-gothic",
+    "style": "wdth",
+    "subsets": [
+      "cyrillic-ext",
+      "cyrillic",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic-ext": 37392,
+      "cyrillic": 45232,
+      "latin": 95680
+    },
+    "kb": 174.1,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource-variable_science-gothic",
+    "style": "wght",
+    "subsets": [
+      "cyrillic-ext",
+      "cyrillic",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic-ext": 16128,
+      "cyrillic": 19552,
+      "latin": 40904
+    },
+    "kb": 74.8,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource-variable_sofia-sans",
+    "style": "wght",
+    "subsets": [
+      "cyrillic-ext",
+      "cyrillic",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic-ext": 3372,
+      "cyrillic": 25568,
+      "latin": 40372
+    },
+    "kb": 67.7,
+    "missing": [
+      "ә",
+      "ғ",
+      "қ",
+      "ң",
+      "ө",
+      "ұ",
+      "ү",
+      "һ",
+      "Ә",
+      "Ғ",
+      "Қ",
+      "Ң",
+      "Ө",
+      "Ұ",
+      "Ү",
+      "Һ"
+    ]
+  },
+  {
+    "pkg": "fontsource-variable_sofia-sans-condensed",
+    "style": "wght",
+    "subsets": [
+      "cyrillic-ext",
+      "cyrillic",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic-ext": 3412,
+      "cyrillic": 25616,
+      "latin": 41240
+    },
+    "kb": 68.6,
+    "missing": [
+      "ә",
+      "ғ",
+      "қ",
+      "ң",
+      "ө",
+      "ұ",
+      "ү",
+      "һ",
+      "Ә",
+      "Ғ",
+      "Қ",
+      "Ң",
+      "Ө",
+      "Ұ",
+      "Ү",
+      "Һ"
+    ]
+  },
+  {
+    "pkg": "fontsource-variable_sofia-sans-extra-condensed",
+    "style": "wght",
+    "subsets": [
+      "cyrillic-ext",
+      "cyrillic",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic-ext": 3428,
+      "cyrillic": 25256,
+      "latin": 40520
+    },
+    "kb": 67.6,
+    "missing": [
+      "ә",
+      "ғ",
+      "қ",
+      "ң",
+      "ө",
+      "ұ",
+      "ү",
+      "һ",
+      "Ә",
+      "Ғ",
+      "Қ",
+      "Ң",
+      "Ө",
+      "Ұ",
+      "Ү",
+      "Һ"
+    ]
+  },
+  {
+    "pkg": "fontsource-variable_source-serif-4",
+    "style": "opsz",
+    "subsets": [
+      "cyrillic-ext",
+      "cyrillic",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic-ext": 45220,
+      "cyrillic": 93440,
+      "latin": 122360
+    },
+    "kb": 254.9,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource-variable_source-serif-4",
+    "style": "standard",
+    "subsets": [
+      "cyrillic-ext",
+      "cyrillic",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic-ext": 45220,
+      "cyrillic": 93440,
+      "latin": 122360
+    },
+    "kb": 254.9,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource-variable_source-serif-4",
+    "style": "wght",
+    "subsets": [
+      "cyrillic-ext",
+      "cyrillic",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic-ext": 18112,
+      "cyrillic": 36508,
+      "latin": 50936
+    },
+    "kb": 103.1,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource-variable_tektur",
+    "style": "standard",
+    "subsets": [
+      "cyrillic-ext",
+      "cyrillic",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic-ext": 10052,
+      "cyrillic": 14056,
+      "latin": 19196
+    },
+    "kb": 42.3,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource-variable_tektur",
+    "style": "wdth",
+    "subsets": [
+      "cyrillic-ext",
+      "cyrillic",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic-ext": 10052,
+      "cyrillic": 14056,
+      "latin": 19196
+    },
+    "kb": 42.3,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource-variable_tektur",
+    "style": "wght",
+    "subsets": [
+      "cyrillic-ext",
+      "cyrillic",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic-ext": 6000,
+      "cyrillic": 8664,
+      "latin": 12148
+    },
+    "kb": 26.2,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource-variable_ubuntu-sans",
+    "style": "standard",
+    "subsets": [
+      "cyrillic-ext",
+      "cyrillic",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic-ext": 42896,
+      "cyrillic": 36888,
+      "latin": 64036
+    },
+    "kb": 140.4,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource-variable_ubuntu-sans",
+    "style": "wdth",
+    "subsets": [
+      "cyrillic-ext",
+      "cyrillic",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic-ext": 42896,
+      "cyrillic": 36888,
+      "latin": 64036
+    },
+    "kb": 140.4,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource-variable_ubuntu-sans",
+    "style": "wght",
+    "subsets": [
+      "cyrillic-ext",
+      "cyrillic",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic-ext": 24280,
+      "cyrillic": 21800,
+      "latin": 38052
+    },
+    "kb": 82.2,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource-variable_ubuntu-sans-mono",
+    "style": "wght",
+    "subsets": [
+      "cyrillic-ext",
+      "cyrillic",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic-ext": 13860,
+      "cyrillic": 11972,
+      "latin": 21040
+    },
+    "kb": 45.8,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource-variable_wix-madefor-display",
+    "style": "wght",
+    "subsets": [
+      "cyrillic-ext",
+      "cyrillic",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic-ext": 1984,
+      "cyrillic": 13816,
+      "latin": 20168
+    },
+    "kb": 35.1,
+    "missing": [
+      "ә",
+      "ғ",
+      "қ",
+      "ң",
+      "ө",
+      "ұ",
+      "ү",
+      "һ",
+      "Ә",
+      "Ғ",
+      "Қ",
+      "Ң",
+      "Ө",
+      "Ұ",
+      "Ү",
+      "Һ"
+    ]
+  },
+  {
+    "pkg": "fontsource_dela-gothic-one",
+    "style": "400",
+    "subsets": [
+      "cyrillic",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic": 7292,
+      "latin": 13804
+    },
+    "kb": 20.6,
+    "missing": [
+      "ә",
+      "ғ",
+      "қ",
+      "ң",
+      "ө",
+      "ұ",
+      "ү",
+      "һ",
+      "Ә",
+      "Ғ",
+      "Қ",
+      "Ң",
+      "Ө",
+      "Ұ",
+      "Ү",
+      "Һ"
+    ]
+  },
+  {
+    "pkg": "fontsource_fira-mono",
+    "style": "400",
+    "subsets": [
+      "cyrillic",
+      "cyrillic-ext",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic": 9324,
+      "cyrillic-ext": 15784,
+      "latin": 16640
+    },
+    "kb": 40.8,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource_fira-mono",
+    "style": "500",
+    "subsets": [
+      "cyrillic",
+      "cyrillic-ext",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic": 9332,
+      "cyrillic-ext": 15732,
+      "latin": 16480
+    },
+    "kb": 40.6,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource_fira-mono",
+    "style": "700",
+    "subsets": [
+      "cyrillic",
+      "cyrillic-ext",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic": 10744,
+      "cyrillic-ext": 18568,
+      "latin": 17996
+    },
+    "kb": 46.2,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource_fira-sans-condensed",
+    "style": "100",
+    "subsets": [
+      "cyrillic",
+      "cyrillic-ext",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic": 10500,
+      "cyrillic-ext": 17020,
+      "latin": 22944
+    },
+    "kb": 49.3,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource_fira-sans-condensed",
+    "style": "200",
+    "subsets": [
+      "cyrillic",
+      "cyrillic-ext",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic": 10652,
+      "cyrillic-ext": 17544,
+      "latin": 23732
+    },
+    "kb": 50.7,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource_fira-sans-condensed",
+    "style": "300",
+    "subsets": [
+      "cyrillic",
+      "cyrillic-ext",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic": 10624,
+      "cyrillic-ext": 17464,
+      "latin": 23588
+    },
+    "kb": 50.5,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource_fira-sans-condensed",
+    "style": "400",
+    "subsets": [
+      "cyrillic",
+      "cyrillic-ext",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic": 10840,
+      "cyrillic-ext": 17952,
+      "latin": 24028
+    },
+    "kb": 51.6,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource_fira-sans-condensed",
+    "style": "500",
+    "subsets": [
+      "cyrillic",
+      "cyrillic-ext",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic": 10776,
+      "cyrillic-ext": 17820,
+      "latin": 24100
+    },
+    "kb": 51.5,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource_fira-sans-condensed",
+    "style": "600",
+    "subsets": [
+      "cyrillic",
+      "cyrillic-ext",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic": 11548,
+      "cyrillic-ext": 19420,
+      "latin": 25036
+    },
+    "kb": 54.7,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource_fira-sans-condensed",
+    "style": "700",
+    "subsets": [
+      "cyrillic",
+      "cyrillic-ext",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic": 11528,
+      "cyrillic-ext": 19736,
+      "latin": 25192
+    },
+    "kb": 55.1,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource_fira-sans-condensed",
+    "style": "800",
+    "subsets": [
+      "cyrillic",
+      "cyrillic-ext",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic": 11548,
+      "cyrillic-ext": 19912,
+      "latin": 25116
+    },
+    "kb": 55.3,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource_fira-sans-condensed",
+    "style": "900",
+    "subsets": [
+      "cyrillic",
+      "cyrillic-ext",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic": 11848,
+      "cyrillic-ext": 20296,
+      "latin": 25356
+    },
+    "kb": 56.2,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource_fira-sans-extra-condensed",
+    "style": "100",
+    "subsets": [
+      "cyrillic",
+      "cyrillic-ext",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic": 10460,
+      "cyrillic-ext": 16932,
+      "latin": 22848
+    },
+    "kb": 49.1,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource_fira-sans-extra-condensed",
+    "style": "200",
+    "subsets": [
+      "cyrillic",
+      "cyrillic-ext",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic": 10616,
+      "cyrillic-ext": 17364,
+      "latin": 23500
+    },
+    "kb": 50.3,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource_fira-sans-extra-condensed",
+    "style": "300",
+    "subsets": [
+      "cyrillic",
+      "cyrillic-ext",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic": 10748,
+      "cyrillic-ext": 17560,
+      "latin": 23684
+    },
+    "kb": 50.8,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource_fira-sans-extra-condensed",
+    "style": "400",
+    "subsets": [
+      "cyrillic",
+      "cyrillic-ext",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic": 10784,
+      "cyrillic-ext": 17716,
+      "latin": 23980
+    },
+    "kb": 51.3,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource_fira-sans-extra-condensed",
+    "style": "500",
+    "subsets": [
+      "cyrillic",
+      "cyrillic-ext",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic": 10784,
+      "cyrillic-ext": 17988,
+      "latin": 24040
+    },
+    "kb": 51.6,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource_fira-sans-extra-condensed",
+    "style": "600",
+    "subsets": [
+      "cyrillic",
+      "cyrillic-ext",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic": 11420,
+      "cyrillic-ext": 19288,
+      "latin": 25108
+    },
+    "kb": 54.5,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource_fira-sans-extra-condensed",
+    "style": "700",
+    "subsets": [
+      "cyrillic",
+      "cyrillic-ext",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic": 12044,
+      "cyrillic-ext": 20184,
+      "latin": 25400
+    },
+    "kb": 56.3,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource_fira-sans-extra-condensed",
+    "style": "800",
+    "subsets": [
+      "cyrillic",
+      "cyrillic-ext",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic": 11624,
+      "cyrillic-ext": 19800,
+      "latin": 25172
+    },
+    "kb": 55.3,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource_fira-sans-extra-condensed",
+    "style": "900",
+    "subsets": [
+      "cyrillic",
+      "cyrillic-ext",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic": 11788,
+      "cyrillic-ext": 20272,
+      "latin": 24916
+    },
+    "kb": 55.6,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource_golos-text",
+    "style": "400",
+    "subsets": [
+      "cyrillic",
+      "cyrillic-ext",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic": 6960,
+      "cyrillic-ext": 5108,
+      "latin": 11992
+    },
+    "kb": 23.5,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource_golos-text",
+    "style": "500",
+    "subsets": [
+      "cyrillic",
+      "cyrillic-ext",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic": 7044,
+      "cyrillic-ext": 5328,
+      "latin": 12032
+    },
+    "kb": 23.8,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource_golos-text",
+    "style": "600",
+    "subsets": [
+      "cyrillic",
+      "cyrillic-ext",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic": 7140,
+      "cyrillic-ext": 5388,
+      "latin": 12300
+    },
+    "kb": 24.2,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource_golos-text",
+    "style": "700",
+    "subsets": [
+      "cyrillic",
+      "cyrillic-ext",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic": 7108,
+      "cyrillic-ext": 5292,
+      "latin": 12380
+    },
+    "kb": 24.2,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource_golos-text",
+    "style": "800",
+    "subsets": [
+      "cyrillic",
+      "cyrillic-ext",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic": 7268,
+      "cyrillic-ext": 5384,
+      "latin": 12668
+    },
+    "kb": 24.7,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource_golos-text",
+    "style": "900",
+    "subsets": [
+      "cyrillic",
+      "cyrillic-ext",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic": 7080,
+      "cyrillic-ext": 5112,
+      "latin": 12140
+    },
+    "kb": 23.8,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource_ibm-plex-mono",
+    "style": "100",
+    "subsets": [
+      "cyrillic",
+      "cyrillic-ext",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic": 8388,
+      "cyrillic-ext": 6956,
+      "latin": 14848
+    },
+    "kb": 29.5,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource_ibm-plex-mono",
+    "style": "200",
+    "subsets": [
+      "cyrillic",
+      "cyrillic-ext",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic": 8212,
+      "cyrillic-ext": 6664,
+      "latin": 14940
+    },
+    "kb": 29.1,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource_ibm-plex-mono",
+    "style": "300",
+    "subsets": [
+      "cyrillic",
+      "cyrillic-ext",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic": 8268,
+      "cyrillic-ext": 6780,
+      "latin": 14748
+    },
+    "kb": 29.1,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource_ibm-plex-mono",
+    "style": "400",
+    "subsets": [
+      "cyrillic",
+      "cyrillic-ext",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic": 8356,
+      "cyrillic-ext": 6912,
+      "latin": 14708
+    },
+    "kb": 29.3,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource_ibm-plex-mono",
+    "style": "500",
+    "subsets": [
+      "cyrillic",
+      "cyrillic-ext",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic": 8460,
+      "cyrillic-ext": 6972,
+      "latin": 14888
+    },
+    "kb": 29.6,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource_ibm-plex-mono",
+    "style": "600",
+    "subsets": [
+      "cyrillic",
+      "cyrillic-ext",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic": 9352,
+      "cyrillic-ext": 7692,
+      "latin": 15620
+    },
+    "kb": 31.9,
+    "missing": []
+  },
+  {
+    "pkg": "fontsource_ibm-plex-mono",
+    "style": "700",
+    "subsets": [
+      "cyrillic",
+      "cyrillic-ext",
+      "latin"
+    ],
+    "sizes": {
+      "cyrillic": 8676,
+      "cyrillic-ext": 7184,
+      "latin": 14908
+    },
+    "kb": 30,
+    "missing": []
+  }
+]

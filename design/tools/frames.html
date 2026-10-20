@@ -1,0 +1,25 @@
+<!doctype html><html><head><meta charset="utf-8"><style>
+body{margin:0;background:#222;color:#eee;font:12px monospace}.row{display:flex;gap:4px;padding:4px}canvas{width:360px;height:225px}
+</style></head><body><div id=out></div><script>
+// Contact sheet: 6 frames from each prototype scroll video (checks that motion was recorded).
+const names = ['chertezh', 'monolit', 'sistema']
+;(async () => {
+  for (const n of names) {
+    const v = document.createElement('video'); v.src = `../concepts/${n}/shots/scroll-1440.webm`; v.muted = true
+    await new Promise((r) => v.addEventListener('loadeddata', r, { once: true }))
+    // webm from Playwright has no duration until seeked far; probe it.
+    v.currentTime = 1e6; await new Promise((r) => v.addEventListener('seeked', r, { once: true }))
+    const d = v.duration && isFinite(v.duration) ? v.duration : v.currentTime
+    const row = document.createElement('div'); row.className = 'row'; row.append(n + ' ' + d.toFixed(1) + 's')
+    v.currentTime = 0; await new Promise((r) => v.addEventListener("seeked", r, { once: true }))
+    await v.play()
+    for (const f of [0.3, 0.42, 0.54, 0.66, 0.78, 0.9]) {
+      while (v.currentTime < d * f && !v.ended) await new Promise((r) => setTimeout(r, 30))
+      const c = document.createElement('canvas'); c.width = 720; c.height = 450
+      c.getContext('2d').drawImage(v, 0, 0, 720, 450); row.append(c)
+    }
+    out.append(row)
+  }
+  document.title = 'done'
+})()
+</script></body></html>
