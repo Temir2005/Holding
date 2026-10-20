@@ -9,6 +9,7 @@ import { Reveal } from '@/components/ui/Reveal'
 import { Section } from '@/components/ui/Section'
 import { SmartImage } from '@/components/ui/SmartImage'
 import { cn } from '@/lib/cn'
+import { usePageSheet } from '@/components/layout/usePageSheet'
 import { pad2, useSectionNumber } from './sectionNumber'
 import { headingId, type SectionProps } from './types'
 
@@ -24,9 +25,11 @@ export function CtaSection({ section }: SectionProps<'cta'>) {
   const { data } = section
   const { t } = useTranslation()
   const number = useSectionNumber()
+  // The stamp carries the page sheet (from the navigation), not the block number.
+  const sheet = usePageSheet()
   const media = data.media
   const title = data.title?.trim()
-  const hasStamp = data.ctas.length > 0 || !!number
+  const hasStamp = data.ctas.length > 0 || !!sheet
 
   return (
     <Section
@@ -83,10 +86,13 @@ export function CtaSection({ section }: SectionProps<'cta'>) {
                 <CtaGroup ctas={data.ctas} />
               </div>
             )}
-            {number && (
+            {sheet && (
               <dl className="grid grid-cols-2 border-line-strong max-md:border-t md:border-l">
-                <StampCell label={t('sheet.sheet')} value={pad2(number.index)} />
-                <StampCell label={t('sheet.sheets')} value={pad2(number.total)} last />
+                <StampCell
+                  label={t('sheet.sheet')}
+                  value={sheet.number ? pad2(sheet.number) : t('sheet.noNumber')}
+                />
+                <StampCell label={t('sheet.sheets')} value={pad2(sheet.total)} last />
               </dl>
             )}
           </div>

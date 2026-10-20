@@ -14,8 +14,8 @@
     "backToProjects": "All projects",
     "sqm": "m²"
   },
-  "team": { "bio": "Biography", "allDivisions": "All divisions" },
-  "vacancy": { "apply": "Apply", "full_time": "Full-time", "part_time": "Part-time", "contract": "Contract", "internship": "Internship" },
+  "team": { "bio": "Biography", "allDivisions": "All divisions", "bioOf": "Biography: {{name}}", "linkedin": "LinkedIn", "colName": "Name", "colPosition": "Position", "colDivision": "Division", "empty": "The team list is coming soon" },
+  "vacancy": { "apply": "Apply", "full_time": "Full-time", "part_time": "Part-time", "contract": "Contract", "internship": "Internship", "colTitle": "Position", "colDivision": "Division", "colLocation": "Location", "colType": "Employment", "empty": "There are no open positions right now", "write": "Write to us" },
   "form": {
     "type": "Topic",
     "types": { "investor": "Investment", "partner": "Partnership", "candidate": "Join the team", "client": "Order products" },
@@ -40,10 +40,21 @@
     "notFoundText": "The link may be outdated or the address may contain a typo."
   },
   "a11y": { "playVideo": "Play video", "prev": "Previous", "next": "Next" },
+  "gallery": { "empty": "Photos are coming soon", "strip": "Photo strip" },
+  "video": { "title": "Video", "source": "Source: {{host}}", "empty": "The video is coming soon" },
   "timeline": { "years_one": "{{n}} year", "years_other": "{{n}} years", "span": "{{from}}–{{to}} · {{length}}", "empty": "The timeline is being filled in" },
   "quote": { "open": "“", "close": "”" },
   "divisions": { "empty": "The list of divisions is being filled in" },
   "showcase": { "no": "No.", "empty": "The register of projects is being updated", "area": "S = {{value}} {{unit}}" },
   "clients": { "empty": "The list of partners is being updated" },
+  "clientsGrid": { "filter": "Industry", "shown": "Showing {{shown}} of {{total}}", "empty": "The client list is being updated" },
+  "testimonials": { "empty": "Testimonials are on their way" },
+  "geography": { "caption": "Schedule of deliveries", "origin": "Dispatch", "code": "Code", "country": "Country", "note": "Note", "empty": "The list of countries is being updated" },
+  "process": { "stage": "Stage", "empty": "The stages are being specified" },
+  "production": { "empty": "The description of the production is being prepared", "legend": "Legend of materials", "finish": { "matte": "matte finish", "gloss": "gloss finish", "texture": "textured finish" } },
+  "capabilities": { "empty": "The list is being filled in" },
+  "projectList": { "total": "Projects in the register", "shown": "Showing {{shown}} of {{total}}", "empty": "No projects match these filters", "reset": "Reset filters" },
+  "tokenization": { "steps": "Scheme", "step": "Step", "benefits": "Specification", "note": "Note", "projects": "Tokenized projects" },
+  "projectPage": { "about": "Description", "tags": "Tags", "spec": "Project specification", "tokenization": "Tokenization", "yes": "Yes", "register": "Project register", "loading": "Loading the project" },
   "preview": { "banner": "Preview — this is not the published version", "expiredTitle": "The preview link has expired", "expiredText": "Open the preview from the admin again: the link is valid for 30 minutes." }
 }

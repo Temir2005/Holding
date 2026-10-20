@@ -183,14 +183,13 @@ function Row({ project: p, index, active, dense, locale, onActivate }: RowProps)
   )
 }
 
-/** A figure of the row. Empty ones are left out on cards and shown as a quiet dash in the table. */
+/**
+ * A figure of the row. An empty one is not shown at all: left out on cards, an empty cell in the
+ * table (it only keeps the column so the other rows stay aligned).
+ */
 function Num({ label, value }: { label: string; value: React.ReactNode }) {
-  if (value == null)
-    return (
-      <div aria-hidden="true" className="hidden text-right text-fg-mute lg:block">
-        —
-      </div>
-    )
+  if (value == null) return <div aria-hidden="true" className="hidden lg:block" />
+
   return (
     <div className="flex flex-col gap-1 lg:text-right">
       <dt className="mono-label lg:sr-only">{label}</dt>

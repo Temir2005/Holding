@@ -5,10 +5,9 @@ import { useParams, useSearchParams } from 'react-router-dom'
 import { ApiError, apiGet } from '@/api/client'
 import type { Page } from '@/api/types'
 import { Seo } from '@/components/Seo'
-import { Container } from '@/components/ui/Container'
 import { useLocale } from '@/lib/locale'
 import { PageRenderer } from '@/sections/PageRenderer'
-import { ErrorState, NotFoundPage, PageSkeleton } from './states'
+import { ErrorState, NotFoundPage, PageSkeleton, PreviewExpired } from './states'
 
 /**
  * Draft of a page by a preview link from the admin (`/:locale/preview/:slug?token=…`).
@@ -31,13 +30,7 @@ export function Component() {
   let content
   if (isPending) content = <PageSkeleton />
   else if (error instanceof ApiError && error.status === 404) content = <NotFoundPage />
-  else if (error instanceof ApiError && error.status === 401)
-    content = (
-      <Container className="flex min-h-[70svh] flex-col items-start justify-center gap-6 pb-16 pt-[calc(var(--header-h)+3rem)]">
-        <h1 className="text-h2">{t('preview.expiredTitle')}</h1>
-        <p className="max-w-prose text-lead text-fg-mute">{t('preview.expiredText')}</p>
-      </Container>
-    )
+  else if (error instanceof ApiError && error.status === 401) content = <PreviewExpired />
   else if (error) content = <ErrorState onRetry={() => void refetch()} />
   else
     content = (
@@ -55,7 +48,7 @@ export function Component() {
       {content}
       <p
         role="status"
-        className="tone-accent fixed inset-x-0 bottom-0 z-50 px-4 py-2 text-center text-sm font-medium"
+        className="tone-accent fixed inset-x-0 bottom-0 z-toast border-t border-line-strong px-4 py-2 text-center font-mono text-caption font-medium uppercase"
       >
         {t('preview.banner')}
       </p>

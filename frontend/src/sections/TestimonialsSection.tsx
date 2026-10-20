@@ -1,37 +1,56 @@
-import { Reveal } from '@/components/ui/Reveal'
-import { stagger } from '@/lib/motion'
+import { useTranslation } from 'react-i18next'
 import { Section } from '@/components/ui/Section'
 import { SectionHeader } from '@/components/ui/SectionHeader'
-import { SmartImage } from '@/components/ui/SmartImage'
+import { cn } from '@/lib/cn'
+import { Testimonial } from './clients/Testimonial'
+import { calloutsToMarks } from './clients/trace'
 import { headingId, type SectionProps } from './types'
 
+/** From this many quotes on the sheets get compact. */
+const DENSE_FROM = 5
+
+/**
+ * Testimonials as large quotes, not a carousel of cards: a vertical run of sheets, each with its
+ * own callout from the line in the margin to the opening mark (as the founder's quote on the
+ * home page). Sheets alternate their stand-off, so the callouts alternate in length; many quotes
+ * get smaller type and the signature beside the quote.
+ */
 export function TestimonialsSection({ section }: SectionProps<'testimonials'>) {
   const { data } = section
-  const items = data.clients.filter((c) => c.testimonial)
-  if (!items.length) return null
+  const { t } = useTranslation()
+  const items = data.clients.filter((c) => c.testimonial?.quote.trim())
+  if (!items.length && !data.title) return null
+  const dense = items.length >= DENSE_FROM
+
   return (
-    <Section tone={section.tone} anchor={section.anchor} labelledBy={headingId(section.id)}>
+    <Section
+      tone={section.tone}
+      anchor={section.anchor}
+      labelledBy={data.title ? headingId(section.id) : undefined}
+      branches={items.length ? calloutsToMarks : undefined}
+    >
       <SectionHeader id={headingId(section.id)} eyebrow={data.eyebrow} title={data.title} />
-      <ul className="grid grid-cols-1 gap-2 md:grid-cols-2">
-        {items.map((c, i) => (
-          <Reveal as="li" key={c.id} delay={stagger(i)}>
-            <figure className="flex h-full flex-col justify-between gap-8 rounded-tile bg-tile p-6 md:p-8">
-              <blockquote className="text-lead">«{c.testimonial?.quote}»</blockquote>
-              <figcaption className="flex items-center justify-between gap-4 border-t border-line pt-5">
-                <div className="flex flex-col">
-                  <span className="font-display font-bold">{c.testimonial?.author}</span>
-                  <span className="text-sm text-fg-mute">{c.testimonial?.position}</span>
-                </div>
-                {c.logo && (
-                  <span className="tone-light rounded-tile px-3 py-2">
-                    <SmartImage media={c.logo} className="h-6 w-auto max-w-[7rem]" fit="contain" />
-                  </span>
-                )}
-              </figcaption>
-            </figure>
-          </Reveal>
-        ))}
-      </ul>
+      {!items.length ? (
+        <div className="plate grid min-h-32 place-items-center border-y border-line p-6">
+          <p className="mono-label text-center">{t('testimonials.empty')}</p>
+        </div>
+      ) : (
+        <ol
+          role="list"
+          className={cn('flex flex-col', dense ? 'gap-14 md:gap-20' : 'gap-20 md:gap-32')}
+        >
+          {items.map((c, i) => (
+            <Testimonial
+              key={c.id}
+              client={c}
+              index={i}
+              tone={section.tone}
+              dense={dense}
+              flip={!dense && i % 2 === 1}
+            />
+          ))}
+        </ol>
+      )}
     </Section>
   )
 }

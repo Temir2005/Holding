@@ -1,54 +1,67 @@
-import { motion, useReducedMotion, useScroll } from 'framer-motion'
 import { useRef } from 'react'
-import { CmsLink } from '@/components/ui/Button'
-import { ArrowIcon } from '@/components/ui/Icon'
-import { Reveal } from '@/components/ui/Reveal'
+import { useTranslation } from 'react-i18next'
+import { usePinnedSteps } from '@/components/motion/usePinnedSteps'
+import type { TraceBranches } from '@/components/trace/paths'
+import { Container } from '@/components/ui/Container'
+import { DimensionLine } from '@/components/ui/DimensionLine'
 import { Section } from '@/components/ui/Section'
 import { SectionHeader } from '@/components/ui/SectionHeader'
-import { SmartImage } from '@/components/ui/SmartImage'
+import { Scene } from './process/Scene'
+import { DIVISION_ANCHOR, StepList } from './process/StepList'
+import { pad2 } from './sectionNumber'
 import { headingId, type SectionProps } from './types'
 
-/** The steps are a real sequence, so they are numbered; the line fills as you scroll. */
+/** List mode: the line branches off the margin into the callout of every division stage. */
+const divisionBranches: TraceBranches = (box) =>
+  (box.anchors[DIVISION_ANCHOR] ?? [])
+    .filter((p) => p.x > box.x)
+    .map((p) => ({ d: `M ${box.x} ${p.y} H ${p.x}`, at: p.y }))
+
+/**
+ * «Полный цикл»: the signature moment of the site.
+ * - With motion and 2+ stages: a pinned scene (process/Scene), the active stage follows the
+ *   scroll position only.
+ * - Reduced motion or a single stage: every stage open in a list on the line (process/StepList).
+ * - No stages: the header and one line of the empty state; nothing without a header.
+ */
 export function ProcessStepsSection({ section }: SectionProps<'process_steps'>) {
   const { data } = section
-  const listRef = useRef<HTMLOListElement>(null)
-  const reduce = useReducedMotion()
-  const { scrollYProgress } = useScroll({ target: listRef, offset: ['start 70%', 'end 60%'] })
+  const { t } = useTranslation()
+  const steps = data.steps
+  const n = steps.length
+  const sceneRef = useRef<HTMLDivElement>(null)
+  const { pinned, active, progress } = usePinnedSteps(sceneRef, n)
+  const hasHeader = Boolean(data.title || data.eyebrow || data.intro)
+  if (!n && !hasHeader) return null
+  const id = headingId(section.id)
+  const range = n > 1 ? <DimensionLine label={`${pad2(1)} — ${pad2(n)}`} /> : undefined
 
   return (
-    <Section tone={section.tone} anchor={section.anchor} labelledBy={headingId(section.id)}>
-      <div className="grid grid-cols-1 gap-10 lg:grid-cols-12">
-        <div className="lg:col-span-4">
-          <div className="lg:sticky lg:top-[calc(var(--header-h)+2rem)]">
-            <SectionHeader id={headingId(section.id)} eyebrow={data.eyebrow} title={data.title} intro={data.intro} className="!mb-0" />
+    <Section
+      tone={section.tone}
+      anchor={section.anchor}
+      labelledBy={data.title ? id : undefined}
+      branches={pinned ? undefined : divisionBranches}
+      bleed
+    >
+      <Container>
+        <SectionHeader
+          id={id}
+          eyebrow={data.eyebrow}
+          title={data.title}
+          intro={data.intro}
+          aside={data.intro ? undefined : range}
+        />
+      </Container>
+      {pinned ? (
+        <Scene steps={steps} sceneRef={sceneRef} active={active} progress={progress} />
+      ) : (
+        <Container>
+          <div ref={sceneRef}>
+            {n ? <StepList steps={steps} /> : <p className="mono-label">{t('process.empty')}</p>}
           </div>
-        </div>
-        <ol ref={listRef} className="relative flex flex-col gap-10 lg:col-span-7 lg:col-start-6">
-          <span aria-hidden="true" className="absolute bottom-2 left-[1.375rem] top-2 w-px bg-line" />
-          <motion.span
-            aria-hidden="true"
-            className="absolute bottom-2 left-[1.375rem] top-2 w-px origin-top bg-accent"
-            style={{ scaleY: reduce ? 1 : scrollYProgress }}
-          />
-          {data.steps.map((step, i) => (
-            <Reveal as="li" key={step.title} className="relative grid grid-cols-[2.75rem_1fr] gap-5">
-              <span className="relative z-10 flex h-11 w-11 items-center justify-center rounded-full border border-accent bg-surface font-mono text-sm text-accent-ink">
-                {String(i + 1).padStart(2, '0')}
-              </span>
-              <div className="flex flex-col gap-3 pt-2">
-                <h3 className="text-h3">{step.title}</h3>
-                <p className="max-w-prose text-fg-mute">{step.text}</p>
-                {step.media && <SmartImage media={step.media} className="aspect-[16/9] rounded-tile" crop sizes="50vw" />}
-                {step.division?.page_slug && (
-                  <CmsLink href={step.division.page_slug} plain className="inline-flex min-h-11 w-fit items-center gap-2 font-display font-semibold text-accent-ink">
-                    {step.division.name} <ArrowIcon />
-                  </CmsLink>
-                )}
-              </div>
-            </Reveal>
-          ))}
-        </ol>
-      </div>
+        </Container>
+      )}
     </Section>
   )
 }
