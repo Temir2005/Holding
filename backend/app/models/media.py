@@ -29,6 +29,10 @@ class Media(IdMixin, TimestampMixin, VersionMixin, Base):
     alt: Mapped[LText] = mapped_column(default=dict)
     blurhash: Mapped[str | None] = mapped_column(String(64))
     dominant_color: Mapped[str | None] = mapped_column(String(7))
+    # The point (0..1 from the left / top) that must stay in frame when the image is
+    # cropped. Both set or both NULL (checked by the admin API).
+    focal_point_x: Mapped[float | None]
+    focal_point_y: Mapped[float | None]
 
     original_filename: Mapped[str | None] = mapped_column(String(255))
     folder: Mapped[str | None] = mapped_column(String(128), index=True)

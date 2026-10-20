@@ -182,6 +182,11 @@ class HeroData(SectionData):
         description="Если заполнены, фото показывается в сетке с образцами",
         default_factory=list,
     )
+    stat_ids: Annotated[list[uuid.UUID], Ref(RefKind.stat, "stats")] = field(
+        "Цифры рядом с заголовком",
+        description="0–3 цифры. Пусто — hero без цифр",
+        default_factory=list,
+    )
 
 
 class HeroDataRead(SectionDataRead):
@@ -190,6 +195,7 @@ class HeroDataRead(SectionDataRead):
     video: MediaRead | None = None
     ctas: list[CtaRead] = []
     swatches: list[SwatchRead] = []
+    stats: list[StatRead] = []
 
 
 class StatsData(SectionData):
@@ -202,10 +208,16 @@ class StatsData(SectionData):
     stat_ids: Annotated[list[uuid.UUID], Ref(RefKind.stat, "stats")] = field(
         "Цифры", default_factory=list
     )
+    layout: Literal["chain", "row"] = field(
+        "Раскладка",
+        labels={"chain": "Главная цифра и размерная цепочка", "row": "Строка"},
+        default="chain",
+    )
 
 
 class StatsDataRead(SectionDataRead):
     stats: list[StatRead] = []
+    layout: Literal["chain", "row"]
 
 
 class AboutTextData(SectionData):
@@ -258,11 +270,17 @@ class ProjectsShowcaseData(SectionData):
         "Проекты", description="Используется, если не включены избранные", default_factory=list
     )
     link: Cta | None = field("Ссылка «Все проекты»", default=None)
+    layout: Literal["register", "sheet"] = field(
+        "Раскладка",
+        labels={"register": "Реестр с превью", "sheet": "Лист проекта"},
+        default="register",
+    )
 
 
 class ProjectsShowcaseDataRead(SectionDataRead):
     projects: list[ProjectCard] = []
     link: CtaRead | None = None
+    layout: Literal["register", "sheet"]
 
 
 class ProjectListData(SectionData):

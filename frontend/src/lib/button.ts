@@ -2,13 +2,17 @@ import { cn } from './cn'
 
 export type ButtonVariant = 'primary' | 'secondary'
 
+/**
+ * Square buttons with a 1px edge, like a stamp on a drawing. Primary is filled with the text
+ * colour of the tone (never the accent: red is reserved for the line), secondary is outlined.
+ */
 export const buttonClass = (variant: ButtonVariant = 'primary', className?: string) =>
   cn(
-    'inline-flex min-h-12 items-center justify-center gap-2 rounded-full px-6 py-3',
-    'font-display text-[0.95rem] font-semibold transition duration-200 ease-out',
-    'motion-safe:hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50',
+    'group/btn inline-flex min-h-12 items-center justify-between gap-4 border py-2 pl-5 pr-4',
+    'text-[0.9375rem] font-medium tracking-[-0.005em] transition-colors duration-2 ease-out',
+    'disabled:cursor-not-allowed disabled:opacity-50',
     variant === 'primary'
-      ? 'bg-accent text-on-accent hover:brightness-110'
-      : 'border border-fg/25 text-fg hover:border-fg/60',
+      ? 'border-fg bg-fg text-surface hover:bg-fg/90'
+      : 'border-fg text-fg hover:bg-fg hover:text-surface',
     className,
   )

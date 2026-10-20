@@ -30,3 +30,6 @@ frontend/e2e/screenshots/
 
 # Local demo stock photos (make demo-photos): never committed
 backend/seed/photos/
+
+# Candidate fonts for the redesign prototypes: restored by design/tools/fonts.sh
+design/concepts/_shared/fonts/

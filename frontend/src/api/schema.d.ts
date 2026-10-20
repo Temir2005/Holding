@@ -1582,6 +1582,22 @@ export interface components {
       /** Note */
       note: string | null
     }
+    /** Кнопка */
+    Cta: {
+      /** Текст кнопки */
+      label: components['schemas']['LocalizedText']
+      /**
+       * Ссылка
+       * @description https://…, #якорь на странице, slug страницы или projects/<slug>
+       */
+      href: string
+      /**
+       * Вид
+       * @default primary
+       * @enum {string}
+       */
+      variant: 'primary' | 'secondary'
+    }
     /** CtaDataRead */
     CtaDataRead: {
       /** Eyebrow */
@@ -1866,6 +1882,16 @@ export interface components {
       /** Label */
       label: string
     }
+    /**
+     * FocalPoint
+     * @description The point that stays in frame when the image is cropped, 0..1 from the left / top.
+     */
+    FocalPoint: {
+      /** X */
+      x: number
+      /** Y */
+      y: number
+    }
     /** FolderCount */
     FolderCount: {
       /** Folder */
@@ -1965,6 +1991,11 @@ export interface components {
        * @default []
        */
       swatches: components['schemas']['SwatchRead'][]
+      /**
+       * Stats
+       * @default []
+       */
+      stats: components['schemas']['StatRead'][]
     }
     /** HeroSection */
     HeroSection: {
@@ -2142,6 +2173,10 @@ export interface components {
       }
       /** Dominant Color */
       dominant_color: string | null
+      /** Focal Point X */
+      focal_point_x?: number | null
+      /** Focal Point Y */
+      focal_point_y?: number | null
       /** Variants */
       variants: components['schemas']['MediaVariant'][]
       /** Uploaded By */
@@ -2237,6 +2272,7 @@ export interface components {
        * @default []
        */
       variants: components['schemas']['MediaVariant'][]
+      focal_point?: components['schemas']['FocalPoint'] | null
     }
     /**
      * MediaStatus
@@ -2257,6 +2293,10 @@ export interface components {
       tags?: string[] | null
       /** Original Filename */
       original_filename?: string | null
+      /** Focal Point X */
+      focal_point_x?: number | null
+      /** Focal Point Y */
+      focal_point_y?: number | null
     }
     /**
      * MediaVariant
@@ -3183,6 +3223,11 @@ export interface components {
        */
       projects: components['schemas']['ProjectCard'][]
       link?: components['schemas']['CtaRead'] | null
+      /**
+       * Layout
+       * @enum {string}
+       */
+      layout: 'register' | 'sheet'
     }
     /** ProjectsShowcaseSection */
     ProjectsShowcaseSection: {
@@ -3557,6 +3602,10 @@ export interface components {
       navigation: {
         [key: string]: unknown
       }[]
+      /** Header Cta */
+      header_cta?: {
+        [key: string]: unknown
+      } | null
       /** Contacts */
       contacts: {
         [key: string]: unknown
@@ -3606,6 +3655,8 @@ export interface components {
       logo_id?: string | null
       /** Меню */
       navigation: components['schemas']['NavItem'][]
+      /** Кнопка в шапке */
+      header_cta?: components['schemas']['Cta'] | null
       contacts: components['schemas']['Contacts']
       /** Соцсети */
       socials: components['schemas']['Social'][]
@@ -3619,6 +3670,7 @@ export interface components {
       logo: components['schemas']['MediaRead'] | null
       /** Navigation */
       navigation: components['schemas']['NavItemRead'][]
+      header_cta?: components['schemas']['CtaRead'] | null
       contacts: components['schemas']['ContactsRead']
       /** Socials */
       socials: components['schemas']['Social'][]
@@ -3738,6 +3790,11 @@ export interface components {
        * @default []
        */
       stats: components['schemas']['StatRead'][]
+      /**
+       * Layout
+       * @enum {string}
+       */
+      layout: 'chain' | 'row'
     }
     /** StatsSection */
     StatsSection: {

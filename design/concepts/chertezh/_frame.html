@@ -1,0 +1,21 @@
+<!doctype html>
+<!-- Service page for screenshots: renders the prototype in an iframe of a fixed viewport, so a
+     full-page screenshot of this page shows one real screen (e.g. ?q=scene%3D3 mid-scroll). -->
+<html lang="ru">
+<head><meta charset="utf-8"><title>frame</title>
+<style>html, body { margin: 0; background: #000; } iframe { display: block; border: 0; }</style></head>
+<body>
+<script>
+  const q = new URLSearchParams(location.search)
+  const f = document.createElement('iframe')
+  f.width = q.get('w') || 1440
+  f.height = q.get('h') || 900
+  f.title = 'prototype'
+  f.src = 'index.html?' + (q.get('q') || '')
+  // late=1: the iframe starts loading only after this page has loaded, so the screenshot
+  // (taken ~300ms after load) catches the prototype ~100–200ms into its own load.
+  if (q.get('late') === '1') addEventListener('load', () => document.body.append(f))
+  else document.body.append(f)
+</script>
+</body>
+</html>

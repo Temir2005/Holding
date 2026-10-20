@@ -24,6 +24,7 @@ class SettingsAdminRead(BaseModel):
     site_name: dict[str, Any]
     logo_id: uuid.UUID | None
     navigation: list[dict[str, Any]]
+    header_cta: dict[str, Any] | None = None
     contacts: dict[str, Any]
     socials: list[dict[str, Any]]
     footer: dict[str, Any]

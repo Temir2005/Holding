@@ -1,4 +1,4 @@
-"""Site settings: name, logo, menu, contacts, socials, footer, default SEO.
+"""Site settings: name, logo, menu, header button, contacts, socials, footer, default SEO.
 
 One row, created by the seeds; the admin reads it and replaces it as a whole (PUT)
 with a version check. The document is validated with the same models the public
@@ -37,7 +37,11 @@ SLUG = re.compile(SLUG_PATTERN)
 
 def document(row: SiteSettings) -> SiteSettingsDoc:
     return SiteSettingsDoc.model_validate(
-        {"logo_id": row.logo_id, **{part: getattr(row, part) for part in JSON_PARTS}}
+        {
+            "logo_id": row.logo_id,
+            "header_cta": row.header_cta,
+            **{part: getattr(row, part) for part in JSON_PARTS},
+        }
     )
 
 
@@ -103,6 +107,8 @@ class SettingsService(CrudService[SiteSettings, SettingsUpdate, SettingsUpdate, 
         # Stored the way the seeds store it: no keys for empty optional values.
         stored = doc.model_dump(mode="json", exclude_none=True)
         obj.logo_id = doc.logo_id
+        # Optional part: NULL when there is no header button.
+        obj.header_cta = stored.get("header_cta")
         for part in JSON_PARTS:
             setattr(obj, part, stored[part])
 
@@ -123,6 +129,7 @@ class SettingsService(CrudService[SiteSettings, SettingsUpdate, SettingsUpdate, 
                 SettingsAdminRead(
                     id=row.id,
                     logo_id=row.logo_id,
+                    header_cta=stored["header_cta"],
                     **{part: stored[part] for part in JSON_PARTS},
                     refs=await self.refs.cards(doc),
                     updated_at=row.updated_at,

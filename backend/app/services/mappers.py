@@ -10,6 +10,7 @@ from app.schemas.entities import (
     DivisionRead,
     DivisionRef,
     DivisionStat,
+    FocalPoint,
     MediaPlaceholder,
     MediaRead,
     MediaVariant,
@@ -58,6 +59,11 @@ class Mapper:
                 )
                 for v in m.variants
             ],
+            focal_point=(
+                FocalPoint(x=m.focal_point_x, y=m.focal_point_y)
+                if m.focal_point_x is not None and m.focal_point_y is not None
+                else None
+            ),
         )
 
     def division_ref(self, d: Division | None) -> DivisionRef | None:

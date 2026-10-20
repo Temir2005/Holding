@@ -20,6 +20,13 @@ class MediaVariant(BaseModel):
     url: str
 
 
+class FocalPoint(BaseModel):
+    """The point that stays in frame when the image is cropped, 0..1 from the left / top."""
+
+    x: float
+    y: float
+
+
 class MediaRead(BaseModel):
     id: uuid.UUID
     url: str
@@ -30,6 +37,8 @@ class MediaRead(BaseModel):
     placeholder: MediaPlaceholder
     # Narrowest first. Empty for SVG, video, PDF and images uploaded before variants existed.
     variants: list[MediaVariant] = []
+    # None: not set, crop around the center.
+    focal_point: FocalPoint | None = None
 
 
 class StatRead(BaseModel):

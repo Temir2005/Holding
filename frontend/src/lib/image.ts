@@ -7,3 +7,13 @@ import type { Media } from '@/api/types'
 export function buildImageUrl(media: Media, _opts: { width?: number } = {}): string {
   return media.url
 }
+
+/**
+ * CSS object-position for the editor's focal point (0–1 on both axes): the point that stays in
+ * the frame whatever the crop. Centre when the media has none.
+ */
+export function focalPosition(media: Media): string {
+  const point = media.focal_point
+  if (!point) return '50% 50%'
+  return `${Math.round(point.x * 1000) / 10}% ${Math.round(point.y * 1000) / 10}%`
+}

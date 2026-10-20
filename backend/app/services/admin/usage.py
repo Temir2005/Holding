@@ -122,6 +122,7 @@ class UsageFinder:
                             label=f"Меню: «{_label(item.get('label'))}»",
                         )
                     )
+        found += await self._header_button(slug)
         for division_id, name in await self.session.execute(
             select(Division.id, Division.name).where(Division.page_slug == slug)
         ):
@@ -179,6 +180,7 @@ class UsageFinder:
         """Blocks listing the project and buttons linking to projects/<slug>."""
         found = await self.entity(RefKind.project, project_id)
         target = f"projects/{slug}"
+        found += await self._header_button(target)
         for block in await self._blocks():
             for path, cta in iter_instances(block.data, Cta):
                 if links_to_page(cta.href, target):
@@ -189,6 +191,23 @@ class UsageFinder:
                         )
                     )
         return found
+
+    async def _header_button(self, target: str) -> list[Usage]:
+        """The header button of the site settings, if it links to `target`."""
+        settings = await self.session.scalar(select(SiteSettings).limit(1))
+        if settings is None or not isinstance(settings.header_cta, dict):
+            return []
+        cta = settings.header_cta
+        if not links_to_page(str(cta.get("href") or ""), target):
+            return []
+        return [
+            Usage(
+                entity_type="site_settings",
+                entity_id=settings.id,
+                field="header_cta.href",
+                label=f"Кнопка в шапке: «{_label(cta.get('label'))}»",
+            )
+        ]
 
     async def stat_context(self, context: str) -> list[Usage]:
         """Stats blocks that show the set of stats with this context."""
@@ -310,6 +329,7 @@ class UsageFinder:
                     "site_name": row.site_name,
                     "logo_id": row.logo_id,
                     "navigation": row.navigation,
+                    "header_cta": row.header_cta,
                     "contacts": row.contacts,
                     "socials": row.socials,
                     "footer": row.footer,

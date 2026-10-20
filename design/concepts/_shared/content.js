@@ -41,6 +41,15 @@ window.MS_CONTENT = {
       planned: { ru: 'В планах', kk: 'Жоспарда', en: 'Planned' },
     },
     empty: { ru: 'Пока пусто', kk: 'Әзірге бос', en: 'Nothing here yet' },
+    /* Fixed enum of the full cycle (project.cycle_stage): UI strings, not CMS content. */
+    cycle: {
+      land: { ru: 'Земля', kk: 'Жер', en: 'Land' },
+      design: { ru: 'Проект', kk: 'Жоба', en: 'Design' },
+      materials: { ru: 'Материалы', kk: 'Материалдар', en: 'Materials' },
+      construction: { ru: 'Стройка', kk: 'Құрылыс', en: 'Construction' },
+      handover: { ru: 'Сдача', kk: 'Тапсыру', en: 'Handover' },
+    },
+    stage: { ru: 'Этап', kk: 'Кезең', en: 'Stage' },
   },
 
   /* Home page sections used by the prototypes, in seed order (tone as in the seed). */
@@ -102,11 +111,39 @@ window.MS_CONTENT = {
     title: { ru: 'Пять этапов, ни одного подрядчика между ними', kk: 'Бес кезең, арасында бірде-бір мердігер жоқ', en: 'Five stages, no contractor in between' },
     intro: null,
     steps: [
-      { title: { ru: 'Поиск земли', kk: 'Жер іздеу', en: 'Land search' }, text: { ru: 'Анализ участков, юридическая проверка, градостроительные условия.', kk: 'Учаскелерді талдау, заңдық тексеру, қала құрылысы шарттары.', en: 'Site analysis, legal due diligence, zoning conditions.' }, division: null, media: null },
-      { title: { ru: 'Концепция и проект', kk: 'Тұжырымдама және жоба', en: 'Concept and design' }, text: { ru: 'Архитектура, инженерия и экспертиза силами своей команды.', kk: 'Сәулет, инженерия және сараптама — өз командамыздың күшімен.', en: 'Architecture, engineering and expert review by our own team.' }, division: null, media: null },
-      { title: { ru: 'Собственные материалы', kk: 'Өз материалдарымыз', en: 'Our own materials' }, text: { ru: 'Панели и фасады с нашего завода Smart Panels: качество и сроки под контролем.', kk: 'Smart Panels зауытымыздың панельдері мен қасбеттері: сапа мен мерзім бақылауда.', en: 'Panels and facades from our Smart Panels plant: quality and timing under control.' }, division: { name: 'Smart Panels 2011', href: '#' }, media: null },
-      { title: { ru: 'Строительство', kk: 'Құрылыс', en: 'Construction' }, text: { ru: 'Генподряд, технадзор и контроль качества на каждом этапе.', kk: 'Бас мердігерлік, техникалық қадағалау және әр кезеңде сапаны бақылау.', en: 'General contracting, technical supervision and quality control at every stage.' }, division: null, media: null },
-      { title: { ru: 'Сдача и управление', kk: 'Тапсыру және басқару', en: 'Handover and management' }, text: { ru: 'Ввод в эксплуатацию, гарантия и управление объектом.', kk: 'Пайдалануға беру, кепілдік және нысанды басқару.', en: 'Commissioning, warranty and property management.' }, division: null, media: null },
+      { title: { ru: 'Поиск земли', kk: 'Жер іздеу', en: 'Land search' }, text: { ru: 'Анализ участков, юридическая проверка, градостроительные условия.', kk: 'Учаскелерді талдау, заңдық тексеру, қала құрылысы шарттары.', en: 'Site analysis, legal due diligence, zoning conditions.' }, division: null, media: { width: 1600, height: 1200, subject: "участок под застройку" } },
+      { title: { ru: 'Концепция и проект', kk: 'Тұжырымдама және жоба', en: 'Concept and design' }, text: { ru: 'Архитектура, инженерия и экспертиза силами своей команды.', kk: 'Сәулет, инженерия және сараптама — өз командамыздың күшімен.', en: 'Architecture, engineering and expert review by our own team.' }, division: null, media: { width: 1600, height: 1200, subject: "чертёж, генплан" } },
+      { title: { ru: 'Собственные материалы', kk: 'Өз материалдарымыз', en: 'Our own materials' }, text: { ru: 'Панели и фасады с нашего завода Smart Panels: качество и сроки под контролем.', kk: 'Smart Panels зауытымыздың панельдері мен қасбеттері: сапа мен мерзім бақылауда.', en: 'Panels and facades from our Smart Panels plant: quality and timing under control.' }, division: { name: 'Smart Panels 2011', href: '#' }, media: { width: 1600, height: 1200, subject: "цех Smart Panels, панели" } },
+      { title: { ru: 'Строительство', kk: 'Құрылыс', en: 'Construction' }, text: { ru: 'Генподряд, технадзор и контроль качества на каждом этапе.', kk: 'Бас мердігерлік, техникалық қадағалау және әр кезеңде сапаны бақылау.', en: 'General contracting, technical supervision and quality control at every stage.' }, division: null, media: { width: 1600, height: 1200, subject: "стройка, каркас и краны" } },
+      { title: { ru: 'Сдача и управление', kk: 'Тапсыру және басқару', en: 'Handover and management' }, text: { ru: 'Ввод в эксплуатацию, гарантия и управление объектом.', kk: 'Пайдалануға беру, кепілдік және нысанды басқару.', en: 'Commissioning, warranty and property management.' }, division: null, media: { width: 1600, height: 1200, subject: "сданный объект, фасад" } },
+    ],
+  },
+
+  /*
+   * project.cycle_stage is the PROPOSED additive backend field (land / design / materials /
+   * construction / handover). Null everywhere: the real stage of each project is not known, and
+   * the harness falls back to what the current status allows (see MS.projectStage).
+   */
+  /* production block (smart-panels page in the seed). swatches here = PROPOSED additive field
+     ProductionData.swatches (moved from the hero by the client decision of 21.10.2026). */
+  production: {
+    type: "production",
+    tone: "dark",
+    eyebrow: { ru: "Производство", kk: "Өндіріс", en: "Production" },
+    title: { ru: "Корейская технология, контроль каждого листа", kk: "Корей технологиясы, әр парақты бақылау", en: "Korean technology, every sheet inspected" },
+    body: {
+      ru: "Завод работает по южнокорейской технологии с 2015 года. Каждый лист проходит контроль геометрии и покрытия перед упаковкой. Минимальный заказ — одна паллета (50 листов).",
+      kk: "Зауыт 2015 жылдан бері оңтүстік корей технологиясы бойынша жұмыс істейді. Әр парақ қаптамадан бұрын геометрия мен жабынды бақылаудан өтеді. Ең аз тапсырыс — бір паллета (50 парақ).",
+      en: "The plant has run on South Korean technology since 2015. Every sheet is checked for geometry and coating before packing. Minimum order is one pallet (50 sheets).",
+    },
+    facts: [
+      { value: "30 000 м²", label: { ru: "площадь производства", kk: "өндіріс ауданы", en: "production area" } },
+      { value: "50 листов", label: { ru: "минимальный заказ, 1 паллета", kk: "ең аз тапсырыс, 1 паллета", en: "minimum order, 1 pallet" } },
+      { value: "2 дня", label: { ru: "отгрузка со склада", kk: "қоймадан жөнелту", en: "to ship from stock" } },
+    ],
+    gallery: [
+      { width: 1600, height: 1200, subject: "линия покраски панелей" },
+      { width: 1200, height: 1600, subject: "макро: фактура панели" },
     ],
   },
 
@@ -121,25 +158,25 @@ window.MS_CONTENT = {
   },
 
   projects: [
-    { slug: 'aaag', title: 'AAAG', division: 'Новые проекты', status: 'planned', location: { ru: 'Alatau City', kk: 'Alatau City', en: 'Alatau City' }, year: null, area_m2: null, is_tokenized: true,
+    { slug: 'aaag', title: 'AAAG', division: 'Новые проекты', status: 'planned', location: { ru: 'Alatau City', kk: 'Alatau City', en: 'Alatau City' }, year: null, area_m2: null, is_tokenized: true, cycle_stage: null,
       short: { ru: 'Многофункциональный комплекс в Alatau City. Описание — плейсхолдер.', kk: 'Alatau City-дегі көпфункциялы кешен. Сипаттамасы — уақытша мәтін.', en: 'Mixed-use complex in Alatau City. Description is a placeholder.' },
       cover: { width: 2000, height: 1250, subject: 'рендер: многофункциональный комплекс' } },
-    { slug: 'birlik', title: 'Birlik', division: 'Новые проекты', status: 'in_progress', location: { ru: 'Alatau City', kk: 'Alatau City', en: 'Alatau City' }, year: null, area_m2: null, is_tokenized: true,
+    { slug: 'birlik', title: 'Birlik', division: 'Новые проекты', status: 'in_progress', location: { ru: 'Alatau City', kk: 'Alatau City', en: 'Alatau City' }, year: null, area_m2: null, is_tokenized: true, cycle_stage: null,
       short: { ru: 'Жилой квартал в Alatau City. Описание — плейсхолдер.', kk: 'Alatau City-дегі тұрғын квартал. Сипаттамасы — уақытша мәтін.', en: 'Residential quarter in Alatau City. Description is a placeholder.' },
       cover: { width: 2000, height: 1250, subject: 'стройка: жилой квартал' } },
-    { slug: 'zhk-proekt-a', title: 'ЖК «Проект A»', division: 'MegaSmart Development', status: 'completed', location: { ru: 'Шымкент', kk: 'Шымкент', en: 'Shymkent' }, year: 2021, area_m2: 18500, is_tokenized: false,
+    { slug: 'zhk-proekt-a', title: 'ЖК «Проект A»', division: 'MegaSmart Development', status: 'completed', location: { ru: 'Шымкент', kk: 'Шымкент', en: 'Shymkent' }, year: 2021, area_m2: 18500, is_tokenized: false, cycle_stage: null,
       short: { ru: 'Жилой комплекс комфорт-класса. Название и цифры — тестовые.', kk: 'Комфорт-класты тұрғын кешен. Атауы мен сандары — сынақ үшін.', en: 'Comfort-class residential complex. Name and figures are test data.' },
       cover: { width: 2000, height: 1250, subject: 'фасад жилого комплекса' } },
-    { slug: 'bc-proekt-b', title: 'Бизнес-центр «Проект B»', division: 'MegaSmart Development', status: 'completed', location: { ru: 'Шымкент', kk: 'Шымкент', en: 'Shymkent' }, year: 2019, area_m2: 9200, is_tokenized: false,
+    { slug: 'bc-proekt-b', title: 'Бизнес-центр «Проект B»', division: 'MegaSmart Development', status: 'completed', location: { ru: 'Шымкент', kk: 'Шымкент', en: 'Shymkent' }, year: 2019, area_m2: 9200, is_tokenized: false, cycle_stage: null,
       short: { ru: 'Офисное здание класса B+. Название и цифры — тестовые.', kk: 'B+ класты кеңсе ғимараты. Атауы мен сандары — сынақ үшін.', en: 'Class B+ office building. Name and figures are test data.' },
       cover: { width: 2000, height: 1250, subject: 'офисное здание, стекло' } },
-    { slug: 'zavod-smart-panels', title: 'Завод Smart Panels', division: 'Smart Panels 2011', status: 'completed', location: { ru: 'Шымкент, промзона Тассай', kk: 'Шымкент, Тассай өнеркәсіп аймағы', en: 'Shymkent, Tassay industrial zone' }, year: 2015, area_m2: 30000, is_tokenized: false,
+    { slug: 'zavod-smart-panels', title: 'Завод Smart Panels', division: 'Smart Panels 2011', status: 'completed', location: { ru: 'Шымкент, промзона Тассай', kk: 'Шымкент, Тассай өнеркәсіп аймағы', en: 'Shymkent, Tassay industrial zone' }, year: 2015, area_m2: 30000, is_tokenized: false, cycle_stage: null,
       short: { ru: 'Производство МДФ-плит по южнокорейской технологии.', kk: 'Оңтүстік корей технологиясы бойынша МДФ-плиталар өндірісі.', en: 'MDF board production using South Korean technology.' },
       cover: { width: 2000, height: 1250, subject: 'цех, линия покраски панелей' } },
-    { slug: 'zhk-proekt-c', title: 'ЖК «Проект C»', division: 'MegaSmart Development', status: 'in_progress', location: { ru: 'Шымкент', kk: 'Шымкент', en: 'Shymkent' }, year: 2026, area_m2: 24000, is_tokenized: false,
+    { slug: 'zhk-proekt-c', title: 'ЖК «Проект C»', division: 'MegaSmart Development', status: 'in_progress', location: { ru: 'Шымкент', kk: 'Шымкент', en: 'Shymkent' }, year: 2026, area_m2: 24000, is_tokenized: false, cycle_stage: null,
       short: { ru: 'Жилой квартал с дворами без машин. Название и цифры — тестовые.', kk: 'Ауласында көлік жоқ тұрғын квартал. Атауы мен сандары — сынақ үшін.', en: 'Residential quarter with car-free courtyards. Name and figures are test data.' },
       cover: { width: 2000, height: 1250, subject: 'стройка, краны' } },
-    { slug: 'logistika-proekt-d', title: 'Логистический центр «Проект D»', division: 'MegaSmart Development', status: 'planned', location: { ru: 'Шымкентская область', kk: 'Шымкент облысы', en: 'Shymkent region' }, year: null, area_m2: 12000, is_tokenized: false,
+    { slug: 'logistika-proekt-d', title: 'Логистический центр «Проект D»', division: 'MegaSmart Development', status: 'planned', location: { ru: 'Шымкентская область', kk: 'Шымкент облысы', en: 'Shymkent region' }, year: null, area_m2: 12000, is_tokenized: false, cycle_stage: null,
       short: { ru: 'Склад и логистика для дилерской сети. Название и цифры — тестовые.', kk: 'Дилерлік желіге арналған қойма және логистика. Атауы мен сандары — сынақ үшін.', en: 'Warehouse and logistics for the dealer network. Name and figures are test data.' },
       cover: { width: 2000, height: 1250, subject: 'склад, логистика' } },
   ],

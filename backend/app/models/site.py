@@ -3,6 +3,7 @@ from datetime import datetime
 from typing import Any
 
 from sqlalchemy import DateTime, ForeignKey, String
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.models.base import Base, IdMixin, LText, PublishableMixin, TimestampMixin, VersionMixin
@@ -21,6 +22,8 @@ class SiteSettings(IdMixin, TimestampMixin, VersionMixin, Base):
     socials: Mapped[list[Any]] = mapped_column(default=list)
     footer: Mapped[dict[str, Any]] = mapped_column(default=dict)
     default_seo: Mapped[dict[str, Any]] = mapped_column(default=dict)
+    # A Cta (app.schemas.sections) or NULL: no button in the header.
+    header_cta: Mapped[dict[str, Any] | None] = mapped_column(JSONB(none_as_null=True))
 
     logo: Mapped[Media | None] = relationship(lazy="selectin")
 

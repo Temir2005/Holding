@@ -1,30 +1,43 @@
 import { Component, type ComponentType, type ReactNode } from 'react'
 import type { Section } from '@/api/types'
 import { sectionRegistry } from './registry'
+import { SectionNumberContext } from './sectionNumber'
+
+// The registry is keyed by type, but TS cannot link section.type to the matching
+// component through a union, so we widen once here.
+const registry = sectionRegistry as Record<string, ComponentType<{ section: Section }> | undefined>
 
 /** Renders CMS sections in order. Unknown or crashing sections are skipped, never fatal. */
 export function PageRenderer({ sections }: { sections: Section[] }) {
+  const known = sections.filter((section) => {
+    if (registry[section.type]) return true
+    if (import.meta.env.DEV)
+      console.warn(`[PageRenderer] no component for section type "${section.type}"`)
+    return false
+  })
   return (
     <>
-      {sections.map((section) => {
-        // The registry is keyed by type, but TS cannot link section.type to the matching
-        // component through a union, so we widen once here.
-        const Renderer = (sectionRegistry as Record<string, ComponentType<{ section: Section }> | undefined>)[section.type]
-        if (!Renderer) {
-          if (import.meta.env.DEV) console.warn(`[PageRenderer] no component for section type "${section.type}"`)
-          return null
-        }
+      {known.map((section, index) => {
+        const Renderer = registry[section.type] as ComponentType<{ section: Section }>
         return (
-          <SectionBoundary key={section.id} type={section.type}>
-            <Renderer section={section} />
-          </SectionBoundary>
+          <SectionNumberContext.Provider
+            key={section.id}
+            value={{ index: index + 1, total: known.length }}
+          >
+            <SectionBoundary type={section.type}>
+              <Renderer section={section} />
+            </SectionBoundary>
+          </SectionNumberContext.Provider>
         )
       })}
     </>
   )
 }
 
-class SectionBoundary extends Component<{ type: string; children: ReactNode }, { failed: boolean }> {
+class SectionBoundary extends Component<
+  { type: string; children: ReactNode },
+  { failed: boolean }
+> {
   state = { failed: false }
 
   static getDerivedStateFromError() {
@@ -38,7 +51,9 @@ class SectionBoundary extends Component<{ type: string; children: ReactNode }, {
   render() {
     if (!this.state.failed) return this.props.children
     return import.meta.env.DEV ? (
-      <div className="tone-accent p-6 font-mono text-sm">Section “{this.props.type}” failed to render. See console.</div>
+      <div className="tone-accent p-6 font-mono text-sm">
+        Section “{this.props.type}” failed to render. See console.
+      </div>
     ) : null
   }
 }

@@ -4,11 +4,25 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * Metric-matched fallback for Geologica: the swap from the system face keeps the line count of
+ * the hero heading, so the first screen does not jump (CLS) while the font loads.
+ */
+@font-face {
+  font-family: 'Geologica Fallback';
+  src: local('Arial'), local('Helvetica Neue'), local('Liberation Sans'), local('DejaVu Sans');
+  size-adjust: 107%;
+  ascent-override: 92%;
+  descent-override: 24%;
+  line-gap-override: 0%;
+}
+
 @layer base {
   html {
     /* framer-motion's useScroll measures offsets against a positioned root. */
     position: relative;
     -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
     text-rendering: optimizeLegibility;
   }
   @media (prefers-reduced-motion: no-preference) {
@@ -17,20 +31,30 @@
     }
   }
   body {
-    @apply bg-surface font-body text-fg antialiased;
+    @apply bg-surface font-sans text-body text-fg antialiased;
+    overflow-x: clip;
   }
   h1,
   h2,
   h3 {
-    @apply font-display font-extrabold;
+    @apply font-display font-heading;
     text-wrap: balance;
   }
+  /* Kazakh words are long: let them break inside instead of overflowing on a phone. */
+  :lang(kk) :is(h1, h2, h3, p, li, dd) {
+    hyphens: auto;
+    -webkit-hyphens: auto;
+  }
   :focus-visible {
-    outline: 2px solid currentColor;
+    outline: 2px solid rgb(var(--accent-ink, var(--red-ink-paper)));
     outline-offset: 3px;
+    border-radius: 1px;
   }
   [id] {
     scroll-margin-top: calc(var(--header-h) + 1rem);
+  }
+  ::selection {
+    background: rgb(var(--red-line) / 0.25);
   }
 }
 
@@ -40,12 +64,127 @@
   .tone-accent {
     @apply bg-surface text-fg;
   }
-  .eyebrow {
-    @apply font-mono text-xs uppercase tracking-[0.08em];
-    color: rgb(var(--accent-ink));
+  /* Mono caption: section meta, codes, units, dimension labels. */
+  .eyebrow,
+  .mono-label {
+    @apply font-mono text-caption font-medium uppercase;
+    color: rgb(var(--fg-mute));
   }
   .tabular {
     font-variant-numeric: tabular-nums;
+  }
+  /* A link whose underline is drawn like a pen stroke on hover and focus. */
+  .link-draw {
+    background-image:
+      linear-gradient(rgb(var(--trace)), rgb(var(--trace))),
+      linear-gradient(rgb(var(--line-strong)), rgb(var(--line-strong)));
+    background-size:
+      0 1px,
+      100% 1px;
+    background-position:
+      0 100%,
+      0 100%;
+    background-repeat: no-repeat;
+    padding-bottom: 2px;
+    transition:
+      background-size var(--dur-3) var(--ease-out),
+      color var(--dur-1);
+  }
+  .link-draw:hover,
+  .link-draw:focus-visible,
+  :is(a, button):hover > .link-draw,
+  :is(a, button):focus-visible > .link-draw {
+    background-size:
+      100% 1px,
+      100% 1px;
+  }
+  /* The sheet of a section (components/ui/Section). */
+  .sheet {
+    position: relative;
+    isolation: isolate;
+    overflow: clip;
+  }
+  /* Ruler along the top edge: a tick every 16px (32px on a phone). */
+  .sheet::before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    top: 0;
+    left: var(--pad-l);
+    right: var(--pad-r);
+    height: 6px;
+    background: repeating-linear-gradient(90deg, rgb(var(--fg) / 0.16) 0 1px, transparent 1px 16px);
+  }
+  /* One scene: no ruler between two sheets of the same tone. */
+  .tone-light.sheet + .tone-light.sheet::before,
+  .tone-dark.sheet + .tone-dark.sheet::before,
+  .tone-accent.sheet + .tone-accent.sheet::before {
+    display: none;
+  }
+  /* Scale beside the line in the binding margin. */
+  .sheet::after {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    top: 0;
+    bottom: 0;
+    width: 4px;
+    left: calc(var(--trace-x) + 8px);
+    background: repeating-linear-gradient(
+      180deg,
+      rgb(var(--fg) / 0.14) 0 1px,
+      transparent 1px 32px
+    );
+  }
+  .sheet-guides {
+    position: absolute;
+    z-index: -1;
+    inset: 0 var(--pad-r) 0 var(--pad-l);
+    display: grid;
+    grid-template-columns: repeat(12, 1fr);
+    column-gap: var(--gap);
+    pointer-events: none;
+  }
+  .sheet-guides i {
+    border-inline: 1px solid rgb(var(--fg) / 0.035);
+  }
+  @media (max-width: 768px) {
+    .sheet::before {
+      background-image: repeating-linear-gradient(
+        90deg,
+        rgb(var(--fg) / 0.16) 0 1px,
+        transparent 1px 32px
+      );
+    }
+    .sheet::after {
+      background-image: repeating-linear-gradient(
+        180deg,
+        rgb(var(--fg) / 0.14) 0 1px,
+        transparent 1px 64px
+      );
+    }
+    .sheet-guides {
+      grid-template-columns: repeat(2, 1fr);
+    }
+    .sheet-guides i:nth-child(n + 3) {
+      display: none;
+    }
+  }
+
+  /* Crop marks around a frame (components/ui/Frame). */
+  .crop-mark {
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    border-color: rgb(var(--fg) / 0.55);
+    pointer-events: none;
+  }
+
+  /* "Place for a frame": a hatched plate in the tone, never an empty box. */
+  .plate {
+    background:
+      repeating-linear-gradient(135deg, rgb(var(--fg) / 0.06) 0 1px, transparent 1px 12px),
+      rgb(var(--plate));
   }
 }
 

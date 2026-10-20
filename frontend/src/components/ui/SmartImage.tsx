@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import type { Media } from '@/api/types'
 import { cn } from '@/lib/cn'
-import { buildImageUrl } from '@/lib/image'
+import { buildImageUrl, focalPosition } from '@/lib/image'
 
 type Props = {
   media: Media | null | undefined
@@ -9,7 +9,10 @@ type Props = {
   sizes?: string
   className?: string
   imgClassName?: string
-  /** Above-the-fold images load eagerly with high priority. */
+  /**
+   * First-screen image (LCP): loads eagerly with high priority and is shown at once,
+   * without the fade-in. Never wrap it in a reveal animation either.
+   */
   priority?: boolean
   /** Fill the parent box; the parent sets both width and height. */
   fill?: boolean
@@ -18,7 +21,11 @@ type Props = {
   fit?: 'cover' | 'contain'
 }
 
-/** The only way to render a CMS image: reserved space, placeholder color, lazy loading. */
+/**
+ * The only way to render a CMS image: reserved space, placeholder, lazy loading, crop around the
+ * editor's focal point. Without media it renders the hatched plate of the tone: lighter than a
+ * dark section and darker than a light one, so a block without a photo never looks empty.
+ */
 export function SmartImage({
   media,
   sizes,
@@ -30,13 +37,21 @@ export function SmartImage({
   fit = 'cover',
 }: Props) {
   const [loaded, setLoaded] = useState(false)
-  if (!media) return <div className={cn('bg-tile', className)} aria-hidden="true" />
+  if (!media)
+    return <div className={cn('plate', fill && 'h-full w-full', className)} aria-hidden="true" />
   // Logos and other transparent images must not sit on a solid placeholder of their own color.
   const opaque = fit === 'cover' && media.mime_type !== 'image/svg+xml'
+  const visible = priority || loaded
 
   return (
     <div
-      className={cn('relative overflow-hidden', fill && 'h-full w-full', crop && 'w-full', className)}
+      className={cn(
+        'relative overflow-hidden',
+        opaque && 'plate',
+        fill && 'h-full w-full',
+        crop && 'w-full',
+        className,
+      )}
       style={{
         backgroundColor: opaque ? (media.placeholder.dominant_color ?? undefined) : undefined,
         aspectRatio: fill || crop ? undefined : `${media.width} / ${media.height}`,
@@ -51,12 +66,14 @@ export function SmartImage({
         loading={priority ? 'eager' : 'lazy'}
         // React 18 does not know `fetchPriority`; the lowercase attribute passes through as is.
         {...{ fetchpriority: priority ? 'high' : 'auto' }}
-        decoding="async"
+        decoding={priority ? 'sync' : 'async'}
         onLoad={() => setLoaded(true)}
+        style={{ objectPosition: focalPosition(media) }}
         className={cn(
-          'absolute inset-0 h-full w-full transition-opacity duration-500',
+          'absolute inset-0 h-full w-full',
           fit === 'cover' ? 'object-cover' : 'object-contain',
-          loaded ? 'opacity-100' : 'opacity-0',
+          !priority && 'transition-opacity duration-3',
+          visible ? 'opacity-100' : 'opacity-0',
           imgClassName,
         )}
       />

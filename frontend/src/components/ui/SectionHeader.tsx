@@ -1,5 +1,7 @@
 import type { ReactNode } from 'react'
 import { cn } from '@/lib/cn'
+import { Eyebrow } from './Eyebrow'
+import { Heading } from './Heading'
 import { Reveal } from './Reveal'
 
 type Props = {
@@ -11,25 +13,32 @@ type Props = {
   className?: string
 }
 
+/**
+ * Header of a sheet: meta row (number + eyebrow) over a hairline, the title on 8 columns,
+ * an aside (link, dimension, filter) on the last three.
+ */
 export function SectionHeader({ id, eyebrow, title, intro, aside, className }: Props) {
   if (!eyebrow && !title && !intro && !aside) return null
   return (
     <Reveal
-      className={cn(
-        'mb-10 flex flex-col gap-6 md:mb-14 md:flex-row md:items-end md:justify-between',
-        className,
-      )}
+      className={cn('mb-12 grid grid-cols-12 items-end gap-x-gap gap-y-6 md:mb-24', className)}
     >
-      <div className="flex max-w-3xl flex-col gap-4">
-        {eyebrow && <p className="eyebrow">{eyebrow}</p>}
-        {title && (
-          <h2 id={id} className="text-h2">
-            {title}
-          </h2>
-        )}
-        {intro && <p className="max-w-prose text-lead text-fg-mute">{intro}</p>}
+      <div className="col-span-12 border-b border-line pb-4">
+        <Eyebrow>{eyebrow}</Eyebrow>
       </div>
-      {aside && <div className="shrink-0">{aside}</div>}
+      {title && (
+        <Heading level={2} id={id} className="col-span-12 lg:col-span-8">
+          {title}
+        </Heading>
+      )}
+      {aside && (
+        <div className="col-span-12 lg:col-span-3 lg:col-start-10 lg:justify-self-start">
+          {aside}
+        </div>
+      )}
+      {intro && (
+        <p className="col-span-12 max-w-[36ch] text-lead text-fg-mute lg:col-span-6">{intro}</p>
+      )}
     </Reveal>
   )
 }

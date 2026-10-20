@@ -1,7 +1,8 @@
 import uuid
 from datetime import datetime
+from typing import Annotated, Self
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 from app.core.i18n import LocalizedText
 from app.models import MediaStatus
@@ -10,6 +11,11 @@ from app.schemas.entities import MediaVariant
 from app.schemas.fields import field
 
 Folder = str
+
+# A focal point coordinate: 0..1 from the left (x) or the top (y).
+Coordinate = Annotated[float, Field(ge=0, le=1)]
+FOCAL_HINT = "Точка, которая остаётся в кадре при обрезке. 0.5 — центр"
+FOCAL_FIELDS = ("focal_point_x", "focal_point_y")
 
 
 class UploadRequest(BaseModel):
@@ -42,6 +48,8 @@ class MediaAdminRead(BaseModel):
     height: int
     alt: dict[str, str] = Field(description="All languages, as stored")
     dominant_color: str | None
+    focal_point_x: float | None = None
+    focal_point_y: float | None = None
     variants: list[MediaVariant]
     uploaded_by: uuid.UUID | None
     created_at: datetime
@@ -64,6 +72,22 @@ class MediaUpdate(VersionedUpdate):
     folder: str | None = Field(default=None, max_length=128)
     tags: list[str] | None = Field(default=None, max_length=30)
     original_filename: str | None = Field(default=None, min_length=1, max_length=255)
+    focal_point_x: Coordinate | None = None
+    focal_point_y: Coordinate | None = None
+
+    @model_validator(mode="after")
+    def _focal_point_whole(self) -> Self:
+        """Both coordinates come together: set both, or clear both with null."""
+        sent = self.model_fields_set & set(FOCAL_FIELDS)
+        if not sent:
+            return self
+        values = [getattr(self, f) for f in FOCAL_FIELDS]
+        if len(sent) == 1 or (None in values and values != [None, None]):
+            raise ValueError(
+                "фокус задаётся двумя координатами: укажите и по горизонтали, и по вертикали "
+                "или оставьте обе пустыми"
+            )
+        return self
 
 
 class MediaForm(BaseModel):
@@ -85,6 +109,12 @@ class MediaForm(BaseModel):
         "Папка", widget="combobox", options="media_folders", default=None, max_length=128
     )
     tags: list[str] = field("Теги", widget="tags", default_factory=list, max_length=30)
+    focal_point_x: Coordinate | None = field(
+        "Фокус по горизонтали (0–1)", description=FOCAL_HINT, default=None
+    )
+    focal_point_y: Coordinate | None = field(
+        "Фокус по вертикали (0–1)", description=FOCAL_HINT, default=None
+    )
 
 
 # Kept as a name for the media endpoints; the shape is shared.

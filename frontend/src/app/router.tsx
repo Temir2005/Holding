@@ -44,6 +44,10 @@ export const router = createBrowserRouter(
         },
         // Draft by a link from the admin; a separate chunk, the site does not load it.
         { path: 'preview/:slug', lazy: () => import('@/pages/PreviewPage') },
+        // Design system bench. Dev builds only: production drops the branch and the chunk.
+        ...(import.meta.env.DEV
+          ? [{ path: 'dev/design', lazy: () => import('@/dev/DesignPage') }]
+          : []),
         {
           path: ':slug',
           element: <CmsPageRoute />,

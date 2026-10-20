@@ -9,6 +9,7 @@ from app.core.i18n import LocalizedText
 from app.schemas.entities import MediaRead
 from app.schemas.fields import field
 from app.schemas.refs import Ref, RefKind
+from app.schemas.sections import Cta, CtaRead
 
 # --- stored ---
 # Titles and widgets are hints for the admin form; validation is what the public API uses.
@@ -81,6 +82,7 @@ class SiteSettingsDoc(BaseModel):
         "Логотип", default=None
     )
     navigation: list[NavItem] = field("Меню")
+    header_cta: Cta | None = field("Кнопка в шапке", default=None)
     contacts: Contacts = field("Контакты")
     socials: list[Social] = field("Соцсети")
     footer: Footer = field("Подвал")
@@ -121,6 +123,7 @@ class SiteSettingsRead(BaseModel):
     site_name: str
     logo: MediaRead | None
     navigation: list[NavItemRead]
+    header_cta: CtaRead | None = None
     contacts: ContactsRead
     socials: list[Social]
     footer: FooterRead

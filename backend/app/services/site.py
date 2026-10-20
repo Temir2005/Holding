@@ -20,6 +20,7 @@ class SiteService:
                 "site_name": row.site_name,
                 "logo_id": row.logo_id,
                 "navigation": row.navigation,
+                "header_cta": row.header_cta,
                 "contacts": row.contacts,
                 "socials": row.socials,
                 "footer": row.footer,

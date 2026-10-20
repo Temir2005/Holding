@@ -13,11 +13,16 @@ const PAGES = [
   { name: 'clients', path: '/ru/clients' },
   { name: 'project', path: '/ru/projects/zhk-proekt-a' },
   { name: '404', path: '/ru/no-such-page' },
+  { name: 'home-kk', path: '/kk' },
+  // Design system bench, dev builds only (the e2e stack runs the Vite dev server).
+  { name: 'dev-design', path: '/ru/dev/design' },
 ] as const
 
 const WIDTHS = [
   { width: 1440, height: 900 },
   { width: 375, height: 812 },
+  { width: 768, height: 1024 },
+  { width: 1920, height: 1080 },
 ] as const
 
 /** Scrolls to the bottom so lazy images start loading, then waits for every image. */

@@ -5,6 +5,9 @@
  *   ?n=0|1|3|12          number of items in stats, process steps and the showcase
  *   ?tone=dark|light|accent  overrides the tone of every section except the hero
  *   ?menu=open           opens the mobile menu on load (for the 375 screenshot)
+ *   ?accent=red|amber    accent variant (the concept decides what it maps to)
+ *   ?stages=demo         illustrative cycle stages for in-progress projects (NOT facts)
+ *   ?nomedia=1           process steps without photos (the drawing fallback must carry the scene)
  * Exposes window.MS. Load after content.js, before the concept's own script.
  */
 ;(function () {
@@ -13,6 +16,9 @@
   const lang = ['ru', 'kk', 'en'].includes(q.get('lang')) ? q.get('lang') : 'ru'
   const n = q.has('n') ? Math.max(0, Math.min(12, parseInt(q.get('n'), 10) || 0)) : null
   const tone = ['dark', 'light', 'accent'].includes(q.get('tone')) ? q.get('tone') : null
+  const accent = ['red', 'amber'].includes(q.get('accent')) ? q.get('accent') : 'red'
+  const demoStages = q.get('stages') === 'demo'
+  const noMedia = q.get('nomedia') === '1'
   const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches
 
   /** Localized text with the API's fallback to ru; null stays null. */
@@ -31,6 +37,21 @@
   const showcaseItems = n == null ? featured : take(C.projects, n)
 
   const sectionTone = (s) => tone || s.tone
+
+  const CYCLE = ['land', 'design', 'materials', 'construction', 'handover']
+  /**
+   * Where a project is in the full cycle: { index 0-4, key, done }.
+   * Uses project.cycle_stage (proposed backend field) when set; otherwise only what the current
+   * status allows: planned → land, in_progress → construction, completed → handover (done).
+   * ?stages=demo spreads in-progress projects over design / materials / construction to show
+   * intermediate states — illustration only.
+   */
+  function projectStage(p, i = 0) {
+    let key = p.cycle_stage
+    if (!key && demoStages && p.status === 'in_progress') key = ['design', 'materials', 'construction'][i % 3]
+    if (!key) key = p.status === 'planned' ? 'land' : p.status === 'in_progress' ? 'construction' : 'handover'
+    return { index: CYCLE.indexOf(key), key, done: p.status === 'completed' }
+  }
 
   const nf = new Intl.NumberFormat(lang === 'en' ? 'en-US' : 'ru-RU')
   /** Number in the site's format: thin no-break space as thousands separator for ru/kk. */
@@ -68,7 +89,7 @@
         return `<a href="${link({ [key]: v })}"${active ? ' aria-current="true"' : ''}>${v ?? '—'}</a>`
       }).join(' ') + '</div>'
     el.innerHTML = `<summary>stress</summary>${opt('lang', [null, 'kk', 'en'])}${opt('n', [null, '0', '1', '3', '12'])}` +
-      `${opt('tone', [null, 'dark', 'light', 'accent'])}<div><a href="../../index.html">← все концепции</a></div>`
+      `${opt('tone', [null, 'dark', 'light', 'accent'])}${opt('accent', [null, 'amber'])}${opt('nomedia', [null, '1'])}<div><a href="../../index.html">← все концепции</a></div>`
     document.body.append(el)
     const css = document.createElement('style')
     css.textContent = `.ms-debug{position:fixed;right:12px;bottom:12px;z-index:9999;font:12px/1.6 ui-monospace,monospace;
@@ -79,11 +100,13 @@
 
   document.documentElement.lang = lang
   window.MS = {
-    C, lang, n, tone, reduced, t, num, esc, plate, sectionTone,
+    C, lang, n, tone, accent, reduced, CYCLE, projectStage, t, num, esc, plate, sectionTone,
     menuOpen: q.get('menu') === 'open',
     hero: C.hero,
     stats: { ...C.stats, items: statsItems },
-    process: { ...C.process, steps: take(C.process.steps, n) },
+    process: { ...C.process, steps: take(C.process.steps, n).map((s) => (noMedia ? { ...s, media: null } : s)) },
+    // Swatches moved from the hero to production (proposed field ProductionData.swatches).
+    production: { ...C.production, swatches: C.hero.swatches },
     showcase: { ...C.showcase, items: showcaseItems },
     projects: C.projects,
     nav: C.site.navigation,

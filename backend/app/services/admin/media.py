@@ -111,6 +111,8 @@ class MediaService(CrudService[Media, UploadRequest, MediaUpdate, MediaAdminRead
             height=obj.height,
             alt=dict(obj.alt),
             dominant_color=obj.dominant_color,
+            focal_point_x=obj.focal_point_x,
+            focal_point_y=obj.focal_point_y,
             variants=[
                 MediaVariant(
                     width=v["width"],
