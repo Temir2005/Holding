@@ -31,8 +31,16 @@ frontend/e2e/screenshots/
 # Local demo stock photos (make demo-photos): never committed
 backend/seed/photos/
 
-# Candidate fonts for the redesign prototypes: restored by design/tools/fonts.sh
+# Design materials travel as a separate archive, not in git: candidate fonts of the
+# prototypes (restored by design/tools/fonts.sh), screenshots and recordings. Prototype code,
+# notes (*.md) and tools stay tracked.
 design/concepts/_shared/fonts/
+design/concepts/**/shots/
+design/stage-*/**/*.png
+design/stage-*/**/*.jpg
+design/stage-*/**/*.jpeg
+design/stage-*/**/*.webm
+design/tools/*.png
 
 # Lighthouse reports (design/tools/lighthouse.sh): regenerated, only the summary is committed
 design/**/lighthouse/*.report.*
