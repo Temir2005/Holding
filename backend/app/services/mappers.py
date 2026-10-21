@@ -16,6 +16,7 @@ from app.schemas.entities import (
     MediaVariant,
     PersonRead,
     ProjectCard,
+    ProjectNeighbor,
     ProjectRead,
     StatRead,
     TestimonialRead,
@@ -107,11 +108,20 @@ class Mapper:
             division=self.division_ref(p.division),
         )
 
-    def project(self, p: Project) -> ProjectRead:
+    def project(
+        self, p: Project, prev: Project | None = None, next: Project | None = None
+    ) -> ProjectRead:
         gallery = [m for m in (self.media(item.media) for item in p.gallery) if m]
         return ProjectRead(
-            **self.project_card(p).model_dump(), body=self.t(p.body), gallery=gallery
+            **self.project_card(p).model_dump(),
+            body=self.t(p.body),
+            gallery=gallery,
+            prev=self.project_neighbor(prev),
+            next=self.project_neighbor(next),
         )
+
+    def project_neighbor(self, p: Project | None) -> ProjectNeighbor | None:
+        return ProjectNeighbor(slug=p.slug, title=self.t(p.title)) if p else None
 
     def person(self, p: Person) -> PersonRead:
         return PersonRead(

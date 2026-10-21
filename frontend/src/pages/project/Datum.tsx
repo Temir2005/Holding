@@ -1,4 +1,4 @@
-import { motion, useReducedMotion } from 'framer-motion'
+import { m, useReducedMotion } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 import { DUR, EASE_OUT } from '@/lib/motion'
 import { DATUM } from './trace'
@@ -18,7 +18,7 @@ export function Datum({ className }: { className?: string }) {
         aria-hidden="true"
         className="absolute -left-[6px] -top-[6px] h-3 w-3 rounded-full border-[1.5px] border-trace bg-surface"
       />
-      <motion.span
+      <m.span
         aria-hidden="true"
         className="absolute inset-0 origin-left bg-trace"
         initial={reduce ? false : { scaleX: 0 }}

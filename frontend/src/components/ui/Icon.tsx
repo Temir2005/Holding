@@ -14,8 +14,10 @@ const PATHS: Record<string, string> = {
   square: 'M5 5h14v14H5z',
   sparkle: 'M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M6 18l2.5-2.5M15.5 8.5 18 6',
   layers: 'M12 3 3 8l9 5 9-5zM3 13l9 5 9-5M3 17.5l9 5 9-5',
-  palette: 'M12 3a9 9 0 0 0 0 18c1.5 0 2-1 2-2s-1-2 0-3 4 0 5-1 2-3 2-4a9 9 0 0 0-9-8zM7.5 11h.01M10 7h.01M15 7h.01',
-  fingerprint: 'M7 11a5 5 0 0 1 10 0v2M12 11v4c0 2 1 4 2 5M9 13c0 3 1 5 2 7M5 9a8 8 0 0 1 14 0M17 16v1',
+  palette:
+    'M12 3a9 9 0 0 0 0 18c1.5 0 2-1 2-2s-1-2 0-3 4 0 5-1 2-3 2-4a9 9 0 0 0-9-8zM7.5 11h.01M10 7h.01M15 7h.01',
+  fingerprint:
+    'M7 11a5 5 0 0 1 10 0v2M12 11v4c0 2 1 4 2 5M9 13c0 3 1 5 2 7M5 9a8 8 0 0 1 14 0M17 16v1',
   leaf: 'M5 19c0-8 5-14 15-15-1 10-7 15-15 15zM5 19l7-7',
   sofa: 'M4 12V8a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v4M2 12h20v5H2zM5 17v2M19 17v2',
   pen: 'M4 20l4-1 11-11-3-3L5 16zM14 6l3 3',
@@ -51,7 +53,14 @@ export function Icon({ name, className }: Props) {
 
 export function ArrowIcon({ className }: { className?: string }) {
   return (
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} aria-hidden="true" className={cn('h-5 w-5', className)}>
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={1.5}
+      aria-hidden="true"
+      className={cn('h-5 w-5', className)}
+    >
       <path d="M5 12h14M13 6l6 6-6 6" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   )

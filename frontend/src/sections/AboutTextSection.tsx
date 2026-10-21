@@ -31,7 +31,7 @@ export function AboutTextSection({ section }: SectionProps<'about_text'>) {
           : 'lg:col-span-7 lg:col-start-5',
       )}
     >
-      <Markdown variant="sheet">{body}</Markdown>
+      <Markdown headingFloor={3}>{body}</Markdown>
     </Reveal>
   )
   const figure = withMedia && (

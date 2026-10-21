@@ -1,4 +1,4 @@
-import { motion, useReducedMotion } from 'framer-motion'
+import { m, useReducedMotion } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 import type { Vacancy } from '@/api/types'
 import { PlusMark } from '@/components/cards/PersonCard'
@@ -136,20 +136,21 @@ function Row({ vacancy: v, index }: { vacancy: Vacancy; index: number }) {
 
       {description ? (
         <div id={panelId} hidden={!open}>
-          <motion.div
+          <m.div
             key={String(open)}
             initial={reduce ? { opacity: 0 } : { opacity: 0, clipPath: 'inset(0 0 100% 0)' }}
             animate={reduce ? { opacity: 1 } : { opacity: 1, clipPath: 'inset(0 0 0% 0)' }}
             transition={{ duration: DUR.step, ease: EASE_OUT }}
             className="grid gap-8 pb-10 pl-[calc(2rem+1rem)] lg:grid-cols-12 lg:gap-x-gap lg:pl-[calc(2.5rem+1rem)]"
           >
-            <Markdown variant="sheet" className="lg:col-span-7">
+            {/* the vacancy title is the h3 of the row: the description starts at h4 */}
+            <Markdown headingFloor={4} className="lg:col-span-7">
               {description}
             </Markdown>
             <div className="lg:col-span-4 lg:col-start-9 lg:justify-self-end">
               <CmsLink href={APPLY_HREF}>{t('vacancy.apply')}</CmsLink>
             </div>
-          </motion.div>
+          </m.div>
         </div>
       ) : (
         <div className="pb-6 pl-[calc(2rem+1rem)] lg:pl-[calc(2.5rem+1rem)]">

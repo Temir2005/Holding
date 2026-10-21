@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next'
-import { Link, useLocation } from 'react-router-dom'
+import { useLocation } from 'react-router-dom'
+import { SiteLink } from '@/components/ui/SiteLink'
 import { cn } from '@/lib/cn'
 import { LOCALE_LABELS, LOCALES, swapLocale, useLocale } from '@/lib/locale'
 
@@ -21,7 +22,7 @@ export function LangSwitch({ className, variant = 'inline' }: Props) {
       {LOCALES.map((l) => {
         const current = l === locale
         return (
-          <Link
+          <SiteLink
             key={l}
             to={swapLocale(pathname, l) + hash}
             hrefLang={l}
@@ -42,7 +43,7 @@ export function LangSwitch({ className, variant = 'inline' }: Props) {
             )}
           >
             {LOCALE_LABELS[l]}
-          </Link>
+          </SiteLink>
         )
       })}
     </nav>

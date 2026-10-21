@@ -55,6 +55,6 @@
   "capabilities": { "empty": "The list is being filled in" },
   "projectList": { "total": "Projects in the register", "shown": "Showing {{shown}} of {{total}}", "empty": "No projects match these filters", "reset": "Reset filters" },
   "tokenization": { "steps": "Scheme", "step": "Step", "benefits": "Specification", "note": "Note", "projects": "Tokenized projects" },
-  "projectPage": { "about": "Description", "tags": "Tags", "spec": "Project specification", "tokenization": "Tokenization", "yes": "Yes", "register": "Project register", "loading": "Loading the project" },
+  "projectPage": { "about": "Description", "tags": "Tags", "spec": "Project specification", "tokenization": "Tokenization", "yes": "Yes", "register": "Project register", "loading": "Loading the project", "prev": "Previous project", "next": "Next project", "neighbors": "Neighbouring projects" },
   "preview": { "banner": "Preview — this is not the published version", "expiredTitle": "The preview link has expired", "expiredText": "Open the preview from the admin again: the link is valid for 30 minutes." }
 }

@@ -1,4 +1,4 @@
-import { motion, useReducedMotion } from 'framer-motion'
+import { m, useReducedMotion } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 import type { Client, Tone } from '@/api/types'
 import { cn } from '@/lib/cn'
@@ -25,7 +25,7 @@ export function ClientDetail({ client, number, id, tone, order, onClose }: Props
   const href = client.website_url
 
   return (
-    <motion.li
+    <m.li
       id={id}
       style={{ order }}
       className={cn(
@@ -78,6 +78,6 @@ export function ClientDetail({ client, number, id, tone, order, onClose }: Props
           </button>
         </div>
       </div>
-    </motion.li>
+    </m.li>
   )
 }

@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { SiteLink } from '@/components/ui/SiteLink'
 import type { SiteSettings } from '@/api/types'
 import { SmartImage } from '@/components/ui/SmartImage'
 import { cn } from '@/lib/cn'
@@ -10,7 +10,7 @@ type Props = { settings: SiteSettings | undefined; className?: string }
 export function Logo({ settings, className }: Props) {
   const locale = useLocale()
   return (
-    <Link
+    <SiteLink
       to={`/${locale}`}
       className={cn(
         'flex min-h-11 flex-none items-center gap-2.5 text-lg font-bold tracking-[-0.02em]',
@@ -31,6 +31,6 @@ export function Logo({ settings, className }: Props) {
           {settings?.site_name ?? ' '}
         </>
       )}
-    </Link>
+    </SiteLink>
   )
 }

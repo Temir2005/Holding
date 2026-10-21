@@ -1,4 +1,4 @@
-import { useRef, type ReactNode } from 'react'
+import type { ReactNode } from 'react'
 import type { Tone } from '@/api/types'
 import type { TraceBranches, TracePath } from '@/components/trace/paths'
 import { TraceSegment } from '@/components/trace/TraceSegment'
@@ -36,10 +36,8 @@ export function Section({
   branches,
   space = 'default',
 }: Props) {
-  const ref = useRef<HTMLElement>(null)
   return (
     <section
-      ref={ref}
       id={anchor ?? undefined}
       aria-labelledby={labelledBy}
       className={cn(
@@ -51,7 +49,7 @@ export function Section({
       )}
     >
       <SheetGuides />
-      {trace !== false && <TraceSegment target={ref} path={trace} branches={branches} />}
+      {trace !== false && <TraceSegment path={trace} branches={branches} />}
       {bleed ? children : <Container>{children}</Container>}
     </section>
   )

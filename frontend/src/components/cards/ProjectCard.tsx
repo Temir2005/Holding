@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link } from 'react-router-dom'
+import { SiteLink } from '@/components/ui/SiteLink'
 import type { ProjectCard as Project } from '@/api/types'
 import { ClipReveal } from '@/components/motion/ClipReveal'
 import { Frame } from '@/components/ui/Frame'
@@ -88,7 +88,7 @@ export function ProjectCard({ project: p, index, wide, className }: Props) {
         )}
       >
         <h3 className="text-[1.0625rem] font-semibold leading-snug tracking-[-0.01em] [overflow-wrap:anywhere] md:text-subtitle">
-          <Link
+          <SiteLink
             to={projectHref(locale, p.slug)}
             className="after:absolute after:inset-0 after:content-[''] focus-visible:outline-none"
           >
@@ -96,7 +96,7 @@ export function ProjectCard({ project: p, index, wide, className }: Props) {
             <span className="bg-[linear-gradient(rgb(var(--trace)),rgb(var(--trace)))] bg-[length:0_1px] bg-[position:0_100%] bg-no-repeat pb-0.5 transition-[background-size] duration-3 ease-out group-hover:bg-[length:100%_1px] group-has-[a:focus-visible]:bg-[length:100%_1px]">
               {p.title}
             </span>
-          </Link>
+          </SiteLink>
         </h3>
         {p.location && <p className="mono-label mt-1.5 md:mt-2">{p.location}</p>}
         {wide && p.short_description && (

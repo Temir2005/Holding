@@ -3147,6 +3147,16 @@ export interface components {
       type: 'project_list'
       data: components['schemas']['ProjectListDataRead']
     }
+    /**
+     * ProjectNeighbor
+     * @description The project before or after this one in the editors' order (published only).
+     */
+    ProjectNeighbor: {
+      /** Slug */
+      slug: string
+      /** Title */
+      title: string
+    }
     /** ProjectRead */
     ProjectRead: {
       /**
@@ -3179,6 +3189,8 @@ export interface components {
       body: string
       /** Gallery */
       gallery: components['schemas']['MediaRead'][]
+      prev?: components['schemas']['ProjectNeighbor'] | null
+      next?: components['schemas']['ProjectNeighbor'] | null
     }
     /**
      * ProjectStatus

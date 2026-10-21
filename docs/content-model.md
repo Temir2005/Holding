@@ -180,7 +180,7 @@ JSONB-части валидируются схемами `app/schemas/site.py`. 
 | GET | `/api/v1/settings?locale=` | `SiteSettingsRead` |
 | GET | `/api/v1/pages/{slug}?locale=` | `PageRead` из опубликованной версии |
 | GET | `/api/v1/projects?division=&status=&featured=&locale=` | `ProjectCard[]` |
-| GET | `/api/v1/projects/{slug}?locale=` | `ProjectRead` (с галереей) |
+| GET | `/api/v1/projects/{slug}?locale=` | `ProjectRead` (с галереей и соседями `prev` / `next`: `{slug, title}` по порядку редактора, только опубликованные, у первого нет `prev`, у последнего нет `next`) |
 | GET | `/api/v1/people?division=&key=&locale=` | `PersonRead[]` |
 | GET | `/api/v1/clients?locale=` | `ClientRead[]` |
 | GET | `/api/v1/vacancies?locale=` | `VacancyRead[]` |

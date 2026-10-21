@@ -1,4 +1,4 @@
-import { motion, useTransform, type MotionValue } from 'framer-motion'
+import { m, useTransform, type MotionValue } from 'framer-motion'
 import { useLayoutEffect, useRef, useState, type CSSProperties, type RefObject } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { components } from '@/api/schema'
@@ -199,7 +199,7 @@ function ScenePath({ geo, progress }: { geo: SceneGeometry; progress: MotionValu
       width={geo.w}
       height={geo.h}
     >
-      <motion.path
+      <m.path
         d={geo.d}
         fill="none"
         stroke="rgb(var(--trace))"
@@ -226,7 +226,7 @@ function Corner({
 }) {
   const opacity = useTransform(drawn, (v) => (v > 0.0005 && v >= at - 0.0005 ? 1 : 0))
   return (
-    <motion.rect
+    <m.rect
       x={x - 4.5}
       y={y - 4.5}
       width={9}
@@ -391,7 +391,7 @@ function Progress({
       className="relative col-span-2 row-start-2 h-[15px] text-fg-mute md:col-span-1 md:row-start-3"
     >
       <span className="absolute inset-x-0 top-[7px] h-px bg-line-strong" />
-      <motion.span
+      <m.span
         className="absolute inset-x-0 top-[6px] h-0.5 origin-left bg-fg"
         style={{ scaleX: progress }}
       />
@@ -454,7 +454,7 @@ function useGeometry(
         prev && next && prev.d === next.d && prev.w === next.w && prev.h === next.h ? prev : next,
       )
     }
-    measure()
+    // first measured by the observer, after the browser's own layout (see TraceSegment)
     const ro = new ResizeObserver(measure)
     ro.observe(st)
     ro.observe(rl)

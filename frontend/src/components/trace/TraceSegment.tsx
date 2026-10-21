@@ -1,5 +1,5 @@
 import {
-  motion,
+  m,
   motionValue,
   useReducedMotion,
   useScroll,
@@ -11,8 +11,6 @@ import { PEN_OFFSET } from '@/lib/motion'
 import { straight, type TraceBox, type TraceBranches, type TracePath } from './paths'
 
 type Props = {
-  /** The section element the segment belongs to; its scroll progress draws the line. */
-  target: RefObject<HTMLElement>
   path?: TracePath
   /** Side strokes, each drawn when the pen reaches its height. */
   branches?: TraceBranches
@@ -25,22 +23,25 @@ type Props = {
  * Progress is the section's own scroll through the pen height (PEN_OFFSET), so the drawing
  * continues across section borders without a pause. Reduced motion: drawn at once.
  */
-export function TraceSegment({ target, path = straight, branches }: Props) {
+export function TraceSegment({ path = straight, branches }: Props) {
   const reduce = useReducedMotion()
   const probe = useRef<HTMLSpanElement>(null)
-  const box = useBox(target, probe)
-  const { scrollYProgress } = useScroll({ target, offset: [...PEN_OFFSET] })
+  const sheet = useSheet(probe)
+  const box = useBox(sheet, probe)
+  const { scrollYProgress } = useScroll({ target: sheet, offset: [...PEN_OFFSET] })
 
   return (
     <>
       {/* Measures var(--trace-x) in pixels: the variable is a clamp() expression. */}
       <span
         ref={probe}
+        data-trace-probe=""
         aria-hidden="true"
         className="pointer-events-none absolute left-[var(--trace-x)] top-0 h-0 w-0"
       />
       {box && (
         <svg
+          data-trace=""
           aria-hidden="true"
           focusable="false"
           className="pointer-events-none absolute inset-0 z-trace h-full w-full overflow-visible"
@@ -83,7 +84,7 @@ function Branch({
 
 function Path({ d, progress }: { d: string; progress: MotionValue<number> | null }) {
   return (
-    <motion.path
+    <m.path
       d={d}
       fill="none"
       stroke="rgb(var(--trace))"
@@ -92,6 +93,21 @@ function Path({ d, progress }: { d: string; progress: MotionValue<number> | null
       style={progress ? { pathLength: progress } : undefined}
     />
   )
+}
+
+/**
+ * The sheet the segment draws on: the parent of its probe (the segment is rendered directly
+ * inside its section or footer). Taken from the segment's own node on purpose: a ref of the
+ * parent element is attached only after the layout effects of its children have run, so in a
+ * production build (no StrictMode re-run) it is still empty when the line subscribes to the
+ * scroll and measures. Declared before useBox / useScroll, so it is set before theirs run.
+ */
+function useSheet(probe: RefObject<HTMLElement>): RefObject<HTMLElement> {
+  const sheet = useRef<HTMLElement | null>(null)
+  useLayoutEffect(() => {
+    sheet.current = probe.current?.parentElement ?? null
+  }, [probe])
+  return sheet
 }
 
 /**
@@ -121,11 +137,13 @@ function useBox(target: RefObject<HTMLElement>, probe: RefObject<HTMLElement>): 
       }
       setBox((prev) => (prev && sameBox(prev, next) ? prev : next))
     }
-    measure()
+    // No measuring here: reading sizes right after the DOM changed forces a layout of the whole
+    // page, once per section as they mount. The observer's first callback comes after the
+    // browser's own layout pass and before paint, so the line is still there in that frame.
     const ro = new ResizeObserver(measure)
     ro.observe(el)
     // Web fonts change line breaks without always resizing the section: measure once more.
-    void document.fonts?.ready.then(measure)
+    void document.fonts?.ready.then(() => requestAnimationFrame(measure))
     return () => ro.disconnect()
   }, [target, probe])
   return box

@@ -1,4 +1,4 @@
-import { motion, useReducedMotion } from 'framer-motion'
+import { m, useReducedMotion } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 import { ClipReveal } from '@/components/motion/ClipReveal'
 import { Eyebrow } from '@/components/ui/Eyebrow'
@@ -60,7 +60,7 @@ export function QuoteSection({ section }: SectionProps<'quote'>) {
         {text && (
           <Reveal className="relative col-span-12 lg:col-span-6 lg:col-start-7 lg:row-start-2">
             {/* Callout: from the edge of the portrait to the opening mark, drawn after it opens. */}
-            <motion.span
+            <m.span
               aria-hidden="true"
               className={cn(
                 size,
@@ -73,7 +73,7 @@ export function QuoteSection({ section }: SectionProps<'quote'>) {
             >
               <span className="absolute -left-[4px] bottom-[-3.5px] h-2 w-2 rounded-full bg-trace" />
               <span className="absolute bottom-0 left-0 right-[0.5em] h-px bg-trace" />
-            </motion.span>
+            </m.span>
             <blockquote className={cn(size, measure, 'font-normal [overflow-wrap:break-word]')}>
               <p>
                 <span className="text-accent lg:absolute lg:-translate-x-full lg:pr-[0.06em]">

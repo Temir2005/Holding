@@ -1,4 +1,4 @@
-import { motion, useReducedMotion } from 'framer-motion'
+import { m, useReducedMotion } from 'framer-motion'
 import type { ReactNode } from 'react'
 import { DUR, EASE_OUT } from '@/lib/motion'
 
@@ -15,7 +15,7 @@ type Props = {
  */
 export function Reveal({ children, className, delay = 0, as = 'div' }: Props) {
   const reduce = useReducedMotion()
-  const Tag = as === 'li' ? motion.li : motion.div
+  const Tag = as === 'li' ? m.li : m.div
   return (
     <Tag
       className={className}

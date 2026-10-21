@@ -1,4 +1,4 @@
-import { motion, useReducedMotion } from 'framer-motion'
+import { m, useReducedMotion } from 'framer-motion'
 import type { Division } from '@/api/types'
 import { Frame } from '@/components/ui/Frame'
 import { SmartImage } from '@/components/ui/SmartImage'
@@ -42,7 +42,7 @@ export function DivisionPreview({ items, active, className }: Props) {
           {items.map((d, i) => {
             const on = i === active
             return (
-              <motion.div
+              <m.div
                 key={d.id}
                 aria-hidden={!on}
                 className="absolute inset-0"
@@ -57,7 +57,7 @@ export function DivisionPreview({ items, active, className }: Props) {
                 }}
               >
                 <SmartImage media={d.cover} fill sizes="40vw" />
-              </motion.div>
+              </m.div>
             )
           })}
         </div>

@@ -1,4 +1,4 @@
-import { motion, useReducedMotion } from 'framer-motion'
+import { m, useReducedMotion } from 'framer-motion'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { Person } from '@/api/types'
@@ -158,7 +158,7 @@ function Row({ person: p, index, active, onActivate }: RowProps) {
             hidden={!open}
             className="pb-6 pl-[calc(2rem+1rem)] lg:pl-[calc(2.5rem+1rem)]"
           >
-            <motion.p
+            <m.p
               key={String(open)}
               initial={reduce ? { opacity: 0 } : { opacity: 0, clipPath: 'inset(0 0 100% 0)' }}
               animate={reduce ? { opacity: 1 } : { opacity: 1, clipPath: 'inset(0 0 0% 0)' }}
@@ -166,7 +166,7 @@ function Row({ person: p, index, active, onActivate }: RowProps) {
               className="max-w-[60ch] text-[0.9375rem] leading-normal text-fg-mute [overflow-wrap:break-word]"
             >
               {bio}
-            </motion.p>
+            </m.p>
           </div>
         )}
       </div>

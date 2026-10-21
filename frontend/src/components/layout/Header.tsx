@@ -1,4 +1,4 @@
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion'
+import { AnimatePresence, m, useReducedMotion } from 'framer-motion'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useLocation } from 'react-router-dom'
@@ -30,7 +30,8 @@ export function Header({ settings }: { settings: SiteSettings | undefined }) {
   return (
     <header
       className={cn(
-        'tone-dark fixed inset-x-0 top-0 z-header border-b transition-[transform,border-color] duration-3 ease-out focus-within:translate-y-0',
+        // its own view-transition group: the header stays put while the page under it changes
+        'tone-dark fixed inset-x-0 top-0 z-header border-b transition-[transform,border-color] duration-3 ease-out [view-transition-name:site-header] focus-within:translate-y-0',
         scrolled || open ? 'border-line-strong' : 'border-transparent',
         hidden && !reduce && '-translate-y-[101%]',
       )}
@@ -57,14 +58,20 @@ export function Header({ settings }: { settings: SiteSettings | undefined }) {
         <button
           ref={menuButton}
           type="button"
-          className="ml-auto inline-flex h-10 items-center gap-2.5 border border-line-strong px-4 font-mono text-caption font-medium uppercase min-[1081px]:hidden"
+          className="group/menu ml-auto inline-flex h-10 items-center gap-2.5 border border-line-strong px-4 font-mono text-caption font-medium uppercase transition-colors duration-1 hover:border-fg active:bg-surface-2 min-[1081px]:hidden"
           aria-expanded={open}
           aria-controls="mobile-menu"
           onClick={() => setOpen((v) => !v)}
         >
           <span aria-hidden="true" className="grid w-4 gap-1">
             <i className="h-px bg-current" />
-            <i className="h-0.5 w-2.5 bg-trace" />
+            {/* the red stroke runs out to the full width on hover and while the menu is open */}
+            <i
+              className={cn(
+                'h-0.5 w-2.5 origin-left bg-trace transition-transform duration-2 ease-out group-hover/menu:scale-x-[1.6]',
+                open && 'scale-x-[1.6]',
+              )}
+            />
           </span>
           {open ? t('nav.close') : t('nav.menu')}
         </button>
@@ -72,7 +79,7 @@ export function Header({ settings }: { settings: SiteSettings | undefined }) {
 
       <AnimatePresence>
         {open && (
-          <motion.div
+          <m.div
             key="menu"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -86,7 +93,7 @@ export function Header({ settings }: { settings: SiteSettings | undefined }) {
                 menuButton.current?.focus()
               }}
             />
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
     </header>

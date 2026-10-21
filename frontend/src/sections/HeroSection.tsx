@@ -1,4 +1,4 @@
-import { motion, useReducedMotion } from 'framer-motion'
+import { m, useReducedMotion } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 import { useLocation } from 'react-router-dom'
 import type { Media, Stat } from '@/api/types'
@@ -83,7 +83,7 @@ function Datum({ origin }: { origin: boolean }) {
           className="absolute -left-[6px] -top-[6px] h-3 w-3 rounded-full border-[1.5px] border-trace bg-surface"
         />
       )}
-      <motion.span
+      <m.span
         aria-hidden="true"
         className="absolute inset-0 origin-left bg-trace"
         initial={reduce ? false : { scaleX: 0 }}
@@ -179,7 +179,7 @@ function CropMarks() {
   return (
     <>
       {marks.map((pos, i) => (
-        <motion.span
+        <m.span
           key={pos}
           aria-hidden="true"
           className={`crop-mark ${pos}`}

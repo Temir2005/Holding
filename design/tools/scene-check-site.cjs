@@ -9,7 +9,7 @@
  */
 const path = require('path')
 const { chromium } = require('@playwright/test')
-const BASE = 'http://localhost:5173'
+const BASE = process.env.BASE || 'http://localhost:5173'
 
 const sceneInfo = (page) =>
   page.evaluate(() => {
@@ -115,7 +115,8 @@ async function shots(browser, out, size, p, which) {
       ['/kk/dev/sections?type=process_steps&n=5&long=1', [[1440, 900], [375, 812]]],
       ['/ru/development', [[1440, 900], [375, 812]]],
       ['/kk/development', [[1280, 720], [375, 667]]],
-    ]
+      ['/en/development', [[1920, 1080], [768, 1024]]],
+    ].filter(([p]) => !process.env.LIVE_ONLY || !p.includes('/dev/')) // LIVE_ONLY: production preview, no bench
     for (const [p, sizes] of sets) for (const [w, h] of sizes) await check(browser, w, h, p)
     const { page } = await open(browser, 375, 812, '/ru/development', true)
     const r = await page.evaluate(() => ({ scene: !!document.querySelector('[data-scene]'), items: document.querySelectorAll('main ol[role=list] > li').length }))

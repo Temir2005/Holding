@@ -73,7 +73,7 @@ export function Filter({ label, options, value, onChange, className, showLabel }
                 'relative flex min-h-12 flex-auto items-center gap-3 border-b border-r border-line px-3 text-left sm:px-4',
                 'font-mono text-caption font-medium uppercase transition-colors duration-1',
                 'focus-visible:z-10 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[rgb(var(--accent-ink))]',
-                on ? 'bg-surface-2 text-fg' : 'text-fg-mute hover:text-fg',
+                on ? 'bg-surface-2 text-fg' : 'text-fg-mute hover:text-fg active:bg-surface-2/60',
               )}
             >
               {/* the legend square of the drawing: empty, or filled with the line colour */}
@@ -81,7 +81,9 @@ export function Filter({ label, options, value, onChange, className, showLabel }
                 aria-hidden="true"
                 className={cn(
                   'h-2.5 w-2.5 flex-none border transition-colors duration-1',
-                  on ? 'border-trace bg-trace' : 'border-current',
+                  on
+                    ? 'animate-[stamp-in_var(--dur-2)_var(--ease-out)] border-trace bg-trace motion-reduce:animate-none'
+                    : 'border-current',
                 )}
               />
               {/* words never break: a long label wraps between words and the cell grows taller */}

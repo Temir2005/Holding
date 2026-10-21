@@ -1,4 +1,4 @@
-import { motion, useInView, useReducedMotion } from 'framer-motion'
+import { m, useInView, useReducedMotion } from 'framer-motion'
 import { useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { ClipReveal } from '@/components/motion/ClipReveal'
@@ -67,7 +67,7 @@ function Item({ step, index, dense }: { step: Step; index: number; dense: boolea
                 : '-left-[6px] -top-[6px] h-3 w-3 shadow-[inset_0_0_0_2px_rgb(var(--trace))]',
             )}
           />
-          <motion.span
+          <m.span
             className={cn(
               'absolute rounded-full bg-trace',
               key

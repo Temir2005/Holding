@@ -1,4 +1,4 @@
-import { motion, useReducedMotion } from 'framer-motion'
+import { m, useReducedMotion } from 'framer-motion'
 import { forwardRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { Client, Tone } from '@/api/types'
@@ -123,7 +123,7 @@ export const GridCell = forwardRef<HTMLButtonElement, Props>(function GridCell(
   )
 
   return (
-    <motion.li
+    <m.li
       style={{ order }}
       className="border-b border-r border-line"
       initial={{ opacity: 0 }}
@@ -155,7 +155,7 @@ export const GridCell = forwardRef<HTMLButtonElement, Props>(function GridCell(
       ) : (
         <div className={cls}>{body}</div>
       )}
-    </motion.li>
+    </m.li>
   )
 })
 

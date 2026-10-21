@@ -1,4 +1,4 @@
-import { motion, useReducedMotion } from 'framer-motion'
+import { m, useReducedMotion } from 'framer-motion'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { ProjectCard as Project, ProjectStatus } from '@/api/types'
@@ -182,7 +182,7 @@ export function ProjectListSection({ section }: SectionProps<'project_list'>) {
             const wide =
               !dense && projects.length > 2 && i > 0 && i === visible.length - 1 && i % 3 === 0
             return (
-              <motion.li
+              <m.li
                 key={p.id}
                 layout={reduce ? false : 'position'}
                 transition={{ layout: { duration: DUR.step, ease: EASE_OUT } }}
@@ -194,7 +194,7 @@ export function ProjectListSection({ section }: SectionProps<'project_list'>) {
                 <Fade delay={stagger(i % 3)} className="h-full">
                   <ProjectCard project={p} index={number.get(p.id) ?? i} wide={wide} />
                 </Fade>
-              </motion.li>
+              </m.li>
             )
           })}
         </ul>

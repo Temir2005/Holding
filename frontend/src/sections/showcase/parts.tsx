@@ -1,4 +1,4 @@
-import { motion, useReducedMotion } from 'framer-motion'
+import { m, useReducedMotion } from 'framer-motion'
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { ProjectCard as Project } from '@/api/types'
@@ -24,7 +24,7 @@ export function Fade({
 }) {
   const reduce = useReducedMotion()
   return (
-    <motion.div
+    <m.div
       className={className}
       initial={{ opacity: 0 }}
       whileInView={{ opacity: 1 }}
@@ -36,7 +36,7 @@ export function Fade({
       }}
     >
       {children}
-    </motion.div>
+    </m.div>
   )
 }
 

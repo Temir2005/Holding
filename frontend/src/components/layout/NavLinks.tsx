@@ -1,8 +1,9 @@
 import type { ReactNode } from 'react'
-import { NavLink } from 'react-router-dom'
+import { NavLink, type NavLinkProps } from 'react-router-dom'
 import type { NavItem } from '@/api/types'
 import { cn } from '@/lib/cn'
 import { pagePath, useLocale } from '@/lib/locale'
+import { usePrefetchIntent } from '@/lib/prefetch'
 
 type Props = {
   items: NavItem[]
@@ -21,7 +22,7 @@ export function NavLinks({ items, className, linkClassName, onNavigate, renderPr
       {items.map((item, i) => (
         <li key={`${item.label}-${item.page_slug ?? item.anchor ?? item.url}`}>
           {item.page_slug ? (
-            <NavLink
+            <PageLink
               to={pagePath(locale, item.page_slug) + (item.anchor ? `#${item.anchor}` : '')}
               end={item.page_slug === 'home'}
               onClick={onNavigate}
@@ -31,13 +32,13 @@ export function NavLinks({ items, className, linkClassName, onNavigate, renderPr
                   'transition-colors duration-1',
                   isActive
                     ? 'text-fg shadow-[inset_0_-1px_0_rgb(var(--trace))]'
-                    : 'text-fg-mute hover:text-fg',
+                    : 'nav-pen text-fg-mute hover:text-fg',
                 )
               }
             >
               {renderPrefix?.(i)}
               <span>{item.label}</span>
-            </NavLink>
+            </PageLink>
           ) : (
             <a
               href={item.url ?? `#${item.anchor ?? ''}`}
@@ -55,4 +56,9 @@ export function NavLinks({ items, className, linkClassName, onNavigate, renderPr
       ))}
     </ul>
   )
+}
+
+/** NavLink with the page-change transition and the warm-up on intent, as SiteLink. */
+function PageLink({ to, ...rest }: NavLinkProps & { to: string }) {
+  return <NavLink to={to} viewTransition {...usePrefetchIntent(to)} {...rest} />
 }

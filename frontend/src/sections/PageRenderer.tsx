@@ -1,37 +1,89 @@
-import { Component, type ComponentType, type ReactNode } from 'react'
+import {
+  Component,
+  startTransition,
+  Suspense,
+  useEffect,
+  useState,
+  type ComponentType,
+  type ReactNode,
+} from 'react'
 import type { Section } from '@/api/types'
-import { sectionRegistry } from './registry'
+import { HashLanding } from '@/components/layout/HashLanding'
+import { isLazySection, rendererOf } from './registry'
 import { SectionNumberContext } from './sectionNumber'
 
-// The registry is keyed by type, but TS cannot link section.type to the matching
-// component through a union, so we widen once here.
-const registry = sectionRegistry as Record<string, ComponentType<{ section: Section }> | undefined>
-
-/** Renders CMS sections in order. Unknown or crashing sections are skipped, never fatal. */
+/**
+ * Renders CMS sections in order. Unknown or crashing sections are skipped, never fatal.
+ *
+ * The sections before the first lazy one render at once (the first screen). Everything from
+ * the first lazy section on is mounted afterwards, one section per idle moment: small
+ * renders instead of one long task right when the first screen should respond.
+ * They only ever append at the bottom, in order, and wait for their chunks behind a Suspense
+ * boundary, so a section never pops in above one already on screen. Until the last one is in,
+ * a screen of empty sheet holds the place, so the footer does not flash up under the hero.
+ */
 export function PageRenderer({ sections }: { sections: Section[] }) {
   const known = sections.filter((section) => {
-    if (registry[section.type]) return true
+    if (rendererOf(section.type)) return true
     if (import.meta.env.DEV)
       console.warn(`[PageRenderer] no component for section type "${section.type}"`)
     return false
   })
+  const split = known.findIndex((section) => isLazySection(section.type))
+  const shown = useMountedCount(split < 0 ? 0 : known.length - split)
+  const rendered = known.map((section, index) => {
+    const Renderer = rendererOf(section.type) as ComponentType<{ section: Section }>
+    return (
+      <SectionNumberContext.Provider
+        key={section.id}
+        value={{ index: index + 1, total: known.length }}
+      >
+        <SectionBoundary type={section.type}>
+          <Renderer section={section} />
+        </SectionBoundary>
+      </SectionNumberContext.Provider>
+    )
+  })
+  if (split < 0)
+    return (
+      <>
+        {rendered}
+        <HashLanding />
+      </>
+    )
+  const tail = rendered.slice(split)
   return (
     <>
-      {known.map((section, index) => {
-        const Renderer = registry[section.type] as ComponentType<{ section: Section }>
-        return (
-          <SectionNumberContext.Provider
-            key={section.id}
-            value={{ index: index + 1, total: known.length }}
-          >
-            <SectionBoundary type={section.type}>
-              <Renderer section={section} />
-            </SectionBoundary>
-          </SectionNumberContext.Provider>
-        )
-      })}
+      {rendered.slice(0, split)}
+      <Suspense fallback={RESERVE}>
+        {tail.slice(0, shown)}
+        {/* after the last lazy section: lands on #anchor once they are all in */}
+        {shown < tail.length ? RESERVE : <HashLanding />}
+      </Suspense>
     </>
   )
+}
+
+const RESERVE = <div aria-hidden="true" className="min-h-[100svh]" />
+
+/**
+ * How many of `total` sections are mounted: one more each time the browser is idle (with a
+ * short timeout, so they always come), inside a transition. The first screen gets the main
+ * thread first; the sheets below arrive while the visitor looks at it.
+ */
+function useMountedCount(total: number) {
+  const [count, setCount] = useState(0)
+  useEffect(() => {
+    if (count >= total) return
+    const next = () => startTransition(() => setCount((c) => c + 1))
+    if (typeof window.requestIdleCallback === 'function') {
+      const id = window.requestIdleCallback(next, { timeout: 400 })
+      return () => window.cancelIdleCallback(id)
+    }
+    const id = window.setTimeout(next, 16)
+    return () => window.clearTimeout(id)
+  }, [count, total])
+  return Math.min(count, total)
 }
 
 class SectionBoundary extends Component<

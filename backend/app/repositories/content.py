@@ -153,6 +153,17 @@ class ContentRepository:
         project: Project | None = await self.session.scalar(stmt)
         return project
 
+    async def project_neighbors(self, project: Project) -> tuple[Project | None, Project | None]:
+        """Published projects right before and after `project` in the editors' order."""
+        ids = await self._ordered_ids(Project)
+        if project.id not in ids:
+            return None, None
+        i = ids.index(project.id)
+        around = [ids[i - 1] if i > 0 else None, ids[i + 1] if i + 1 < len(ids) else None]
+        by_id = await self.published_by_ids(Project, [x for x in around if x])
+        prev, nxt = (by_id.get(x) if x else None for x in around)
+        return prev, nxt
+
     async def people(self, *, division_slug: str | None, key: bool | None) -> Sequence[Person]:
         stmt = select(Person).where(Person.is_published.is_(True))
         if division_slug:

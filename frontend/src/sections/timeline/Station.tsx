@@ -1,4 +1,4 @@
-import { motion, useInView, useReducedMotion } from 'framer-motion'
+import { m, useInView, useReducedMotion } from 'framer-motion'
 import { forwardRef, useRef } from 'react'
 import type { TimelineEvent } from '@/api/types'
 import { ClipReveal } from '@/components/motion/ClipReveal'
@@ -54,14 +54,14 @@ export function Station({ event, index, count, interval }: Props) {
         )}
       >
         <StationMark ref={mark} lit={lit} now={now} />
-        <motion.span
+        <m.span
           className="block"
           initial={false}
           animate={{ opacity: lit ? 1 : 0.3 }}
           transition={{ duration: DUR.reveal, ease: EASE_OUT }}
         >
           {event.year}
-        </motion.span>
+        </m.span>
       </p>
 
       <Reveal
@@ -123,14 +123,14 @@ const StationMark = forwardRef<HTMLSpanElement, { lit: boolean; now: boolean }>(
         aria-hidden="true"
         className="absolute left-[calc(var(--trace-x)-var(--pad-l))] top-1/2 z-[3] h-0 w-0"
       >
-        <motion.span
+        <m.span
           className="absolute left-0 top-0 h-px w-[calc(var(--pad-l)-var(--trace-x)-10px)] origin-left bg-trace"
           initial={false}
           animate={reduce ? { opacity: lit ? 1 : 0 } : { scaleX: lit ? 1 : 0 }}
           transition={t}
         />
         <span className="absolute -left-[6px] -top-[6px] h-3 w-3 rounded-full bg-surface shadow-[inset_0_0_0_1.5px_rgb(var(--fg-mute))]" />
-        <motion.span
+        <m.span
           className={cn(
             'absolute rounded-full bg-trace',
             now
@@ -159,7 +159,7 @@ function Interval({ label }: { label: string }) {
       aria-hidden="true"
       className="relative my-8 flex h-20 items-center pl-6 text-fg-mute md:col-span-4 md:col-start-1 md:row-start-2 md:my-0 md:mt-10 md:h-auto md:min-h-24"
     >
-      <motion.span
+      <m.span
         className="absolute inset-y-0 left-0 w-[11px] origin-top"
         initial={reduce ? false : { scaleY: 0 }}
         whileInView={{ scaleY: 1 }}
@@ -169,7 +169,7 @@ function Interval({ label }: { label: string }) {
         <span className="absolute inset-x-0 top-0 h-px bg-current" />
         <span className="absolute inset-y-0 left-[5px] w-px bg-current" />
         <span className="absolute inset-x-0 bottom-0 h-px bg-current" />
-      </motion.span>
+      </m.span>
       <span className="mono-label whitespace-nowrap">{label}</span>
     </div>
   )

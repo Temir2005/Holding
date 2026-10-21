@@ -1,11 +1,11 @@
 import * as Tabs from '@radix-ui/react-tabs'
 import { Bold, Heading2, Italic, Link2, List, ListOrdered, type LucideIcon } from 'lucide-react'
 import { useRef, useState, type Ref } from 'react'
-import { Markdown } from '@/components/ui/Markdown'
 import { cn } from '@/lib/cn'
 import { useT } from '../../../i18n'
 import { controlClass } from '../../../ui/styles'
 import { applyMarkdown, type MarkdownAction } from '../../markdown'
+import { MarkdownPreview } from './MarkdownPreview'
 
 const ACTIONS: { action: MarkdownAction; icon: LucideIcon; label: string }[] = [
   { action: 'bold', icon: Bold, label: 'form.markdown.bold' },
@@ -126,7 +126,7 @@ export function MarkdownEditor({
       <Tabs.Content value="preview" className="p-3">
         {value.trim() ? (
           <div className="tone-light rounded p-4" lang={lang}>
-            <Markdown>{value}</Markdown>
+            <MarkdownPreview>{value}</MarkdownPreview>
           </div>
         ) : (
           <p className="text-sm text-mute">{t('form.markdown.empty')}</p>

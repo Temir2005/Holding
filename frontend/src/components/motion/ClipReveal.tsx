@@ -1,4 +1,4 @@
-import { motion, useReducedMotion } from 'framer-motion'
+import { m, useReducedMotion } from 'framer-motion'
 import type { ReactNode } from 'react'
 import { DUR, EASE_OUT } from '@/lib/motion'
 
@@ -19,7 +19,7 @@ const closed = { bottom: 'inset(100% 0 0 0)', left: 'inset(0 100% 0 0)' } as con
 export function ClipReveal({ children, className, from = 'bottom', delay = 0 }: Props) {
   const reduce = useReducedMotion()
   return (
-    <motion.div
+    <m.div
       className={className}
       initial={reduce ? { opacity: 0 } : { clipPath: closed[from] }}
       whileInView={reduce ? { opacity: 1 } : { clipPath: 'inset(0% 0 0 0)' }}
@@ -31,6 +31,6 @@ export function ClipReveal({ children, className, from = 'bottom', delay = 0 }: 
       }}
     >
       {children}
-    </motion.div>
+    </m.div>
   )
 }

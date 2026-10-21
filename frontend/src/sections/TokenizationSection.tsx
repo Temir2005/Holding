@@ -1,6 +1,6 @@
 import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link } from 'react-router-dom'
+import { SiteLink } from '@/components/ui/SiteLink'
 import type { ProjectCard as Project, SectionOf } from '@/api/types'
 import { usePageSheet } from '@/components/layout/usePageSheet'
 import type { TraceBranches } from '@/components/trace/paths'
@@ -199,7 +199,7 @@ function Projects({ items, className }: { items: Project[]; className?: string }
       <ul role="list">
         {items.map((p) => (
           <li key={p.id} className="border-b border-line">
-            <Link
+            <SiteLink
               to={projectHref(locale, p.slug)}
               className="group/more grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-6 gap-y-1 py-4 transition-colors duration-2 hover:bg-surface-2 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[rgb(var(--accent-ink))] md:-mx-3 md:px-3"
             >
@@ -211,7 +211,7 @@ function Projects({ items, className }: { items: Project[]; className?: string }
                 <StatusMark status={p.status} />
                 {p.location && <span className="mono-label">{p.location}</span>}
               </span>
-            </Link>
+            </SiteLink>
           </li>
         ))}
       </ul>

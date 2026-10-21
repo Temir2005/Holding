@@ -1,5 +1,5 @@
 import { useTranslation } from 'react-i18next'
-import { Link } from 'react-router-dom'
+import { SiteLink } from '@/components/ui/SiteLink'
 import type { Project } from '@/api/types'
 import { Eyebrow } from '@/components/ui/Eyebrow'
 import { Section } from '@/components/ui/Section'
@@ -31,13 +31,13 @@ export function ProjectHead({ project: p }: { project: Project }) {
         <div className="border-b border-line pb-4">
           {/* no station tick: the line is born lower, on the datum */}
           <Eyebrow numbered={false} station={false}>
-            <Link
+            <SiteLink
               to={`/${locale}/projects`}
               className="inline-flex min-h-11 items-center gap-3 text-fg focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[rgb(var(--accent-ink))]"
             >
               <span aria-hidden="true">←</span>
               <span className="link-draw">{t('project.backToProjects')}</span>
-            </Link>
+            </SiteLink>
           </Eyebrow>
         </div>
 

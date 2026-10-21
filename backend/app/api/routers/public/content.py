@@ -44,7 +44,8 @@ async def get_project(slug: str, repo: RepoDep, mapper: MapperDep) -> ProjectRea
     project = await repo.project_by_slug(slug)
     if project is None:
         raise HTTPException(404, "Project not found")
-    return mapper.project(project)
+    prev, next_ = await repo.project_neighbors(project)
+    return mapper.project(project, prev, next_)
 
 
 @router.get("/people", response_model=list[PersonRead])

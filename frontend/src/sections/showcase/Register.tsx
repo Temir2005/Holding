@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link } from 'react-router-dom'
+import { SiteLink } from '@/components/ui/SiteLink'
 import type { ProjectCard as Project } from '@/api/types'
 import { ClipReveal } from '@/components/motion/ClipReveal'
 import { Frame } from '@/components/ui/Frame'
@@ -138,7 +138,7 @@ function Row({ project: p, index, active, dense, locale, onActivate }: RowProps)
         </span>
 
         <h3 className="text-subtitle font-semibold [overflow-wrap:anywhere] lg:col-start-2 lg:row-start-1">
-          <Link
+          <SiteLink
             to={projectHref(locale, p.slug)}
             className="after:absolute after:inset-0 after:content-[''] focus-visible:outline-none"
           >
@@ -152,7 +152,7 @@ function Row({ project: p, index, active, dense, locale, onActivate }: RowProps)
             >
               {p.title}
             </span>
-          </Link>
+          </SiteLink>
         </h3>
 
         <div className="flex flex-col gap-2 lg:col-span-3 lg:col-start-2 lg:row-start-2 lg:flex-row lg:flex-wrap lg:items-center lg:justify-between lg:gap-x-6">

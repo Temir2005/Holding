@@ -1,4 +1,3 @@
-import { useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useLocation } from 'react-router-dom'
 import type { SiteSettings } from '@/api/types'
@@ -27,15 +26,14 @@ const intoStamp: TraceBranches = (box) => {
  */
 export function Footer({ settings }: { settings: SiteSettings | undefined }) {
   const { t } = useTranslation()
-  const ref = useRef<HTMLElement>(null)
   const { pathname } = useLocation()
   if (!settings) return null
   const { contacts, footer, socials, navigation, site_name: name } = settings
   const sheet = sheetOf(navigation, pathname)
 
   return (
-    <footer ref={ref} id="footer" className="tone-dark sheet relative pb-10 pt-16 md:pt-24">
-      <TraceSegment target={ref} path={toStamp} branches={intoStamp} />
+    <footer id="footer" className="tone-dark sheet relative pb-10 pt-16 md:pt-24">
+      <TraceSegment path={toStamp} branches={intoStamp} />
       <div className="mx-auto max-w-sheet pl-pad-l pr-pad-r">
         <div className="relative border border-line-strong">
           <div className="grid gap-12 p-6 md:p-10 lg:grid-cols-12 lg:gap-x-gap">
@@ -79,7 +77,7 @@ export function Footer({ settings }: { settings: SiteSettings | undefined }) {
                   href={whatsappHref(contacts.whatsapp)}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="link-draw w-fit"
+                  className="link-draw hit-area w-fit"
                 >
                   {t('contacts.whatsapp')}
                 </a>
@@ -93,7 +91,7 @@ export function Footer({ settings }: { settings: SiteSettings | undefined }) {
                         href={s.url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="mono-label link-draw text-fg"
+                        className="mono-label link-draw hit-area text-fg"
                       >
                         {s.type}
                       </a>

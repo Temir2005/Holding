@@ -50,6 +50,17 @@
     outline-offset: 3px;
     border-radius: 1px;
   }
+  /* Reduced motion = opacity only, for every state change: hover and focus transitions keep
+     fading colours and opacity, while transforms, clips and drawn underlines change at once. */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    ::before,
+    ::after {
+      transition-property:
+        opacity, color, background-color, border-color, outline-color, fill, stroke,
+        visibility !important;
+    }
+  }
   [id] {
     scroll-margin-top: calc(var(--header-h) + 1rem);
   }
@@ -97,6 +108,37 @@
     background-size:
       100% 1px,
       100% 1px;
+  }
+  .link-draw:active,
+  :is(a, button):active > .link-draw {
+    /* the pen presses: the stroke gets heavier for the moment of the click */
+    background-size:
+      100% 2px,
+      100% 1px;
+  }
+  /* A menu item: the pen draws the line under it on hover and focus; the current page keeps
+     the line (NavLinks). Sits at the bottom of the link, where the current page has it. */
+  .nav-pen {
+    background: linear-gradient(rgb(var(--trace)), rgb(var(--trace))) 0 100% / 0 1px no-repeat;
+    transition:
+      background-size var(--dur-3) var(--ease-out),
+      color var(--dur-1);
+  }
+  .nav-pen:hover,
+  .nav-pen:focus-visible {
+    background-size: 100% 1px;
+  }
+  /* A small standalone link (mono caption) gets a hit area of at least 24px (WCAG 2.5.8)
+     without changing how it looks or where its underline sits. */
+  .hit-area {
+    position: relative;
+  }
+  .hit-area::after {
+    content: '';
+    position: absolute;
+    inset: 50% -4px auto;
+    height: max(100%, 24px);
+    transform: translateY(-50%);
   }
   /* The sheet of a section (components/ui/Section). */
   .sheet {
@@ -204,6 +246,77 @@
 @layer utilities {
   .text-accent-ink {
     color: rgb(var(--accent-ink));
+  }
+}
+
+/*
+ * Page change (SiteLink, NavLinks → a view transition): the new sheet is laid over the old one
+ * from the top edge while the old one fades; the header is a group of its own and stays.
+ * Reduced motion: a short cross-fade, nothing moves. No support: the page changes at once.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-old(root) {
+    animation: sheet-out var(--dur-2) var(--ease-out) both;
+  }
+  ::view-transition-new(root) {
+    animation: sheet-in var(--dur-3) var(--ease-out) both;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation-duration: var(--dur-1);
+  }
+}
+@keyframes sheet-out {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes sheet-in {
+  from {
+    clip-path: inset(0 0 100% 0);
+  }
+  to {
+    clip-path: inset(0);
+  }
+}
+
+/* Micro-interactions (transform, clip and opacity only: nothing moves the layout). */
+@keyframes stamp-in {
+  from {
+    transform: scale(0);
+  }
+}
+@keyframes draw-in {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0);
+  }
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes pen-run {
+  0% {
+    transform: scaleX(0);
+    transform-origin: left;
+  }
+  50% {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+  50.01% {
+    transform-origin: right;
+  }
+  100% {
+    transform: scaleX(0);
+    transform-origin: right;
   }
 }
 

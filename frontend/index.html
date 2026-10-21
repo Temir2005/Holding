@@ -3,9 +3,55 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#0C1C27" />
+    <meta name="theme-color" content="#141413" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <title>MegaSmart</title>
+    <script>
+      // Early start (src/api/boot.ts): the API calls of this URL and the first-screen image
+      // begin while the app bundle is still downloading, instead of after it has run.
+      ;(function () {
+        try {
+          var parts = location.pathname.split('/')
+          var locale = parts[1]
+          if (!/^(ru|kk|en)$/.test(locale)) return
+          var q = '?locale=' + locale
+          var get = function (path) {
+            return fetch('/api/v1' + path + q, { headers: { Accept: 'application/json' } }).then(
+              function (res) {
+                if (!res.ok) throw new Error(String(res.status))
+                return res.json()
+              },
+            )
+          }
+          var preload = function (media) {
+            if (!media || !media.url) return
+            var link = document.createElement('link')
+            link.rel = 'preload'
+            link.as = 'image'
+            link.href = media.url
+            link.setAttribute('fetchpriority', 'high')
+            document.head.appendChild(link)
+          }
+          var data = { settings: get('/settings') }
+          if (parts[2] === 'projects' && parts[3] && !parts[4]) {
+            data['project:' + parts[3]] = get('/projects/' + parts[3]).then(function (p) {
+              preload(p.cover)
+              return p
+            })
+          } else if (!parts[3] && parts[2] !== 'preview') {
+            data['page:' + (parts[2] || 'home')] = get('/pages/' + (parts[2] || 'home')).then(
+              function (page) {
+                var first = page.sections && page.sections[0]
+                if (first && first.type === 'hero') preload(first.data.background)
+                return page
+              },
+            )
+          }
+          for (var key in data) data[key].catch(function () {})
+          window.__boot = { locale: locale, data: data }
+        } catch (e) {}
+      })()
+    </script>
   </head>
   <body class="tone-dark">
     <div id="root"></div>

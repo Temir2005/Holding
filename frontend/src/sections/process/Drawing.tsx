@@ -1,4 +1,4 @@
-import { motion, useTransform, type MotionValue } from 'framer-motion'
+import { m, useTransform, type MotionValue } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/cn'
 
@@ -116,14 +116,14 @@ export function Drawing({ progress, n }: { progress: MotionValue<number>; n: num
       {PARTS.map(([kind, d], k) => (
         <Part key={k} kind={kind} d={d} range={partRange(k, n)} progress={progress} />
       ))}
-      <motion.text
+      <m.text
         x="402"
         y="330"
         style={{ opacity: level }}
         className="fill-fg-mute font-mono text-[11px] tracking-[0.04em]"
       >
         {t('sheet.datum')}
-      </motion.text>
+      </m.text>
     </svg>
   )
 }
@@ -141,7 +141,7 @@ function Part({
 }) {
   const drawn = useTransform(progress, range, [0, 1])
   return (
-    <motion.path
+    <m.path
       d={d}
       fill="none"
       // butt caps: a part that has not started yet leaves no dot

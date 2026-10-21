@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react'
-import { Link } from 'react-router-dom'
+import { SiteLink } from './SiteLink'
 import { resolveHref } from '@/lib/href'
 import { type ButtonVariant, buttonClass } from '@/lib/button'
 import { cn } from '@/lib/cn'
@@ -37,9 +37,9 @@ export function CmsLink({ href, children, variant = 'primary', className, plain 
   )
   if (target.kind === 'internal') {
     return (
-      <Link to={target.to} className={cls}>
+      <SiteLink to={target.to} className={cls}>
         {body}
-      </Link>
+      </SiteLink>
     )
   }
   return (

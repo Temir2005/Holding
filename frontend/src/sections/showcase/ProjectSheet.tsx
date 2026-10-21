@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link } from 'react-router-dom'
+import { SiteLink } from '@/components/ui/SiteLink'
 import type { ProjectCard as Project } from '@/api/types'
 import { ClipReveal } from '@/components/motion/ClipReveal'
 import { DimensionLine } from '@/components/ui/DimensionLine'
@@ -62,9 +62,9 @@ export function ProjectSheet({ project: p, index, flip }: Props) {
           </span>
         </p>
         <h3 className="text-[clamp(2rem,1.2rem+2.4vw,3.5rem)] font-heading leading-none tracking-[-0.035em] [overflow-wrap:anywhere]">
-          <Link to={projectHref(locale, p.slug)} className="link-draw">
+          <SiteLink to={projectHref(locale, p.slug)} className="link-draw">
             {p.title}
-          </Link>
+          </SiteLink>
         </h3>
         {p.short_description && <p className="max-w-[46ch] text-fg-mute">{p.short_description}</p>}
 

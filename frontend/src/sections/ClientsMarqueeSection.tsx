@@ -1,4 +1,4 @@
-import { motion, useReducedMotion } from 'framer-motion'
+import { m, useReducedMotion } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 import type { Client, Tone } from '@/api/types'
 import { Section } from '@/components/ui/Section'
@@ -151,7 +151,7 @@ function Cell({ client, index, column, tone }: CellProps) {
   const cls =
     'group relative isolate grid h-full min-h-36 grid-cols-[minmax(0,1fr)] grid-rows-[auto_1fr_auto] gap-2 p-3 sm:p-4 md:min-h-44 md:p-5 focus-visible:outline-offset-[-3px]'
   return (
-    <motion.li
+    <m.li
       className="border-b border-r border-line"
       initial={{ opacity: 0 }}
       whileInView={{ opacity: 1 }}
@@ -170,7 +170,7 @@ function Cell({ client, index, column, tone }: CellProps) {
       ) : (
         <div className={cls}>{body}</div>
       )}
-    </motion.li>
+    </m.li>
   )
 }
 

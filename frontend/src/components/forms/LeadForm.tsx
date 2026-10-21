@@ -37,6 +37,9 @@ export function LeadForm({ leadTypes, defaultType, consentText, successText }: P
   const [type, setType] = useState<LeadType>(defaultType)
   const [errors, setErrors] = useState<Errors>({})
   const successRef = useRef<HTMLDivElement>(null)
+  // height of the form at submit: the confirmation keeps it, so the footer does not jump up
+  // when the answer arrives (a shift that late after the click would count as CLS)
+  const formHeight = useRef(0)
 
   // The form is replaced by the confirmation: move focus there so keyboard users are not lost.
   useEffect(() => {
@@ -62,6 +65,7 @@ export function LeadForm({ leadTypes, defaultType, consentText, successText }: P
       return
     }
 
+    formHeight.current = e.currentTarget.offsetHeight
     mutation.mutate({
       name: name ?? '',
       phone,
@@ -80,11 +84,18 @@ export function LeadForm({ leadTypes, defaultType, consentText, successText }: P
         ref={successRef}
         role="status"
         tabIndex={-1}
-        className="flex flex-col items-start gap-8 border-t border-fg pt-8 focus:outline-none"
+        style={{ minHeight: formHeight.current || undefined }}
+        className="flex flex-col items-start justify-center gap-8 border-t border-fg py-8 focus:outline-none"
       >
+        {/* the square is stamped, then the text is drawn in (transform and clip only) */}
         <p className="flex items-start gap-4 text-subtitle font-medium">
-          <span aria-hidden="true" className="mt-[0.4em] h-3 w-3 flex-none bg-trace" />
-          {successText}
+          <span
+            aria-hidden="true"
+            className="mt-[0.4em] h-3 w-3 flex-none animate-[stamp-in_var(--dur-3)_var(--ease-out)_both] bg-trace motion-reduce:animate-none"
+          />
+          <span className="animate-[draw-in_var(--dur-4)_var(--ease-out)_120ms_both] motion-reduce:animate-[fade-in_var(--dur-2)_linear_both]">
+            {successText}
+          </span>
         </p>
         <button type="button" className={buttonClass('secondary')} onClick={() => mutation.reset()}>
           {t('form.again')}
@@ -112,7 +123,9 @@ export function LeadForm({ leadTypes, defaultType, consentText, successText }: P
                     'relative flex min-h-14 flex-1 basis-[9rem] cursor-pointer items-center gap-3 border-b border-r border-line px-3 sm:basis-[10.5rem] sm:px-4',
                     'font-mono text-caption font-medium uppercase transition-colors duration-1',
                     'has-[:focus-visible]:z-10 has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:-outline-offset-2 has-[:focus-visible]:outline-[rgb(var(--accent-ink))]',
-                    on ? 'bg-surface-2 text-fg' : 'text-fg-mute hover:text-fg',
+                    on
+                      ? 'bg-surface-2 text-fg'
+                      : 'text-fg-mute hover:text-fg active:bg-surface-2/60',
                   )}
                 >
                   <input
@@ -128,7 +141,9 @@ export function LeadForm({ leadTypes, defaultType, consentText, successText }: P
                     aria-hidden="true"
                     className={cn(
                       'h-2.5 w-2.5 flex-none border transition-colors duration-1',
-                      on ? 'border-trace bg-trace' : 'border-current',
+                      on
+                        ? 'animate-[stamp-in_var(--dur-2)_var(--ease-out)] border-trace bg-trace motion-reduce:animate-none'
+                        : 'border-current',
                     )}
                   />
                   {t(`form.types.${lt}`)}
@@ -203,10 +218,24 @@ export function LeadForm({ leadTypes, defaultType, consentText, successText }: P
         <button
           type="submit"
           disabled={mutation.isPending}
-          className={buttonClass('primary', 'w-full sm:w-auto sm:self-start')}
+          className={buttonClass(
+            'primary',
+            // sending is not «disabled»: the button keeps its colour while the pen runs
+            cn(
+              'relative w-full sm:w-auto sm:self-start',
+              mutation.isPending && 'cursor-progress disabled:opacity-100',
+            ),
+          )}
         >
           <span>{mutation.isPending ? t('form.sending') : t('form.submit')}</span>
           <DimArrow />
+          {/* while sending, the pen runs along the bottom edge (the text says it as well) */}
+          {mutation.isPending && (
+            <span
+              aria-hidden="true"
+              className="absolute inset-x-0 bottom-0 h-0.5 origin-left animate-[pen-run_1.2s_var(--ease-in-out)_infinite] bg-trace motion-reduce:animate-none"
+            />
+          )}
         </button>
         <p aria-live="polite" className="sr-only">
           {mutation.isPending ? t('form.sending') : ''}

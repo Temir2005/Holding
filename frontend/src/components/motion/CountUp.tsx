@@ -1,6 +1,8 @@
-import { animate, useInView, useReducedMotion } from 'framer-motion'
+import { useInView, useReducedMotion } from 'framer-motion'
 import { useEffect, useRef, useState } from 'react'
-import { DUR, EASE_OUT } from '@/lib/motion'
+import { cubicBezier, DUR, EASE_OUT } from '@/lib/motion'
+
+const ease = cubicBezier(EASE_OUT)
 
 type Props = {
   value: number
@@ -25,13 +27,17 @@ export function CountUp({ value, format, className }: Props) {
 
   useEffect(() => {
     if (!inView || reduce) return
-    const controls = animate(0, value, {
-      duration: DUR.draw * 1.2,
-      ease: EASE_OUT,
-      onUpdate: (n) => setShown(Math.round(n)),
-      onComplete: () => setShown(null),
+    // counted by hand on animation frames: one number does not need the animation engine
+    const duration = DUR.draw * 1.2 * 1000
+    let start: number | null = null
+    let frame = requestAnimationFrame(function step(now) {
+      start ??= now
+      const p = Math.min(1, (now - start) / duration)
+      if (p >= 1) return setShown(null)
+      setShown(Math.round(ease(p) * value))
+      frame = requestAnimationFrame(step)
     })
-    return () => controls.stop()
+    return () => cancelAnimationFrame(frame)
   }, [inView, reduce, value])
 
   const counting = shown !== null

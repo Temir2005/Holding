@@ -52,7 +52,7 @@ export function ContactFormSection({ section }: SectionProps<'contact_form'>) {
                         href={whatsappHref(wa)}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="mono-label link-draw text-fg"
+                        className="mono-label link-draw hit-area text-fg"
                       >
                         {t('contacts.whatsapp')}
                         <span aria-hidden="true"> ↗</span>

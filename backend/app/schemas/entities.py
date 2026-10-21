@@ -97,9 +97,19 @@ class ProjectCard(BaseModel):
     division: DivisionRef | None
 
 
+class ProjectNeighbor(BaseModel):
+    """The project before or after this one in the editors' order (published only)."""
+
+    slug: str
+    title: str
+
+
 class ProjectRead(ProjectCard):
     body: str
     gallery: list[MediaRead]
+    # no wrap-around: the first project has no `prev`, the last has no `next`
+    prev: ProjectNeighbor | None = None
+    next: ProjectNeighbor | None = None
 
 
 class PersonRead(BaseModel):

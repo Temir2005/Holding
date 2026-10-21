@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link } from 'react-router-dom'
+import { SiteLink } from '@/components/ui/SiteLink'
 import { DimensionLine } from '@/components/ui/DimensionLine'
 import { Frame } from '@/components/ui/Frame'
 import { Section } from '@/components/ui/Section'
@@ -103,10 +103,10 @@ export function NotFoundPage() {
       title={t('states.notFoundTitle')}
       text={t('states.notFoundText')}
       action={
-        <Link to={`/${locale}`} className={buttonClass('primary')}>
+        <SiteLink to={`/${locale}`} className={buttonClass('primary')}>
           <span>{t('nav.home')}</span>
           <DimArrow />
-        </Link>
+        </SiteLink>
       }
     />
   )

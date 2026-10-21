@@ -3,7 +3,7 @@
  * Dev only: the route is registered under import.meta.env.DEV, so this chunk is not built for
  * production. Also the bench of the line contract: shuffle the sheets and the line must not break.
  */
-import { motion, useTransform } from 'framer-motion'
+import { m, useTransform } from 'framer-motion'
 import { useMemo, useRef, useState, type ReactNode } from 'react'
 import type { Tone } from '@/api/types'
 import { ClipReveal } from '@/components/motion/ClipReveal'
@@ -278,9 +278,7 @@ function PinnedDemo() {
               </li>
             ))}
           </ol>
-          {pinned && (
-            <motion.div className="mt-10 h-px origin-left bg-trace" style={{ scaleX: bar }} />
-          )}
+          {pinned && <m.div className="mt-10 h-px origin-left bg-trace" style={{ scaleX: bar }} />}
         </div>
       </section>
     </>

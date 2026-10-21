@@ -36,7 +36,8 @@ export function ProjectBody({ project: p }: { project: Project }) {
         )}
         {body && (
           <Reveal className="min-w-0 lg:col-span-7 lg:col-start-5">
-            <Markdown variant="sheet">{body}</Markdown>
+            {/* the project title is the page h1: the description starts at h2 */}
+            <Markdown headingFloor={2}>{body}</Markdown>
           </Reveal>
         )}
       </div>

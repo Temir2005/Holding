@@ -1,4 +1,4 @@
-import { motion, useReducedMotion } from 'framer-motion'
+import { m, useReducedMotion } from 'framer-motion'
 import type { ReactNode } from 'react'
 import { cn } from '@/lib/cn'
 import { DUR, EASE_OUT } from '@/lib/motion'
@@ -16,7 +16,7 @@ export function DimensionLine({ label, className, grow = true }: Props) {
   const reduce = useReducedMotion()
   const animate = grow && !reduce
   return (
-    <motion.div
+    <m.div
       className={cn('flex items-center gap-2 text-fg-mute', className)}
       // Drawn from the start like a pen stroke; clip-path keeps the label from squeezing.
       initial={animate ? { clipPath: 'inset(0 100% 0 0)' } : false}
@@ -31,7 +31,7 @@ export function DimensionLine({ label, className, grow = true }: Props) {
       )}
       {label != null && <span aria-hidden="true" className="h-px flex-1 bg-current" />}
       <End side="end" />
-    </motion.div>
+    </m.div>
   )
 }
 
