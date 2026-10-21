@@ -2,7 +2,7 @@
 # Lighthouse (mobile, default throttling) on the production build: the static build behind
 # Caddy (frontend/Dockerfile.prod) with the API and MinIO, seeded from scratch, in its own
 # throwaway compose project `megasmart-lh` (the e2e-prod files). Removed afterwards, its own
-# volumes only. Three runs per page; reports in design/stage-5/lighthouse, medians printed.
+# volumes and built images only. Three runs per page; reports in design/stage-5/lighthouse, medians printed.
 #   design/tools/lighthouse.sh            # up, seed, measure, down
 #   KEEP=1 design/tools/lighthouse.sh     # leave the stack up; a second KEEP=1 run rebuilds
 #                                         # only `web` (the build) and measures again
@@ -13,8 +13,12 @@ set -eu
 cd "$(dirname "$0")/../.."
 OUT=design/stage-5/lighthouse
 P="docker compose -p megasmart-lh -f infra/docker-compose.yml -f infra/docker-compose.e2e.yml -f infra/docker-compose.e2e-prod.yml --env-file .env.example"
-if [ -n "${DOWN:-}" ]; then $P --profile e2e down -v --remove-orphans; exit 0; fi
-if [ -z "${KEEP:-}" ]; then trap '$P --profile e2e down -v --remove-orphans >/dev/null 2>&1' EXIT; fi
+# down: this project's containers, volumes and the images it built (pulled images stay)
+SINCE=$(date -u +%Y-%m-%dT%H:%M:%S)
+DOWN_ALL="$P --profile e2e down -v --rmi local --remove-orphans"
+CLEAN="$DOWN_ALL; infra/prune-built-images.sh $SINCE"
+if [ -n "${DOWN:-}" ]; then $DOWN_ALL; exit 0; fi
+if [ -z "${KEEP:-}" ]; then trap 'eval "$CLEAN" >/dev/null 2>&1' EXIT; fi
 if [ -n "${KEEP:-}" ] && [ -n "$($P ps -q backend 2>/dev/null)" ]; then
   $P up -d --build --wait web
 else

@@ -75,19 +75,22 @@ e2e:
 
 # Smoke tests of the production build (frontend/e2e/*.prod.ts, playwright.prod.config.ts):
 # the static build behind Caddy as it ships, without the dev server and StrictMode. Same
-# isolation as `make e2e`, its own compose project, removed afterwards. Pass args via ARGS.
+# isolation as `make e2e`, its own compose project, removed afterwards together with the
+# images it built (`--rmi local`, then the untagged build stages of this run:
+# infra/prune-built-images.sh; pulled and older images stay). Pass args via ARGS.
 E2E_PROD_COMPOSE := docker compose -p megasmart-e2e-prod -f infra/docker-compose.yml \
 	-f infra/docker-compose.e2e.yml -f infra/docker-compose.e2e-prod.yml --env-file .env.example
 
 e2e-prod:
-	@status=0; \
+	@status=0; since=$$(date -u +%Y-%m-%dT%H:%M:%S); \
 	$(E2E_PROD_COMPOSE) up -d --build --wait postgres minio backend web && \
 	$(E2E_PROD_COMPOSE) run --rm --no-deps frontend true && \
 	$(E2E_PROD_COMPOSE) exec -T backend alembic upgrade head && \
 	$(E2E_PROD_COMPOSE) exec -T backend python -m seed.run && \
 	$(E2E_PROD_COMPOSE) run --rm e2e-prod npx playwright test -c playwright.prod.config.ts $(ARGS) \
 		|| status=$$?; \
-	$(E2E_PROD_COMPOSE) --profile e2e down -v --remove-orphans; \
+	$(E2E_PROD_COMPOSE) --profile e2e down -v --rmi local --remove-orphans; \
+	infra/prune-built-images.sh "$$since"; \
 	exit $$status
 
 gen-types:

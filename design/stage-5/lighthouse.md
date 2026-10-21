@@ -2,9 +2,9 @@
 
 Lighthouse 13.5.0, mobile (Moto G Power, медленный 4G, симуляция), прод-сборка за Caddy с API и MinIO
 на сидах (`design/tools/lighthouse.sh`: свой compose-проект `megasmart-lh`, удаляется после замера).
-По 5 прогонов на страницу, в таблице медиана. Отчёты медианных прогонов лежат рядом:
-`home-4x.report.html`, `project-4x.report.html`, `*-calibrated.report.json` (их открывает
-[Lighthouse Viewer](https://googlechrome.github.io/lighthouse/viewer/)).
+По 5 прогонов на страницу, в таблице медиана. Сами отчёты (`lighthouse/*.report.*`) в репозиторий
+не входят: их заново создаёт `design/tools/lighthouse.sh`, JSON открывает
+[Lighthouse Viewer](https://googlechrome.github.io/lighthouse/viewer/).
 
 ## Почему два режима
 Замедление CPU по умолчанию (4×) рассчитано на хост с benchmarkIndex около 1500–2000. VM colima
@@ -41,8 +41,9 @@ Lighthouse 13.5.0, mobile (Moto G Power, медленный 4G, симуляци
 ## Что не зависит от кода сайта
 - **BP 81**: только `is-on-https` (стенд по http).
 - **SEO 58**: `is-crawlable` — Caddy ставит `X-Robots-Tag: noindex, nofollow` (прототип скрыт от
-  поиска намеренно, переменная `ROBOTS`); `robots-txt` — файла нет, SPA отдаёт вместо него
-  `index.html`.
+  поиска намеренно); `robots-txt` — файла не было, SPA отдавала вместо него `index.html`. После
+  этапа 5 оба управляются `SITE_INDEXING` (`docs/architecture.md`, «Деплой»): `robots.txt` есть
+  всегда, при `false` он закрывает сайт, при `true` открывает.
 - **LCP > 2,5 с**: на главной и в проекте LCP — первая картинка. Её вес (73 КБ JPEG оригинального
   размера на телефоне) упирается в отсутствие адаптивных вариантов: `buildImageUrl` пока отдаёт
   оригинал, image-proxy запланирован.

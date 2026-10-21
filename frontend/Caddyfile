@@ -1,7 +1,9 @@
 # Env:
 #   PORT          port to listen on (Railway sets it)
 #   API_UPSTREAM  backend base URL, e.g. http://backend.railway.internal:8000
-#   ROBOTS        X-Robots-Tag value; "noindex, nofollow" keeps the prototype out of search
+#   SITE_INDEXING "true" opens the site to search engines: robots.txt allows crawling and
+#                 points at /sitemap.xml, no X-Robots-Tag. Anything else (default "false")
+#                 keeps it out: robots.txt disallows everything, every response says noindex.
 {
 	admin off
 	auto_https off
@@ -17,7 +19,28 @@
 
 :{$PORT:8080} {
 	encode zstd gzip
-	header X-Robots-Tag "{$ROBOTS:noindex, nofollow}"
+
+	# Search engines: only the exact value "true" opens the site (unset = closed).
+	@indexing expression `{env.SITE_INDEXING} == 'true'`
+	@hidden expression `{env.SITE_INDEXING} != 'true'`
+	header @hidden X-Robots-Tag "noindex, nofollow"
+
+	handle /robots.txt {
+		header Content-Type "text/plain; charset=utf-8"
+		# The site is served over https only (Railway terminates TLS in front of Caddy).
+		respond @indexing <<TXT
+			User-agent: *
+			Allow: /
+
+			Sitemap: https://{http.request.host}/sitemap.xml
+
+			TXT 200
+		respond <<TXT
+			User-agent: *
+			Disallow: /
+
+			TXT 200
+	}
 
 	handle /api/* {
 		reverse_proxy {$API_UPSTREAM} {

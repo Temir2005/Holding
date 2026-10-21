@@ -33,3 +33,6 @@ backend/seed/photos/
 
 # Candidate fonts for the redesign prototypes: restored by design/tools/fonts.sh
 design/concepts/_shared/fonts/
+
+# Lighthouse reports (design/tools/lighthouse.sh): regenerated, only the summary is committed
+design/**/lighthouse/*.report.*
