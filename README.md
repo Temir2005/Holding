@@ -14,6 +14,8 @@ make seed      # загрузить картинки в MinIO и тестовы�
 docker compose -f infra/docker-compose.yml --env-file .env exec backend python -m app.cli create-admin --email you@example.com --name "Имя"
 ```
 
+После `git pull` достаточно снова `make up`: если изменились зависимости фронтенда (`package-lock.json`), контейнер сам переустановит их при старте, это займёт около минуты. Без изменений старт не замедляется. Переустановить вручную — `make deps`.
+
 Через пару минут:
 
 | Что | Адрес |
@@ -30,6 +32,7 @@ docker compose -f infra/docker-compose.yml --env-file .env exec backend python -
 | Команда | Что делает |
 |---|---|
 | `make up` / `make down` | запустить / остановить |
+| `make deps` | переустановить зависимости фронтенда (обычно не нужно: `make up` делает это сам) |
 | `make logs` | логи бэкенда и фронтенда |
 | `make migrate` | применить миграции |
 | `make seed` | тестовый контент (только в пустую базу) |

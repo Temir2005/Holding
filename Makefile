@@ -2,7 +2,7 @@ COMPOSE := docker compose -f infra/docker-compose.yml --env-file .env
 BACKEND := $(COMPOSE) exec backend
 FRONTEND := $(COMPOSE) exec frontend
 
-.PHONY: env up down logs migrate seed seed-force demo-photos lint test e2e e2e-prod gen-types fmt reset
+.PHONY: env up down deps logs migrate seed seed-force demo-photos lint test e2e e2e-prod gen-types fmt reset
 
 env:
 	@test -f .env || (cp .env.example .env && echo "created .env from .env.example")
@@ -15,6 +15,14 @@ up: env
 
 down:
 	$(COMPOSE) down
+
+# Reinstalls the frontend packages into the node_modules volume from package-lock.json.
+# `make up` already does it by itself when the lock file changed (frontend/docker-entrypoint.sh);
+# this is for a volume broken some other way. Vite is stopped meanwhile and started again.
+deps: env
+	$(COMPOSE) stop frontend
+	$(COMPOSE) run --rm --no-deps -e DEPS_FORCE=1 --entrypoint sh frontend docker-entrypoint.sh
+	$(COMPOSE) up -d frontend
 
 logs:
 	$(COMPOSE) logs -f backend frontend
