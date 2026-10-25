@@ -75,7 +75,7 @@ async def test_downloads_every_slot_once_and_credits_it(tmp_path: Path) -> None:
     assert report.not_found == []
     for never in ("person-founder", "client-0", "swatch-ral-7016"):
         assert not (tmp_path / f"{never}.jpg").exists()
-    with Image.open(tmp_path / "hero-skyline.jpg") as photo:
+    with Image.open(tmp_path / "hero-holding.jpg") as photo:
         assert photo.format == "JPEG" and photo.size == (2400, 1600)
     assert all("=2400" in url for url in fake.images), "resized on the CDN"
 
@@ -88,7 +88,7 @@ async def test_downloads_every_slot_once_and_credits_it(tmp_path: Path) -> None:
 
     credits = (tmp_path / fp.CREDITS).read_text()
     assert "Перед публикацией сайта заменить портреты команды" in credits
-    assert "| `office` | [pexels:" in credits and "Pexels License" in credits
+    assert "| `office-team` | [pexels:" in credits and "Pexels License" in credits
     assert "person-founder" in credits and "| `person-founder` |" not in credits
 
     # The next run keeps everything and makes no requests.
@@ -102,19 +102,19 @@ async def test_downloads_every_slot_once_and_credits_it(tmp_path: Path) -> None:
 async def test_replace_takes_the_next_result(tmp_path: Path) -> None:
     fake = FakePexels()
     await fp.fetch_photos(fake.provider(), tmp_path, [])
-    first = fp.State.load(tmp_path / fp.SOURCES).slots["office"].id
-    untouched = (tmp_path / "office-2.jpg").stat().st_mtime_ns
+    first = fp.State.load(tmp_path / fp.SOURCES).slots["office-team"].id
+    untouched = (tmp_path / "dev-land.jpg").stat().st_mtime_ns
     fake.images.clear()
 
-    await fp.fetch_photos(fake.provider(), tmp_path, ["office"])
+    await fp.fetch_photos(fake.provider(), tmp_path, ["office-team"])
     state = fp.State.load(tmp_path / fp.SOURCES)
-    second = state.slots["office"].id
-    assert second != first and state.rejected["office"] == [first]
+    second = state.slots["office-team"].id
+    assert second != first and state.rejected["office-team"] == [first]
     assert len(fake.images) == 1
-    assert (tmp_path / "office-2.jpg").stat().st_mtime_ns == untouched
+    assert (tmp_path / "dev-land.jpg").stat().st_mtime_ns == untouched
 
-    await fp.fetch_photos(fake.provider(), tmp_path, ["office"])
-    third = fp.State.load(tmp_path / fp.SOURCES).slots["office"].id
+    await fp.fetch_photos(fake.provider(), tmp_path, ["office-team"])
+    third = fp.State.load(tmp_path / fp.SOURCES).slots["office-team"].id
     assert third not in (first, second)
 
 
@@ -140,5 +140,5 @@ async def test_every_slot_is_an_image_the_seeds_upload(
     session: AsyncSession, storage: InMemoryStorage
 ) -> None:
     await run_seed(session, storage, get_settings())
-    seeded = {key.removeprefix("seed/").removesuffix(".jpg") for key in storage.objects}
+    seeded = {key.removeprefix("seed/").rsplit(".", 1)[0] for key in storage.objects}
     assert {slot.key for slot in fp.SLOTS} <= seeded

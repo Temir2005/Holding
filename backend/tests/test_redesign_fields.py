@@ -66,7 +66,7 @@ def test_layouts_accept_only_their_values() -> None:
 def test_form_hints_of_new_fields() -> None:
     hero = HeroData.model_json_schema()["properties"]["stat_ids"]
     assert hero["title"] == "Цифры рядом с заголовком"
-    assert hero["description"] == "0–3 цифры. Пусто — hero без цифр"
+    assert hero["description"] == "0–4 цифры. Пусто — hero без цифр"
     assert hero["x-ref"] == {"kind": "stat", "many": True}
     stats = StatsData.model_json_schema()["properties"]["layout"]
     assert stats["x-enum-labels"] == {"chain": "Главная цифра и размерная цепочка", "row": "Строка"}
@@ -128,7 +128,7 @@ async def test_home_hero_expands_published_stats(
     }
     assert "stat_ids" not in hero
     assert bare["stats"] == []
-    assert set(hero) == OLD_HERO_KEYS | {"stats"}
+    assert set(hero) == OLD_HERO_KEYS | {"stats", "overlay", "theme"}
 
     assert stats_row["layout"] == "row"
     assert stats_chain["layout"] == "chain"
@@ -153,13 +153,13 @@ async def test_admin_refuses_missing_hero_stats(client: AsyncClient, editor: Adm
     assert ("body", "data", "stat_ids", 0) in locs
 
 
-async def test_public_hero_shows_at_most_three_stats(
+async def test_public_hero_shows_at_most_four_stats(
     client: AsyncClient, session: AsyncSession
 ) -> None:
     """Data saved before the limit still renders: the site cuts it, a hidden stat
     does not take a place."""
     hidden = Stat(value=0, label={"ru": "скрыто"}, context="home", is_published=False)
-    stats = [Stat(value=i, label={"ru": f"цифра {i}"}, context="home") for i in range(1, 6)]
+    stats = [Stat(value=i, label={"ru": f"цифра {i}"}, context="home") for i in range(1, 7)]
     session.add_all([hidden, *stats])
     await session.flush()
     page = Page(slug="home", title={"ru": "Главная"})
@@ -177,16 +177,16 @@ async def test_public_hero_shows_at_most_three_stats(
     res = await client.get("/api/v1/pages/home")
     assert res.status_code == 200, res.text
     hero = res.json()["sections"][0]["data"]
-    assert [s["label"] for s in hero["stats"]] == ["цифра 1", "цифра 2", "цифра 3"]
+    assert [s["label"] for s in hero["stats"]] == ["цифра 1", "цифра 2", "цифра 3", "цифра 4"]
 
 
-HERO_LIMIT_MSG = "В hero можно выбрать не больше трёх цифр"
+HERO_LIMIT_MSG = "В hero можно выбрать не больше четырёх цифр"
 
 
-async def test_admin_refuses_more_than_three_hero_stats(
+async def test_admin_refuses_more_than_four_hero_stats(
     client: AsyncClient, editor: AdminUser, session: AsyncSession
 ) -> None:
-    stats = [Stat(value=i, label={"ru": f"цифра {i}"}, context="home") for i in range(4)]
+    stats = [Stat(value=i, label={"ru": f"цифра {i}"}, context="home") for i in range(5)]
     session.add_all(stats)
     await session.commit()
     ids = [str(s.id) for s in stats]
@@ -201,11 +201,11 @@ async def test_admin_refuses_more_than_three_hero_stats(
     details = too_many.json()["error"]["details"]
     assert {"loc": ["body", "data", "stat_ids"], "msg": HERO_LIMIT_MSG} in details
 
-    three = await client.post(
-        sections, headers=h, json={"type": "hero", "data": {"stat_ids": ids[:3]}}
+    four = await client.post(
+        sections, headers=h, json={"type": "hero", "data": {"stat_ids": ids[:4]}}
     )
-    assert three.status_code == 201, three.text
-    section = three.json()
+    assert four.status_code == 201, four.text
+    section = four.json()
     res = await client.patch(
         f"{ADMIN}/sections/{section['id']}",
         headers=h,

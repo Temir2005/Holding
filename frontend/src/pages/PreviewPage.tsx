@@ -46,10 +46,7 @@ export function Component() {
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
       {content}
-      <p
-        role="status"
-        className="tone-accent fixed inset-x-0 bottom-0 z-toast border-t border-line-strong px-4 py-2 text-center font-mono text-caption font-medium uppercase"
-      >
+      <p role="status" className="preview-bar">
         {t('preview.banner')}
       </p>
     </>

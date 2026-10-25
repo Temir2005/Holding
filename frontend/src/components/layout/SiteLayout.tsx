@@ -1,19 +1,13 @@
-import { LazyMotion } from 'framer-motion'
 import { useEffect, useLayoutEffect, useRef } from 'react'
 import { Helmet } from 'react-helmet-async'
 import { useTranslation } from 'react-i18next'
 import { Navigate, Outlet, ScrollRestoration, useLocation, useParams } from 'react-router-dom'
 import { useSettings } from '@/api/queries'
 import { prefetchPath } from '@/app/prefetch'
-import { whenIdle } from '@/lib/idle'
 import { DEFAULT_LOCALE, isLocale } from '@/lib/locale'
 import { PrefetchContext } from '@/lib/prefetch'
 import { Footer } from './Footer'
 import { Header } from './Header'
-
-// After the first screen: the features would otherwise share the network with its image.
-const loadMotionFeatures = () =>
-  whenIdle().then(() => import('@/lib/motionFeatures').then((m) => m.default))
 
 /** Shell for every localized route: validates the locale and syncs i18n with the URL. */
 export function SiteLayout() {
@@ -21,6 +15,12 @@ export function SiteLayout() {
   const { t, i18n } = useTranslation()
   const valid = isLocale(locale)
   const settings = useSettings(valid ? locale : DEFAULT_LOCALE)
+
+  // site styles are scoped to body.site: the admin shares the document
+  useEffect(() => {
+    document.body.classList.add('site')
+    return () => document.body.classList.remove('site')
+  }, [])
 
   useEffect(() => {
     if (!valid) return
@@ -32,14 +32,10 @@ export function SiteLayout() {
   if (!valid) return <Navigate to={`/${DEFAULT_LOCALE}`} replace />
 
   return (
-    // `m` components animate once the features arrive; until then they show their first frame
-    <LazyMotion features={loadMotionFeatures}>
+    <>
       <PrefetchContext.Provider value={prefetchPath}>
         <Helmet htmlAttributes={{ lang: locale }} />
-        <a
-          href="#main"
-          className="tone-light fixed left-4 top-4 z-50 -translate-y-24 rounded-full px-4 py-2 focus:translate-y-0"
-        >
+        <a href="#main" className="skip">
           {t('nav.skip')}
         </a>
         <Header settings={settings.data} />
@@ -50,7 +46,7 @@ export function SiteLayout() {
         <InstantPageScroll />
         <ScrollRestoration />
       </PrefetchContext.Provider>
-    </LazyMotion>
+    </>
   )
 }
 

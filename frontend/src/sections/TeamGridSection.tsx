@@ -1,102 +1,234 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Eyebrow } from '@/components/ui/Eyebrow'
-import { Filter } from '@/components/ui/Filter'
-import { Reveal } from '@/components/ui/Reveal'
-import { Section } from '@/components/ui/Section'
-import { SectionHeader } from '@/components/ui/SectionHeader'
-import { KeyPeople } from './team/KeyPeople'
-import { divisionsOf, splitPeople } from './team/people'
-import { TeamRegister } from './team/Register'
-import { Spread } from './team/Spread'
-import { rowTicks } from './team/trace'
-import { headingId, type SectionProps } from './types'
+import type { Person } from '@/api/types'
+import { Head, Plus, Sec } from '@/components/site/kit'
+import { reduceMotion } from '@/components/site/hooks'
+import { useFlip } from '@/components/site/useFlip'
+import { SmartImage } from '@/components/ui/SmartImage'
+import type { SectionProps } from './types'
 
-const ALL = 'all'
-
-/**
- * People of the holding in three registers of loudness:
- * - the founder (mode `founder`, or anyone flagged as founder): a monograph spread;
- * - key people: an editorial grid of portraits of different sizes;
- * - the wider team: a dense register with the bio on demand.
- * `mode: all` shows the groups in this order. The division filter narrows grid and register.
- */
+/** Founder (a large portrait), key people (cards with a bio dialog) or the team with a filter. */
 export function TeamGridSection({ section }: SectionProps<'team_grid'>) {
-  const { data } = section
-  const { t } = useTranslation()
-  const [division, setDivision] = useState(ALL)
-  const groups = useMemo(() => splitPeople(data.people, data.mode), [data.people, data.mode])
-  const divisions = useMemo(() => divisionsOf([...groups.key, ...groups.rest]), [groups])
-  const title = data.title?.trim()
-  if (!data.people.length && !title) return null
+  const d = section.data
+  const first = d.people[0]
+  if (!first) return null
+  if (d.mode === 'founder') return <Founder section={section} person={first} />
+  if (d.mode === 'key') return <KeyPeople section={section} />
+  return <Crew section={section} />
+}
 
-  const id = headingId(section.id)
-  // Without a block title the first founder's name is the heading of the sheet.
-  const founderIsHeading = !title && groups.founders.length > 0
-  const showFilter = data.show_division_filter && divisions.length > 1
-  const pick = <T extends { division: { slug: string } | null }>(list: T[]) =>
-    division === ALL ? list : list.filter((p) => p.division?.slug === division)
-  const key = pick(groups.key)
-  const rest = pick(groups.rest)
-  const onlyOneKey = groups.key.length === 1 && !groups.rest.length && !groups.founders.length
+function Founder({ section, person }: SectionProps<'team_grid'> & { person: Person }) {
+  const d = section.data
+  return (
+    <Sec tone={section.tone} anchor={section.anchor}>
+      <div className="wrap founder">
+        <div className="founder__ph">
+          <SmartImage media={person.photo} fill sizes="(max-width: 860px) 100vw, 40vw" />
+        </div>
+        <div>
+          <span className="eyebrow">{d.eyebrow}</span>
+          <h2 className="h2" style={{ marginTop: 16 }}>
+            {person.full_name}
+          </h2>
+          <p className="muted" style={{ marginTop: 8, fontWeight: 600 }}>
+            {person.position}
+          </p>
+          {(d.intro || person.bio) && (
+            <p className="lead" style={{ marginTop: 24 }}>
+              {d.intro ?? person.bio}
+            </p>
+          )}
+        </div>
+      </div>
+    </Sec>
+  )
+}
+
+function KeyPeople({ section }: SectionProps<'team_grid'>) {
+  const { t } = useTranslation()
+  const d = section.data
+  const dialog = useRef<HTMLDialogElement>(null)
+  const opener = useRef<HTMLButtonElement | null>(null)
+  const [open, setOpen] = useState<Person | null>(null)
+
+  const show = (p: Person, from: HTMLButtonElement) => {
+    opener.current = from
+    setOpen(p)
+  }
+  // open after the dialog has the person's content; it grows from the card that opened it
+  useEffect(() => {
+    const dlg = dialog.current
+    if (!open || !dlg || dlg.open) return
+    dlg.showModal()
+    const r = opener.current?.getBoundingClientRect()
+    const b = dlg.getBoundingClientRect()
+    if (r)
+      dlg.style.transformOrigin = `${r.left + r.width / 2 - b.left}px ${r.top + r.height / 2 - b.top}px`
+  }, [open])
+  const close = () => {
+    const dlg = dialog.current
+    if (!dlg) return
+    if (reduceMotion()) return dlg.close()
+    dlg.classList.add('closing')
+    dlg.addEventListener(
+      'animationend',
+      () => {
+        dlg.classList.remove('closing')
+        dlg.close()
+      },
+      { once: true },
+    )
+  }
 
   return (
-    <Section
-      tone={section.tone}
-      anchor={section.anchor}
-      labelledBy={title || founderIsHeading ? id : undefined}
-      branches={rest.length ? rowTicks : undefined}
-    >
-      {title ? (
-        <SectionHeader id={id} eyebrow={data.eyebrow} title={title} intro={data.intro} />
-      ) : (
-        <Reveal className="mb-12 border-b border-line pb-4 md:mb-16">
-          <Eyebrow>{data.eyebrow}</Eyebrow>
-        </Reveal>
-      )}
-
-      {!data.people.length && (
-        <div className="plate grid min-h-32 place-items-center border-y border-line p-6">
-          <p className="mono-label text-center">{t('team.empty')}</p>
+    <Sec tone={section.tone} anchor={section.anchor}>
+      <div className="wrap">
+        <Head eyebrow={d.eyebrow} title={d.title} lead={d.intro} />
+        <div className="people">
+          {d.people.map((p) => (
+            <button
+              key={p.id}
+              className="person rv"
+              onClick={(e) => show(p, e.currentTarget)}
+              aria-haspopup="dialog"
+            >
+              <span className="person__ph" style={{ display: 'block' }}>
+                <SmartImage media={p.photo} fill sizes="(max-width: 560px) 100vw, 33vw" />
+                <span className="person__more" aria-hidden="true">
+                  <Plus />
+                </span>
+              </span>
+              <span className="h3" style={{ display: 'block', margin: '18px 0 2px' }}>
+                {p.full_name}
+              </span>
+              <span className="muted" style={{ display: 'block', fontSize: 15 }}>
+                {p.position}
+              </span>
+              {p.division && <span className="divtag">{p.division.name}</span>}
+              <span className="sr-only">{t('team.bio')}</span>
+            </button>
+          ))}
         </div>
-      )}
-
-      <div className="flex flex-col gap-24 md:gap-32">
-        {groups.founders.map((p, i) => (
-          <Spread
-            key={p.id}
-            person={p}
-            level={founderIsHeading && i === 0 ? 2 : 3}
-            headingId={founderIsHeading && i === 0 ? id : undefined}
-            flip={i % 2 === 1}
-          />
-        ))}
-
-        {(key.length > 0 || rest.length > 0) && (
-          <div className="flex flex-col gap-12 md:gap-16">
-            {showFilter && (
-              <Filter
-                label={t('team.allDivisions')}
-                value={division}
-                onChange={setDivision}
-                options={[
-                  { value: ALL, label: t('team.allDivisions') },
-                  ...divisions.map(([value, label]) => ({ value, label })),
-                ]}
-              />
-            )}
-            {/* Keyed by the filter: the people that stay are shown afresh, not shuffled. */}
-            <div key={division} className="flex flex-col gap-24 md:gap-32">
-              {onlyOneKey && key[0] ? (
-                <Spread person={key[0]} level={3} compact />
-              ) : (
-                key.length > 0 && <KeyPeople people={key} />
+      </div>
+      <dialog
+        ref={dialog}
+        className="bio"
+        aria-labelledby={`bio-${section.id}`}
+        onCancel={(e) => {
+          e.preventDefault()
+          close()
+        }}
+        onClick={(e) => e.target === dialog.current && close()}
+        onClose={() => {
+          setOpen(null)
+          opener.current?.focus()
+        }}
+      >
+        {open && (
+          <div className="bio__in">
+            <SmartImage media={open.photo} fill sizes="(max-width: 700px) 100vw, 360px" />
+            <div className="bio__txt">
+              {open.division && (
+                <span className="eyebrow" style={{ color: 'var(--on-light-2)' }}>
+                  {open.division.name}
+                </span>
               )}
-              {rest.length > 0 && <TeamRegister people={rest} />}
+              <h3
+                className="h2"
+                id={`bio-${section.id}`}
+                style={{ fontSize: 'clamp(28px,3vw,40px)' }}
+              >
+                {open.full_name}
+              </h3>
+              <p style={{ fontWeight: 600, color: 'var(--ink)' }}>{open.position}</p>
+              <p>{open.bio}</p>
+              {open.linkedin_url && (
+                <a
+                  href={open.linkedin_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn btn--ink"
+                  style={{ alignSelf: 'flex-start' }}
+                >
+                  {t('team.linkedin')}
+                </a>
+              )}
             </div>
           </div>
         )}
+        <button className="bio__close" aria-label={t('common.close')} onClick={close}>
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            aria-hidden="true"
+          >
+            <path d="M6 6l12 12M18 6L6 18" />
+          </svg>
+        </button>
+      </dialog>
+    </Sec>
+  )
+}
+
+function Crew({ section }: SectionProps<'team_grid'>) {
+  const { t } = useTranslation()
+  const d = section.data
+  const [div, setDiv] = useState<string>('all')
+  const flip = useFlip<HTMLDivElement>()
+  // the holding's own people (no division) get their own filter too
+  const NONE = '-'
+  const divisions = [
+    ...new Map(
+      d.people.map((p) => [p.division?.slug ?? NONE, p.division?.name ?? t('ui.holding')]),
+    ).entries(),
+  ]
+  const shown = d.people.filter((p) => div === 'all' || (p.division?.slug ?? NONE) === div)
+  return (
+    <Sec tone={section.tone} anchor={section.anchor}>
+      <div className="wrap">
+        <Head
+          eyebrow={d.eyebrow}
+          title={d.title}
+          lead={d.intro}
+          aside={
+            d.show_division_filter && divisions.length > 1 ? (
+              <div className="pills" role="group" aria-label={t('team.allDivisions')}>
+                <button
+                  className="pill"
+                  aria-pressed={div === 'all'}
+                  onClick={() => flip(() => setDiv('all'))}
+                >
+                  {t('common.all')}
+                </button>
+                {divisions.map(([slug, name]) => (
+                  <button
+                    key={slug}
+                    className="pill"
+                    aria-pressed={div === slug}
+                    onClick={() => flip(() => setDiv(slug))}
+                  >
+                    {name}
+                  </button>
+                ))}
+              </div>
+            ) : undefined
+          }
+        />
+        <div className="crew" ref={flip.ref}>
+          {shown.map((p) => (
+            <div key={p.id} className="mate" data-flip={p.id}>
+              <SmartImage media={p.photo} fill sizes="(max-width: 560px) 50vw, 20vw" />
+              <h3>{p.full_name}</h3>
+              <p>{p.position}</p>
+            </div>
+          ))}
+        </div>
       </div>
-    </Section>
+    </Sec>
   )
 }

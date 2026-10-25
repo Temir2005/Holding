@@ -1,137 +1,134 @@
-import { AnimatePresence, m, useReducedMotion } from 'framer-motion'
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useLocation } from 'react-router-dom'
+import { matchPath, useLocation } from 'react-router-dom'
 import type { SiteSettings } from '@/api/types'
-import { CmsLink } from '@/components/ui/Button'
+import { Arrow, CmsLink } from '@/components/site/kit'
+import { SiteLink } from '@/components/ui/SiteLink'
 import { cn } from '@/lib/cn'
-import { DUR, EASE_OUT } from '@/lib/motion'
+import { useLocale } from '@/lib/locale'
 import { LangSwitch } from './LangSwitch'
-import { Logo } from './Logo'
-import { MobileMenu } from './MobileMenu'
+import { LogoMark } from './Logo'
 import { NavLinks } from './NavLinks'
 
 /**
- * Site header: a solid graphite strip that hides while scrolling down and comes back on the way
- * up (and whenever something inside it has keyboard focus). Below 1080px the navigation moves
- * into a full-screen menu. Reduced motion: the header simply stays.
+ * Transparent over the hero, solid with blur once the page scrolls. A project page has no
+ * full-bleed photo on top, so there it is solid from the start.
  */
 export function Header({ settings }: { settings: SiteSettings | undefined }) {
   const { t } = useTranslation()
-  const [open, setOpen] = useState(false)
-  const { scrolled, hidden } = useHideOnScroll(open)
+  const locale = useLocale()
   const { pathname } = useLocation()
-  const reduce = useReducedMotion()
-  const menuButton = useRef<HTMLButtonElement>(null)
-  const items = settings?.navigation ?? []
+  const [scrolled, setScrolled] = useState(false)
+  const [open, setOpen] = useState(false)
+  const burger = useRef<HTMLButtonElement>(null)
+  const menu = useRef<HTMLDivElement>(null)
 
+  useEffect(() => {
+    const on = () => setScrolled(window.scrollY > 40)
+    on()
+    window.addEventListener('scroll', on, { passive: true })
+    return () => window.removeEventListener('scroll', on)
+  }, [])
+
+  // a page change closes the menu
   useEffect(() => setOpen(false), [pathname])
 
+  useEffect(() => {
+    if (!open) return
+    document.body.style.overflow = 'hidden'
+    menu.current?.querySelector<HTMLElement>('a, button')?.focus()
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setOpen(false)
+        burger.current?.focus()
+      }
+    }
+    window.addEventListener('keydown', onKey)
+    return () => {
+      document.body.style.overflow = ''
+      window.removeEventListener('keydown', onKey)
+    }
+  }, [open])
+
+  const name = settings?.site_name ?? 'MegaSmart'
+  const solid = scrolled || !!matchPath('/:locale/projects/:slug', pathname)
+  const close = () => setOpen(false)
+
   return (
-    <header
-      className={cn(
-        // its own view-transition group: the header stays put while the page under it changes
-        'tone-dark fixed inset-x-0 top-0 z-header border-b transition-[transform,border-color] duration-3 ease-out [view-transition-name:site-header] focus-within:translate-y-0',
-        scrolled || open ? 'border-line-strong' : 'border-transparent',
-        hidden && !reduce && '-translate-y-[101%]',
-      )}
-    >
-      <div className="mx-auto flex h-header max-w-sheet items-center gap-[clamp(16px,2.4vw,40px)] pl-pad-l pr-pad-r">
-        <Logo settings={settings} />
-        <nav aria-label="primary" className="ml-auto hidden min-[1081px]:block">
-          <NavLinks
-            items={items}
-            className="flex items-center gap-[clamp(16px,1.7vw,32px)]"
-            linkClassName="block pb-1 pt-1.5 text-sm font-medium"
-          />
-        </nav>
-        <LangSwitch className="hidden min-[1081px]:flex" />
-        {settings?.header_cta && (
-          <CmsLink
-            href={settings.header_cta.href}
-            variant="secondary"
-            className="hidden min-h-10 py-1 min-[1081px]:inline-flex"
+    <>
+      <header className={cn('hdr', solid && 'is-solid')}>
+        <div className="wrap">
+          <SiteLink to={`/${locale}`} className="logo" aria-label={`${name} — ${t('nav.home')}`}>
+            <LogoMark />
+            {name.toUpperCase()}
+          </SiteLink>
+          <nav className="nav" aria-label={t('nav.main')}>
+            {settings && <NavLinks items={settings.navigation} />}
+          </nav>
+          <LangSwitch />
+          {settings?.header_cta && (
+            <CmsLink href={settings.header_cta.href} className="btn btn--accent">
+              {settings.header_cta.label}
+            </CmsLink>
+          )}
+          <button
+            ref={burger}
+            className="burger"
+            aria-label={t('nav.menu')}
+            aria-expanded={open}
+            aria-controls="site-menu"
+            onClick={() => setOpen(true)}
           >
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              aria-hidden="true"
+            >
+              <path d="M4 8h16M4 16h16" />
+            </svg>
+          </button>
+        </div>
+      </header>
+      <div
+        ref={menu}
+        id="site-menu"
+        className={cn('menu', open && 'open')}
+        role="dialog"
+        aria-modal="true"
+        aria-label={t('nav.menu')}
+        aria-hidden={!open}
+        {...(open ? {} : { inert: '' })}
+      >
+        <button className="close" aria-label={t('nav.close')} onClick={close}>
+          <svg
+            width="24"
+            height="24"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            aria-hidden="true"
+          >
+            <path d="M6 6l12 12M18 6L6 18" />
+          </svg>
+        </button>
+        <nav aria-label={t('nav.main')}>
+          {settings && <NavLinks items={settings.navigation} onNavigate={close} />}
+        </nav>
+        <LangSwitch onNavigate={close} />
+        {settings?.header_cta && (
+          <CmsLink href={settings.header_cta.href} className="btn btn--accent" onClick={close}>
             {settings.header_cta.label}
+            <Arrow />
           </CmsLink>
         )}
-        <button
-          ref={menuButton}
-          type="button"
-          className="group/menu ml-auto inline-flex h-10 items-center gap-2.5 border border-line-strong px-4 font-mono text-caption font-medium uppercase transition-colors duration-1 hover:border-fg active:bg-surface-2 min-[1081px]:hidden"
-          aria-expanded={open}
-          aria-controls="mobile-menu"
-          onClick={() => setOpen((v) => !v)}
-        >
-          <span aria-hidden="true" className="grid w-4 gap-1">
-            <i className="h-px bg-current" />
-            {/* the red stroke runs out to the full width on hover and while the menu is open */}
-            <i
-              className={cn(
-                'h-0.5 w-2.5 origin-left bg-trace transition-transform duration-2 ease-out group-hover/menu:scale-x-[1.6]',
-                open && 'scale-x-[1.6]',
-              )}
-            />
-          </span>
-          {open ? t('nav.close') : t('nav.menu')}
-        </button>
       </div>
-
-      <AnimatePresence>
-        {open && (
-          <m.div
-            key="menu"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: reduce ? 0 : DUR.base, ease: EASE_OUT }}
-          >
-            <MobileMenu
-              settings={settings}
-              onClose={() => {
-                setOpen(false)
-                menuButton.current?.focus()
-              }}
-            />
-          </m.div>
-        )}
-      </AnimatePresence>
-    </header>
+    </>
   )
-}
-
-/** Hidden after scrolling down past the header, shown again on any scroll up. One rAF per event. */
-function useHideOnScroll(locked: boolean) {
-  const [state, setState] = useState({ scrolled: false, hidden: false })
-  useEffect(() => {
-    let last = window.scrollY
-    let frame = 0
-    const update = () => {
-      frame = 0
-      const y = window.scrollY
-      const delta = y - last
-      setState((prev) => {
-        const hidden = locked
-          ? false
-          : delta > 4 && y > 96
-            ? true
-            : delta < -4
-              ? false
-              : prev.hidden
-        const scrolled = y > 8
-        return prev.hidden === hidden && prev.scrolled === scrolled ? prev : { hidden, scrolled }
-      })
-      if (Math.abs(delta) > 4) last = y
-    }
-    const onScroll = () => {
-      if (!frame) frame = requestAnimationFrame(update)
-    }
-    update()
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => {
-      window.removeEventListener('scroll', onScroll)
-      cancelAnimationFrame(frame)
-    }
-  }, [locked])
-  return state
 }

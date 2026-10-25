@@ -67,7 +67,9 @@ class Seeder:
         override = self.photos_dir / f"{key}.jpg"
         if image.mime_type != "image/svg+xml" and key not in NO_OVERRIDE and override.is_file():
             image = photo(override)
-        ext = "svg" if image.mime_type == "image/svg+xml" else "jpg"
+        ext = {"image/svg+xml": "svg", "image/webp": "webp", "image/png": "png"}.get(
+            image.mime_type, "jpg"
+        )
         s3_key = f"seed/{key}.{ext}"
         await self.storage.upload(s3_key, image.body, image.mime_type)
         return await self.upsert(

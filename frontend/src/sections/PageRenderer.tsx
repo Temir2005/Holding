@@ -9,8 +9,8 @@ import {
 } from 'react'
 import type { Section } from '@/api/types'
 import { HashLanding } from '@/components/layout/HashLanding'
+import { AltContext } from '@/components/site/hooks'
 import { isLazySection, rendererOf } from './registry'
-import { SectionNumberContext } from './sectionNumber'
 
 /**
  * Renders CMS sections in order. Unknown or crashing sections are skipped, never fatal.
@@ -31,17 +31,18 @@ export function PageRenderer({ sections }: { sections: Section[] }) {
   })
   const split = known.findIndex((section) => isLazySection(section.type))
   const shown = useMountedCount(split < 0 ? 0 : known.length - split)
-  const rendered = known.map((section, index) => {
+  usePageTheme(known)
+  // light sections that follow each other alternate between grey and white
+  let lightRun = 0
+  const rendered = known.map((section) => {
     const Renderer = rendererOf(section.type) as ComponentType<{ section: Section }>
+    lightRun = section.tone === 'light' && !FULL_BLEED.has(section.type) ? lightRun + 1 : 0
     return (
-      <SectionNumberContext.Provider
-        key={section.id}
-        value={{ index: index + 1, total: known.length }}
-      >
+      <AltContext.Provider key={section.id} value={lightRun % 2 === 0 && lightRun > 0}>
         <SectionBoundary type={section.type}>
           <Renderer section={section} />
         </SectionBoundary>
-      </SectionNumberContext.Provider>
+      </AltContext.Provider>
     )
   })
   if (split < 0)
@@ -65,6 +66,29 @@ export function PageRenderer({ sections }: { sections: Section[] }) {
 }
 
 const RESERVE = <div aria-hidden="true" className="min-h-[100svh]" />
+
+// sections that ignore their tone and always sit on a photo or a dark map
+const FULL_BLEED = new Set([
+  'hero',
+  'contact_form',
+  'production',
+  'geography',
+  'air_routes',
+  'projects_map',
+])
+
+/** The page's palette (holding, Smart Panels, AAAG) comes from its hero; header and footer follow. */
+function usePageTheme(sections: Section[]) {
+  const hero = sections.find((s) => s.type === 'hero')
+  const theme = hero?.type === 'hero' ? hero.data.theme : 'holding'
+  useEffect(() => {
+    if (theme === 'holding') delete document.body.dataset.theme
+    else document.body.dataset.theme = theme
+    return () => {
+      delete document.body.dataset.theme
+    }
+  }, [theme])
+}
 
 /**
  * How many of `total` sections are mounted: one more each time the browser is idle (with a
@@ -103,9 +127,7 @@ class SectionBoundary extends Component<
   render() {
     if (!this.state.failed) return this.props.children
     return import.meta.env.DEV ? (
-      <div className="tone-accent p-6 font-mono text-sm">
-        Section “{this.props.type}” failed to render. See console.
-      </div>
+      <div className="p-6 text-sm">Section “{this.props.type}” failed to render. See console.</div>
     ) : null
   }
 }

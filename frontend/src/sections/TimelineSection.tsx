@@ -1,59 +1,105 @@
-import { useTranslation } from 'react-i18next'
-import { DimensionLine } from '@/components/ui/DimensionLine'
-import { Section } from '@/components/ui/Section'
-import { SectionHeader } from '@/components/ui/SectionHeader'
-import { formatNumber } from '@/lib/format'
-import { useLocale } from '@/lib/locale'
-import { Station } from './timeline/Station'
-import { headingId, type SectionProps } from './types'
+import { type CSSProperties, useEffect, useRef } from 'react'
+import { Head, Sec } from '@/components/site/kit'
+import { reduceMotion, useInView } from '@/components/site/hooks'
+import { SmartImage } from '@/components/ui/SmartImage'
+import type { TimelineEvent } from '@/api/types'
+import type { SectionProps } from './types'
 
 /**
- * History as a drawing: the red line in the margin is the axis, every event is a station on it.
- * Rows sit on the 12-column grid (year 1–4, text 5–8, frame 9–12); a vertical dimension between
- * rows measures the years between events, and the frames widen from the first event to the last,
- * so the growth reads without reading the text. The last event is the current one (ring mark).
+ * History: a vertical line fills while the page scrolls, events alternate sides with photos.
+ * Events without photos (a launch plan) become a horizontal roadmap.
  */
 export function TimelineSection({ section }: SectionProps<'timeline'>) {
-  const { data } = section
-  const { t } = useTranslation()
-  const locale = useLocale()
-  const events = data.events
-  if (!events.length && !data.title) return null
-
-  const id = headingId(section.id)
-  const years = (count: number) => t('timeline.years', { count, n: formatNumber(count, locale) })
-  const all = events.map((e) => e.year)
-  const from = Math.min(...all)
-  const to = Math.max(...all)
-
+  const d = section.data
+  const photos = d.events.some((e) => e.image)
   return (
-    <Section tone={section.tone} anchor={section.anchor} labelledBy={data.title ? id : undefined}>
-      <SectionHeader id={id} eyebrow={data.eyebrow} title={data.title} />
-      {events.length === 0 ? (
-        <p className="mono-label">{t('timeline.empty')}</p>
-      ) : (
-        <ol>
-          {events.map((event, i) => {
-            const next = events[i + 1]
-            const gap = next ? Math.abs(next.year - event.year) : 0
-            return (
-              <Station
-                key={event.id}
-                event={event}
-                index={i}
-                count={events.length}
-                interval={gap > 0 ? years(gap) : null}
-              />
-            )
-          })}
-        </ol>
+    <Sec tone={section.tone} anchor={section.anchor}>
+      <div className="wrap">
+        <Head eyebrow={d.eyebrow} title={d.title} />
+        {photos ? <History events={d.events} /> : <Roadmap events={d.events} />}
+      </div>
+    </Sec>
+  )
+}
+
+function Roadmap({ events }: { events: TimelineEvent[] }) {
+  return (
+    <ol className="road" style={{ '--n': events.length } as CSSProperties}>
+      {events.map((e, i) => (
+        <li
+          key={e.id}
+          className="road__it rv"
+          style={{ '--d': `${0.2 + i * 0.25}s` } as CSSProperties}
+        >
+          <b className="tnum">{e.year}</b>
+          <h3 className="h3">{e.title}</h3>
+          <p>{e.description}</p>
+        </li>
+      ))}
+    </ol>
+  )
+}
+
+function History({ events }: { events: TimelineEvent[] }) {
+  const root = useRef<HTMLDivElement>(null)
+  const fill = useRef<HTMLSpanElement>(null)
+  useEffect(() => {
+    const el = root.current
+    if (!el) return
+    const items = [...el.querySelectorAll<HTMLElement>('.ev')]
+    let raf = 0
+    const update = () => {
+      raf = 0
+      const r = el.getBoundingClientRect()
+      const pen = window.innerHeight * 0.6
+      const p = reduceMotion() ? 1 : Math.min(1, Math.max(0, (pen - r.top) / r.height))
+      fill.current?.style.setProperty('--p', String(p))
+      items.forEach((it) => {
+        const b = it.getBoundingClientRect()
+        it.classList.toggle('passed', b.top + b.height / 2 < pen)
+      })
+    }
+    const on = () => {
+      if (!raf) raf = requestAnimationFrame(update)
+    }
+    update()
+    window.addEventListener('scroll', on, { passive: true })
+    window.addEventListener('resize', on)
+    return () => {
+      cancelAnimationFrame(raf)
+      window.removeEventListener('scroll', on)
+      window.removeEventListener('resize', on)
+    }
+  }, [])
+  return (
+    <div className="tl" ref={root}>
+      <div className="tl__rail" aria-hidden="true">
+        <span className="tl__fill" ref={fill} />
+      </div>
+      <ol>
+        {events.map((e) => (
+          <Event key={e.id} event={e} />
+        ))}
+      </ol>
+    </div>
+  )
+}
+
+function Event({ event: e }: { event: TimelineEvent }) {
+  const [ref, seen] = useInView<HTMLLIElement>()
+  return (
+    <li ref={ref} className={seen ? 'ev in' : 'ev'}>
+      <span className="ev__dot" aria-hidden="true" />
+      <div className="ev__text">
+        <div className="ev__year">{e.year}</div>
+        <h3 className="h3 ev__title">{e.title}</h3>
+        <p>{e.description}</p>
+      </div>
+      {e.image && (
+        <div className="ev__media">
+          <SmartImage media={e.image} fill sizes="(max-width: 860px) 100vw, 45vw" />
+        </div>
       )}
-      {events.length > 1 && to > from && (
-        <DimensionLine
-          className="mt-16 md:mt-24"
-          label={t('timeline.span', { from, to, length: years(to - from) })}
-        />
-      )}
-    </Section>
+    </li>
   )
 }

@@ -1,53 +1,52 @@
+import { useRef } from 'react'
 import { useTranslation } from 'react-i18next'
-import { MoreLink } from '@/components/ui/Button'
-import { Section } from '@/components/ui/Section'
-import { SectionHeader } from '@/components/ui/SectionHeader'
-import { ProjectSheet } from './showcase/ProjectSheet'
-import { Register } from './showcase/Register'
-import { registerTicks } from './showcase/trace'
-import { headingId, type SectionProps } from './types'
+import { ArrowLeft, Arrow, CmsLink, Head, Sec } from '@/components/site/kit'
+import { ProjectCardView } from '@/components/site/ProjectCard'
+import type { SectionProps } from './types'
 
-/**
- * Featured projects, two layouts:
- * - `register`: a schedule of objects with a sticky preview (one project falls back to a sheet);
- * - `sheet`: every project as its own "project sheet", frames alternating sides.
- * The line ticks every row number as it passes.
- */
+/** Featured projects as a horizontal rail with arrows; swipe on touch. */
 export function ProjectsShowcaseSection({ section }: SectionProps<'projects_showcase'>) {
-  const { data } = section
   const { t } = useTranslation()
-  const { projects } = data
-  if (!projects.length && !data.title) return null
-  const sheets = data.layout === 'sheet' || projects.length === 1
-  const link = data.link && <MoreLink href={data.link.href}>{data.link.label}</MoreLink>
-
+  const d = section.data
+  const rail = useRef<HTMLDivElement>(null)
+  if (!d.projects.length) return null
+  const step = (dir: number) => {
+    const el = rail.current
+    const card = el?.querySelector('.card')
+    if (!el || !card) return
+    el.scrollBy({ left: dir * (card.getBoundingClientRect().width + 24), behavior: 'smooth' })
+  }
   return (
-    <Section
-      tone={section.tone}
-      anchor={section.anchor}
-      labelledBy={data.title ? headingId(section.id) : undefined}
-      branches={registerTicks}
-    >
-      <SectionHeader
-        id={headingId(section.id)}
-        eyebrow={data.eyebrow}
-        title={data.title}
-        aside={link}
-      />
-      {!projects.length ? (
-        <div className="plate grid min-h-32 place-items-center border-y border-line p-6">
-          <p className="mono-label text-center">{t('showcase.empty')}</p>
-        </div>
-      ) : sheets ? (
-        <div className="flex flex-col gap-24 md:gap-32">
-          {projects.map((p, i) => (
-            <ProjectSheet key={p.id} project={p} index={i} flip={i % 2 === 1} />
-          ))}
-        </div>
-      ) : (
-        <Register projects={projects} />
-      )}
-      {link && projects.length > 3 && <div className="mt-10 flex justify-end">{link}</div>}
-    </Section>
+    <Sec tone={section.tone} anchor={section.anchor} style={{ overflow: 'hidden' }}>
+      <div className="wrap">
+        <Head
+          eyebrow={d.eyebrow}
+          title={d.title}
+          aside={
+            <div className="ctas" style={{ marginTop: 0, alignItems: 'center' }}>
+              <button className="circ" aria-label={t('a11y.prev')} onClick={() => step(-1)}>
+                <ArrowLeft />
+              </button>
+              <button className="circ" aria-label={t('a11y.next')} onClick={() => step(1)}>
+                <Arrow />
+              </button>
+              {d.link && (
+                <CmsLink
+                  href={d.link.href}
+                  className={section.tone === 'dark' ? 'btn btn--white' : 'btn btn--ink'}
+                >
+                  {d.link.label}
+                </CmsLink>
+              )}
+            </div>
+          }
+        />
+      </div>
+      <div className="rail" ref={rail}>
+        {d.projects.map((p) => (
+          <ProjectCardView key={p.id} project={p} />
+        ))}
+      </div>
+    </Sec>
   )
 }

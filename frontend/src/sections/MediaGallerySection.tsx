@@ -1,39 +1,43 @@
+import type { CSSProperties } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Section } from '@/components/ui/Section'
-import { SectionHeader } from '@/components/ui/SectionHeader'
-import { GalleryGrid } from './gallery/GalleryGrid'
-import { GalleryStrip } from './gallery/GalleryStrip'
-import { headingId, type SectionProps } from './types'
+import { Head, Sec } from '@/components/site/kit'
+import { SmartImage } from '@/components/ui/SmartImage'
+import type { SectionProps } from './types'
 
-/**
- * Photos of the office and production, two layouts the editor picks:
- * - `grid`: an editorial spread of frames in their own proportions, with crop marks;
- * - `strip`: a film strip scrolled sideways inside the block, with prev/next and a counter.
- * Captions are the alt texts of the CMS, numbered like figures.
- */
+/** Photos in a mosaic that open one after another; or a swipeable strip. */
 export function MediaGallerySection({ section }: SectionProps<'media_gallery'>) {
-  const { data } = section
   const { t } = useTranslation()
-  const title = data.title?.trim()
-  const items = data.items
-  if (!items.length && !title && !data.eyebrow) return null
-
+  const d = section.data
+  if (!d.items.length) return null
   return (
-    <Section
+    <Sec
       tone={section.tone}
       anchor={section.anchor}
-      labelledBy={title ? headingId(section.id) : undefined}
+      style={d.layout === 'strip' ? { overflow: 'hidden' } : undefined}
     >
-      <SectionHeader id={headingId(section.id)} eyebrow={data.eyebrow} title={title} />
-      {!items.length ? (
-        <div className="plate grid min-h-32 place-items-center border-y border-line p-6">
-          <p className="mono-label text-center">{t('gallery.empty')}</p>
+      <div className="wrap">
+        <Head eyebrow={d.eyebrow} title={d.title} />
+        {d.layout === 'grid' && (
+          <div className="gal4">
+            {d.items.map((m, i) => (
+              <figure key={m.id} style={{ '--d': `${(i % 4) * 0.1}s` } as CSSProperties}>
+                <SmartImage media={m} fill sizes="(max-width: 760px) 50vw, 33vw" />
+              </figure>
+            ))}
+          </div>
+        )}
+      </div>
+      {d.layout === 'strip' && (
+        <div className="rail" aria-label={t('gallery.strip')}>
+          {d.items.map((m) => (
+            <div key={m.id} className="card" style={{ flexBasis: 'min(640px, 84vw)' }}>
+              <div className="card__img">
+                <SmartImage media={m} fill sizes="84vw" />
+              </div>
+            </div>
+          ))}
         </div>
-      ) : data.layout === 'strip' ? (
-        <GalleryStrip items={items} label={title || data.eyebrow || t('gallery.strip')} />
-      ) : (
-        <GalleryGrid items={items} />
       )}
-    </Section>
+    </Sec>
   )
 }

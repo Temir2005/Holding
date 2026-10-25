@@ -8,12 +8,13 @@
 	admin off
 	auto_https off
 	servers {
-		# Railway's edge proxy connects from a private or CGNAT address and puts the
-		# real client into X-Forwarded-For. Trust only those hops and read the client
-		# from the right, so an address a client typed into the header is ignored.
+		# Railway's edge proxy connects from a private or CGNAT address and sets
+		# X-Real-IP to the client address it saw, overwriting any value the client sent.
+		# X-Forwarded-For is not usable here: Railway's edge runs on CDN77, and the
+		# rightmost entry is a CDN77 hop, so every visitor would look like a few
+		# shared addresses. Trust only the direct private hop and read X-Real-IP.
 		trusted_proxies static private_ranges 100.64.0.0/10
-		trusted_proxies_strict
-		client_ip_headers X-Forwarded-For
+		client_ip_headers X-Real-IP
 	}
 }
 

@@ -1,154 +1,82 @@
 /*
- * Design tokens, design "Чертёж" (design/stage-0.md, prototype design/concepts/chertezh).
- * A set of architectural drawings: paper, warm graphite, one red line.
+ * Design tokens. Brand: MEGA SMART (smart-office.kz) — graphite #1C1F24, orange #F0843E,
+ * steel #4B4E53, light #ECEEF1. Division accents: Smart Panels #E31E24 / #0B1320 (smartpanels.kz),
+ * AAAG #3B2E73 / #5A47B8 (AAAG brandbook). One page has one palette: `data-theme` on <body>,
+ * set from the page's hero (see sections/PageRenderer.tsx).
  *
- * Raw palette first (RGB triplets, so Tailwind can add alpha), then semantic tokens per section
- * tone. Components use only the semantic ones (surface, fg, line, trace, accent...). Raw names
- * describe materials, not hues; a new palette changes only the values here.
- * Contrast notes are against the surface of the same tone (WCAG 2.1).
+ * Colours used by Tailwind utilities are RGB triplets (alpha syntax); the rest are plain values.
  */
 :root {
-  /* paper: light sections */
-  --paper: 243 242 238; /* #F3F2EE */
-  --paper-2: 235 233 227; /* #EBE9E3 */
-  --carbon: 23 23 21; /* #171715, text on paper 16:1 */
-  --carbon-mute: 94 94 90; /* #5E5E5A, 5.8:1 on paper */
-  --paper-line: 218 215 207; /* #DAD7CF */
-  --paper-line-strong: 163 160 151; /* #A3A097 */
-  --paper-plate: 228 225 217; /* #E4E1D9, image placeholder: darker than paper */
+  --ink: #1c1f24;
+  --ink-rgb: 28 31 36;
+  --steel: #4b4e53;
+  --light: #eceef1;
+  --paper: #f5f6f8;
+  --accent: #f0843e;
+  --accent-ink: #1c1f24;
+  --accent-hover: #f49a60;
+  --focus: #f0843e;
+  --bar: #f0843e;
 
-  /* graphite: dark sections, warm-neutral, no blue */
-  --graphite: 20 20 19; /* #141413 */
-  --graphite-2: 27 27 25; /* #1B1B19 */
-  --graphite-3: 35 35 33; /* #232321 */
-  --chalk: 236 234 228; /* #ECEAE4, 15.3:1 on graphite */
-  --chalk-mute: 156 154 147; /* #9C9A93, 6.5:1 on graphite */
-  --graphite-line: 37 37 36; /* 7% white on graphite */
-  --graphite-line-strong: 66 66 64; /* 18% white */
-  --graphite-plate: 46 46 43; /* #2E2E2B, placeholder: lighter than graphite, never "empty" */
+  --on-dark: #fff;
+  --on-dark-2: rgba(255, 255, 255, 0.74);
+  --line-dark: rgba(255, 255, 255, 0.14);
+  --on-light-2: #4b4e53;
+  --line-light: rgba(28, 31, 36, 0.12);
 
-  /* red: the line of the drawing */
-  --red-line: 224 72 43; /* #E0482B, lines and marks: 3.6:1 on paper, 4.5:1 on graphite */
-  --red-ink-paper: 179 54 27; /* #B3361B, red text on paper 5.4:1 */
-  --red-ink-graphite: 238 95 66; /* #EE5F42, red text on graphite 5.6:1 */
-  --red-fill: 229 85 58; /* #E5553A, accent section surface; carbon text 5.1:1 */
-  --red-fill-2: 216 76 49; /* #D84C31 */
-  --red-fill-mute: 42 22 17; /* #2A1611, 4.7:1 on the fill */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --gut: clamp(16px, 4vw, 64px);
+  --max: 1440px;
+  --header-h: 76px;
+  --section-y: clamp(80px, 10vw, 140px);
 
-  /* compatibility aliases for code written before the redesign */
-  --deep: var(--graphite);
-  --ink: var(--chalk);
+  --font-sans: 'Montserrat', system-ui, sans-serif;
 
-  /* fonts */
-  --font-sans: 'Geologica', 'Geologica Fallback', system-ui, sans-serif;
-  --font-mono: 'IBM Plex Mono', ui-monospace, 'SFMono-Regular', monospace;
+  /* Tailwind's semantic colours (a few utility classes still use them) */
+  --surface: 28 31 36;
+  --surface-2: 38 42 48;
+  --tile: 38 42 48;
+  --fg: 255 255 255;
+  --fg-mute: 190 194 200;
+  --line: 255 255 255;
+  --line-strong: 255 255 255;
+  --plate: 46 50 56;
+  --trace: 240 132 62;
+  --on-accent: 28 31 36;
+  --paper-rgb: 245 246 248;
+  --carbon: 28 31 36;
+  --graphite: 28 31 36;
+  --chalk: 236 238 241;
+  --deep: 28 31 36;
 
-  /* type scale (fluid 375 → 1920) */
-  --fs-display: clamp(2.5rem, 0.85rem + 7vw, 9.25rem);
-  --fs-h2: clamp(2.125rem, 1.15rem + 3.4vw, 4.75rem);
-  --fs-h3: clamp(1.25rem, 1.05rem + 0.6vw, 1.75rem);
-  --fs-stat-hero: clamp(6.5rem, 1rem + 22vw, 28rem);
-  --fs-stat: clamp(3.25rem, 1rem + 7vw, 8.5rem);
-  --fs-lead: clamp(1.0625rem, 0.98rem + 0.36vw, 1.375rem);
-  --fs-body: clamp(1rem, 0.96rem + 0.14vw, 1.0938rem);
-  --fs-caption: clamp(0.6875rem, 0.66rem + 0.1vw, 0.75rem);
-
-  /* the sheet: a wide binding margin on the left holds the line */
-  --pad-l: clamp(32px, 5.6vw, 104px);
-  --pad-r: clamp(16px, 3.2vw, 56px);
-  --trace-x: calc(var(--pad-l) * 0.42);
-  --gap: clamp(16px, 1.6vw, 24px);
-  --sheet-max: 120rem;
-  --gutter: var(--pad-r); /* old name */
-  --header-h: 4rem;
-
-  /* spacing: 8px baseline */
-  --s-1: 8px;
-  --s-2: 16px;
-  --s-3: 24px;
-  --s-4: 32px;
-  --s-6: 48px;
-  --s-8: 64px;
-  --s-12: 96px;
-  --section-y: clamp(48px, 5.4vw, 96px);
-  --section-y-end: clamp(48px, 6vw, 104px);
-
-  /* layers */
-  --z-base: 0;
-  --z-trace: 2;
-  --z-sticky: 10;
-  --z-header: 40;
-  --z-menu: 50;
-  --z-toast: 60;
-
-  /* motion */
-  --dur-1: 150ms;
-  --dur-2: 300ms;
-  --dur-3: 450ms;
-  --dur-4: 700ms;
-  --dur-5: 1100ms;
-  --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
-  --ease-in-out: cubic-bezier(0.6, 0, 0.2, 1);
-  /* the pen: every section draws its part of the line where it crosses this viewport height */
-  --pen: 78%;
+  --z-header: 50;
+  --z-menu: 60;
+  --z-toast: 70;
 }
 
-@media (max-width: 768px) {
+body[data-theme='smart_panels'] {
+  --ink: #0b1320;
+  --ink-rgb: 11 19 32;
+  --accent: #e31e24;
+  --accent-ink: #fff;
+  --accent-hover: #c8161c;
+  --focus: #ff5a5f;
+  --bar: #e31e24;
+}
+
+body[data-theme='aaag'] {
+  --ink: #1f1b20;
+  --ink-rgb: 31 27 32;
+  --accent: #3b2e73;
+  --accent-ink: #fff;
+  --accent-hover: #4a3a8c;
+  --focus: #8f7ee8;
+  --bar: #5a47b8;
+}
+
+@media (max-width: 1100px) {
   :root {
-    --header-h: 3.5rem;
+    --header-h: 64px;
   }
-}
-
-/* Kazakh words are longer: one step smaller display sizes. */
-:lang(kk) {
-  --fs-display: clamp(2.25rem, 0.7rem + 6.2vw, 8.25rem);
-  --fs-h2: clamp(1.875rem, 1rem + 3.1vw, 4.25rem);
-}
-
-.tone-light {
-  --surface: var(--paper);
-  --surface-2: var(--paper-2);
-  --tile: var(--paper-2);
-  --fg: var(--carbon);
-  --fg-mute: var(--carbon-mute);
-  --line: var(--paper-line);
-  --line-strong: var(--paper-line-strong);
-  --plate: var(--paper-plate);
-  --trace: var(--red-line);
-  --accent: var(--red-ink-paper);
-  --accent-ink: var(--red-ink-paper);
-  --on-accent: var(--paper);
-  color-scheme: light;
-}
-
-.tone-dark {
-  --surface: var(--graphite);
-  --surface-2: var(--graphite-2);
-  --tile: var(--graphite-2);
-  --fg: var(--chalk);
-  --fg-mute: var(--chalk-mute);
-  --line: var(--graphite-line);
-  --line-strong: var(--graphite-line-strong);
-  --plate: var(--graphite-plate);
-  --trace: var(--red-line);
-  --accent: var(--red-ink-graphite);
-  --accent-ink: var(--red-ink-graphite);
-  --on-accent: var(--graphite);
-  color-scheme: dark;
-}
-
-/* Red section: the line and every accent role turn graphite so they stay visible. */
-.tone-accent {
-  --surface: var(--red-fill);
-  --surface-2: var(--red-fill-2);
-  --tile: var(--red-fill-2);
-  --fg: var(--carbon);
-  --fg-mute: var(--red-fill-mute);
-  --line: 188 73 51; /* carbon 20% on the fill */
-  --line-strong: 126 54 40; /* carbon 50% */
-  --plate: var(--red-fill-2);
-  --trace: var(--carbon);
-  --accent: var(--carbon);
-  --accent-ink: var(--carbon);
-  --on-accent: var(--chalk);
 }

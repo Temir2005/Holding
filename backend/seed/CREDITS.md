@@ -1,9 +1,11 @@
-# Seed images
+# Картинки сидов
 
-All seed images are generated procedurally by `seed/images.py` (gradients and simple
-shapes in the site palette). No third-party photos are used, so there is nothing to credit.
-Replace them with real photos through the admin once they are available.
+Стартовые картинки лежат в `seed/assets/` и загружаются в хранилище как есть (`seed/images.py`, `asset()`). Логотипы клиентов-заглушек рисуются кодом (`logo_mark()`).
 
-For a local demo only, `make demo-photos` downloads free stock photos into `seed/photos/`
-(ignored by git and docker), which the seeds then take instead; their authors and licenses
-are listed in `seed/photos/CREDITS.md`.
+- Фотографии и визуализации сгенерированы для сайта: это иллюстрации, а не съёмка реальных объектов. Портреты команды — сгенерированные заглушки, перед запуском их нужно заменить настоящими фото через админку.
+- `team-khegay.webp` — настоящий портрет основателя Сергея Хегая (с сайта AAAG).
+- `evtol-aaag.webp`, `aaag-blueprint.webp`, `aaag-vertiport.webp` — аппарат AAAG в фирменной ливрее, перерисован по изображению с сайта AAAG.
+- `map-almaty-region.webp` — карта Алматы, Конаева и Капшагайского водохранилища, нарисована по данным © OpenStreetMap contributors (ODbL). Граница Алматы взята из данных сайта AAAG.
+- `map-eurasia.webp` — точечная карта по границам стран Natural Earth (общественное достояние).
+
+Только для локального демо: `make demo-photos` скачивает бесплатные стоковые фото в `seed/photos/` (папка не попадает в git и в образы). Сиды берут их вместо картинок из `seed/assets/`. Авторы и лицензии перечислены в `seed/photos/CREDITS.md`.

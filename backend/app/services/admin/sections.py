@@ -58,7 +58,7 @@ def consistency_errors(data: SectionData, loc: Loc = DATA_LOC) -> list[dict[str,
     errors: list[dict[str, Any]] = []
     if isinstance(data, HeroData) and len(data.stat_ids) > HERO_MAX_STATS:
         errors.append(
-            {"loc": [*loc, "stat_ids"], "msg": "В hero можно выбрать не больше трёх цифр"}
+            {"loc": [*loc, "stat_ids"], "msg": "В hero можно выбрать не больше четырёх цифр"}
         )
     if isinstance(data, ContactFormData):
         if not data.lead_types:

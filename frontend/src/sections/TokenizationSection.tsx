@@ -1,265 +1,163 @@
-import type { CSSProperties } from 'react'
+import { type CSSProperties, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Head, Sec } from '@/components/site/kit'
+import { reduceMotion, useInView } from '@/components/site/hooks'
+import { SmartImage } from '@/components/ui/SmartImage'
 import { SiteLink } from '@/components/ui/SiteLink'
-import type { ProjectCard as Project, SectionOf } from '@/api/types'
-import { usePageSheet } from '@/components/layout/usePageSheet'
-import type { TraceBranches } from '@/components/trace/paths'
-import { DimArrow } from '@/components/ui/DimArrow'
-import { Reveal } from '@/components/ui/Reveal'
-import { Section } from '@/components/ui/Section'
-import { SectionHeader } from '@/components/ui/SectionHeader'
-import { StatusMark } from '@/components/ui/StatusMark'
-import { cn } from '@/lib/cn'
-import { useLocale } from '@/lib/locale'
-import { stagger } from '@/lib/motion'
-import { pad2 } from './sectionNumber'
-import { Fade } from './showcase/parts'
-import { projectHref } from './showcase/trace'
-import { headingId, type SectionProps } from './types'
+import { pagePath, useLocale } from '@/lib/locale'
+import type { SectionProps } from './types'
 
-/** Up to this many steps the scheme is one horizontal pipeline on desktop. */
-const ROW_MAX = 5
-const NODE = 'token-node'
-const NOTE = 'token-note'
-
-type Step = SectionOf<'tokenization_explainer'>['data']['steps'][number]
+const COLS = 6
+const ROWS = 7
+const TW = 44
+const TH = 40
+const X0 = 60
+const Y0 = 372 - ROWS * TH
+// the shares that go to the investor's card
+const PICKS = [3, 10, 16, 23, 29, 38]
+const DUR = 3600
 
 /**
- * The line works the scheme: when the step nodes stand in one row (desktop), it turns off the
- * margin and runs through them as the pipeline; when they stand in a column, every node gets a
- * short branch. The last branch turns into the stamp of the note.
- */
-const schemeBranches: TraceBranches = (box) => {
-  const inside = (p: { y: number }) => p.y > 0 && p.y < box.h
-  const nodes = (box.anchors[NODE] ?? []).filter(inside)
-  const note = (box.anchors[NOTE] ?? []).filter(inside)[0]
-  const out: { d: string; at: number }[] = []
-  const first = nodes[0]
-  const last = nodes[nodes.length - 1]
-  if (first && last && nodes.length > 1 && nodes.every((n) => Math.abs(n.y - first.y) < 4)) {
-    out.push({ d: `M ${box.x} ${first.y} H ${last.x + 5}`, at: first.y })
-  } else {
-    nodes.forEach((n) => out.push({ d: `M ${box.x} ${n.y} H ${n.x}`, at: n.y }))
-  }
-  if (note) out.push({ d: `M ${box.x} ${note.y} H ${note.x}`, at: note.y })
-  return out
-}
-
-/**
- * Tokenization explained as a calm scheme: the steps as a pipeline with nodes on the line, the
- * benefits as a specification, the projects as short register rows, and the disclaimer as the
- * note stamp of the drawing — part of the sheet, not small print. No figures are made up: the
- * block shows only what the editor wrote.
+ * How tokenization works, drawn: a building (object), split into shares, a few shares move to
+ * the investor's card, the floors report progress. Steps play by themselves while in view;
+ * a click picks a step and stops the play. The legal disclaimer comes from the CMS.
  */
 export function TokenizationSection({ section }: SectionProps<'tokenization_explainer'>) {
-  const { data } = section
-  const { steps, benefits, projects } = data
-  const disclaimer = data.disclaimer.trim()
-
-  return (
-    <Section
-      tone={section.tone}
-      anchor={section.anchor}
-      labelledBy={data.title ? headingId(section.id) : undefined}
-      branches={schemeBranches}
-    >
-      <SectionHeader
-        id={headingId(section.id)}
-        eyebrow={data.eyebrow}
-        title={data.title}
-        intro={data.intro}
-      />
-
-      {steps.length > 0 && <Scheme steps={steps} />}
-
-      {(benefits.length > 0 || projects.length > 0) && (
-        <div className="mt-16 grid grid-cols-1 gap-y-14 md:mt-24 lg:grid-cols-12 lg:gap-x-gap">
-          {benefits.length > 0 && (
-            <Benefits
-              items={benefits}
-              className={projects.length ? 'lg:col-span-6' : 'lg:col-span-8'}
-            />
-          )}
-          {projects.length > 0 && (
-            <Projects
-              items={projects}
-              className={benefits.length ? 'lg:col-span-5 lg:col-start-8' : 'lg:col-span-8'}
-            />
-          )}
-        </div>
-      )}
-
-      {disclaimer && (
-        <div className="mt-16 grid grid-cols-1 md:mt-24 lg:grid-cols-12 lg:gap-x-gap">
-          <Note text={disclaimer} className="lg:col-span-7 lg:col-start-6" />
-        </div>
-      )}
-    </Section>
-  )
-}
-
-/** The steps: one row of nodes on desktop (up to ROW_MAX), a column of nodes otherwise. */
-function Scheme({ steps }: { steps: Step[] }) {
-  const { t } = useTranslation()
-  const row = steps.length <= ROW_MAX
-  return (
-    <div>
-      <p className={cn('mono-label border-b border-fg pb-3', row && 'lg:border-0 lg:pb-0')}>
-        {t('tokenization.steps')}
-        <span className="tabular"> · {pad2(steps.length)}</span>
-      </p>
-      <ol
-        role="list"
-        style={{ '--n': steps.length } as CSSProperties}
-        className={cn(
-          'grid grid-cols-1',
-          row && 'lg:grid-cols-[repeat(var(--n),minmax(0,1fr))] lg:gap-x-gap lg:pt-10',
-        )}
-      >
-        {steps.map((s, i) => (
-          <li
-            key={`${i}-${s.title}`}
-            className={cn(
-              'grid grid-cols-[1.25rem_minmax(0,1fr)] gap-x-4 border-b border-line py-6',
-              row && 'lg:block lg:border-0 lg:py-0',
-            )}
-          >
-            {/* the node: a filled legend square the line runs through */}
-            <span
-              aria-hidden="true"
-              data-trace-anchor={NODE}
-              className={cn('mt-[0.3em] block h-2.5 w-2.5 bg-trace', row && 'lg:mt-0')}
-            />
-            <Fade
-              delay={stagger(i)}
-              className={cn(
-                'min-w-0',
-                row ? 'lg:mt-8 lg:pr-4' : 'lg:grid lg:grid-cols-12 lg:items-baseline lg:gap-x-gap',
-              )}
-            >
-              <p className={cn('mono-label tabular', !row && 'lg:col-span-2')}>
-                {t('tokenization.step')} {pad2(i + 1)}
-              </p>
-              <h3
-                className={cn(
-                  'mt-3 text-subtitle font-semibold [overflow-wrap:anywhere]',
-                  !row && 'lg:col-span-4 lg:mt-0',
-                )}
-              >
-                {s.title}
-              </h3>
-              {s.text && (
-                <p
-                  className={cn(
-                    'mt-3 max-w-[38ch] text-fg-mute',
-                    !row && 'lg:col-span-6 lg:mt-0 lg:max-w-[56ch]',
-                  )}
-                >
-                  {s.text}
-                </p>
-              )}
-            </Fade>
-          </li>
-        ))}
-      </ol>
-    </div>
-  )
-}
-
-/** Benefits as the specification of the scheme: numbered hairline rows. */
-function Benefits({ items, className }: { items: string[]; className?: string }) {
-  const { t } = useTranslation()
-  return (
-    <Reveal className={className}>
-      <p className="mono-label border-b border-fg pb-3">{t('tokenization.benefits')}</p>
-      <ul role="list">
-        {items.map((b, i) => (
-          <li
-            key={`${i}-${b}`}
-            className="grid grid-cols-[2.5rem_minmax(0,1fr)] gap-x-4 border-b border-line py-4 md:py-5"
-          >
-            <span aria-hidden="true" className="tabular mono-label pt-[0.45em]">
-              {pad2(i + 1)}
-            </span>
-            <span className="text-lead [overflow-wrap:anywhere]">{b}</span>
-          </li>
-        ))}
-      </ul>
-    </Reveal>
-  )
-}
-
-/** Projects open to tokenization: compact register rows, each one link. */
-function Projects({ items, className }: { items: Project[]; className?: string }) {
   const { t } = useTranslation()
   const locale = useLocale()
-  return (
-    <Reveal className={className} delay={0.1}>
-      <p className="mono-label border-b border-fg pb-3">{t('tokenization.projects')}</p>
-      <ul role="list">
-        {items.map((p) => (
-          <li key={p.id} className="border-b border-line">
-            <SiteLink
-              to={projectHref(locale, p.slug)}
-              className="group/more grid grid-cols-[minmax(0,1fr)_auto] items-center gap-x-6 gap-y-1 py-4 transition-colors duration-2 hover:bg-surface-2 focus-visible:outline focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-[rgb(var(--accent-ink))] md:-mx-3 md:px-3"
-            >
-              <span className="link-draw justify-self-start text-lg font-semibold [overflow-wrap:anywhere]">
-                {p.title}
-              </span>
-              <DimArrow className="col-start-2 row-span-2 row-start-1" />
-              <span className="flex flex-wrap items-center gap-x-4 gap-y-1">
-                <StatusMark status={p.status} />
-                {p.location && <span className="mono-label">{p.location}</span>}
-              </span>
-            </SiteLink>
-          </li>
-        ))}
-      </ul>
-    </Reveal>
-  )
-}
+  const d = section.data
+  const n = d.steps.length
+  const [step, setStep] = useState(0)
+  const [paused, setPaused] = useState(false)
+  const [ref, seen] = useInView<HTMLDivElement>('0px 0px -30% 0px')
+  const [run, setRun] = useState(0)
+  const timer = useRef(0)
 
-/**
- * The disclaimer as the note stamp of the drawing: a hairline title block with the sheet cells,
- * the text at reading size. The line turns into it at the top strip.
- */
-function Note({ text, className }: { text: string; className?: string }) {
-  const { t } = useTranslation()
-  const sheet = usePageSheet()
-  const cell =
-    'flex min-w-[4.5rem] flex-col justify-center gap-1 border-l border-line-strong px-3 py-2'
+  const playing = seen && !paused && !reduceMotion() && n > 1
+  useEffect(() => {
+    if (!playing) return
+    timer.current = window.setTimeout(() => {
+      setStep((s) => (s + 1) % n)
+      setRun((r) => r + 1)
+    }, DUR)
+    return () => window.clearTimeout(timer.current)
+  }, [playing, step, n])
+
+  // the drawing has four states; with more or fewer steps they map proportionally
+  const art = n > 1 ? Math.round((step / (n - 1)) * 3) : 3
+
+  const tiles = []
+  for (let r = 0; r < ROWS; r++)
+    for (let c = 0; c < COLS; c++) {
+      const k = r * COLS + c
+      const x = X0 + c * TW
+      const y = Y0 + r * TH
+      const pi = PICKS.indexOf(k)
+      const style = {
+        '--r': ROWS - 1 - r,
+        ...(pi > -1
+          ? {
+              '--tx': `${392 + (pi % 3) * 50 - x}px`,
+              '--ty': `${176 + Math.floor(pi / 3) * 50 - y}px`,
+            }
+          : {}),
+      } as CSSProperties
+      tiles.push(
+        <g key={k} className={pi > -1 ? 'tile pick' : 'tile'} style={style}>
+          <rect className="bg" x={x} y={y} width={TW} height={TH} />
+          <rect className="win" x={x + 12} y={y + 10} width={20} height={20} rx={2} />
+        </g>,
+      )
+    }
+
   return (
-    <Reveal className={className}>
-      <aside role="note" aria-label={t('tokenization.note')} className="border border-line-strong">
-        <div className="flex border-b border-line-strong">
-          <p
-            data-trace-anchor={NOTE}
-            className="mono-label flex flex-1 items-center gap-3 px-4 py-3 text-fg md:px-5"
-          >
-            <span aria-hidden="true" className="h-2.5 w-2.5 flex-none bg-trace" />
-            {t('tokenization.note')}
-          </p>
-          {sheet && (
-            <dl className="flex">
-              <div className={cell}>
-                <dt className="mono-label">{t('sheet.sheet')}</dt>
-                <dd className="tabular font-mono text-[0.8125rem] font-medium">
-                  {sheet.number ? pad2(sheet.number) : t('sheet.noNumber')}
-                </dd>
-              </div>
-              <div className={cell}>
-                <dt className="mono-label">{t('sheet.sheets')}</dt>
-                <dd className="tabular font-mono text-[0.8125rem] font-medium">
-                  {pad2(sheet.total)}
-                </dd>
-              </div>
-            </dl>
-          )}
+    <Sec tone={section.tone} anchor={section.anchor} className={playing ? 'play' : undefined}>
+      <div className="wrap">
+        <Head eyebrow={d.eyebrow} title={d.title} lead={d.intro} className="tok__head" />
+        <div className="tok__grid" ref={ref} style={{ '--dur': `${DUR}ms` } as CSSProperties}>
+          <ol className="tsteps" aria-label={t('tokenization.steps')}>
+            {d.steps.map((s, i) => (
+              <li key={i}>
+                <button
+                  className="tstep"
+                  aria-current={i === step ? 'step' : undefined}
+                  onClick={() => {
+                    setStep(i)
+                    setPaused(true)
+                  }}
+                >
+                  <b>{String(i + 1).padStart(2, '0')}</b>
+                  <h3>{s.title}</h3>
+                  <p>{s.text}</p>
+                  {i === step && <i key={run} aria-hidden="true" />}
+                </button>
+              </li>
+            ))}
+          </ol>
+          <div className="tok__art" aria-hidden="true">
+            <svg className="art" data-step={art} viewBox="0 0 600 420">
+              <line className="ground" x1="40" y1="372" x2="560" y2="372" />
+              <g>{tiles}</g>
+              <g className="wallet">
+                <rect className="card-bg" x="372" y="96" width="188" height="200" rx="16" />
+                <text x="392" y="132">
+                  {t('tokenization.share')}
+                </text>
+                <g className="prog">
+                  <text x="392" y="322" style={{ fontSize: 12, fontWeight: 500, opacity: 0.6 }}>
+                    {t('tokenization.progress')}
+                  </text>
+                  <rect
+                    x="392"
+                    y="334"
+                    width="148"
+                    height="6"
+                    rx="3"
+                    fill="rgba(255,255,255,.14)"
+                  />
+                  <rect className="fill" x="392" y="334" width="148" height="6" rx="3" />
+                </g>
+              </g>
+            </svg>
+          </div>
         </div>
-        <p className="max-w-[68ch] px-4 py-5 text-[0.9375rem] leading-relaxed text-fg md:px-5 md:py-6">
-          {text}
-        </p>
-      </aside>
-    </Reveal>
+        <div className="tok__foot">
+          <div>
+            <ul className="ben">
+              {d.benefits.map((b) => (
+                <li key={b}>
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.4"
+                    aria-hidden="true"
+                  >
+                    <path d="M5 12l5 5L20 7" />
+                  </svg>
+                  {b}
+                </li>
+              ))}
+            </ul>
+            {d.projects.length > 0 && (
+              <div className="tok__projects" aria-label={t('tokenization.projects')}>
+                {d.projects.map((p) => (
+                  <SiteLink key={p.id} to={pagePath(locale, `projects/${p.slug}`)}>
+                    <SmartImage media={p.cover} fill sizes="32px" />
+                    {p.title}
+                  </SiteLink>
+                ))}
+              </div>
+            )}
+          </div>
+          <div className="disc">
+            <h3>{t('tokenization.note')}</h3>
+            <p>{d.disclaimer}</p>
+          </div>
+        </div>
+      </div>
+    </Sec>
   )
 }

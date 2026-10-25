@@ -1,0 +1,98 @@
+# Release: a tag vX.Y.Z runs the checks and deploys backend and frontend to Railway
+# (project megasmart-holding, environment production).
+#
+# Secret RAILWAY_TOKEN: a Railway *project* token for the production environment
+# (Railway → project → Settings → Tokens). With a project token the CLI already knows the
+# project and the environment, only the service is named here.
+#
+# Build settings live in the Railway services, not in this file: root directory
+# (/backend, /frontend), Dockerfile (Dockerfile, Dockerfile.prod), pre-deploy command
+# (migrations + seeds) and healthcheck. `railway up` uploads the repository and Railway
+# builds each service from its root directory.
+name: Deploy
+
+on:
+  push:
+    tags: ["v*.*.*"]
+
+# One release at a time; a newer tag waits instead of cancelling a deploy halfway.
+concurrency:
+  group: railway-production
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  backend-checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: megasmart
+          POSTGRES_PASSWORD: megasmart
+          POSTGRES_DB: megasmart
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U megasmart -d megasmart"
+          --health-interval 3s --health-timeout 3s --health-retries 20
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      APP_ENV: dev
+      DATABASE_URL: postgresql+asyncpg://megasmart:megasmart@localhost:5432/megasmart
+      TEST_DATABASE_URL: postgresql+asyncpg://megasmart:megasmart@localhost:5432/megasmart_test
+      # Tests use InMemoryStorage; settings still require the S3 fields to be present.
+      S3_ENDPOINT_URL: http://localhost:9000
+      S3_PUBLIC_URL: http://localhost:9000
+      S3_ACCESS_KEY: test
+      S3_SECRET_KEY: test-secret
+      S3_BUCKET: megasmart-media
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.12"
+      - run: uv sync --frozen
+      - run: uv run ruff check .
+      - run: uv run ruff format --check .
+      - run: uv run mypy app seed tests
+      - run: uv run pytest
+
+  frontend-checks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+
+  deploy:
+    needs: [backend-checks, frontend-checks]
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Railway CLI
+        run: npm install --global @railway/cli@5.71.0
+      # Backend first: its pre-deploy step migrates the database before the new API starts.
+      # --ci streams the build log and fails the job if the build fails.
+      - name: Deploy backend
+        run: railway up --service backend --ci --message "${GITHUB_REF_NAME}"
+      - name: Deploy frontend
+        run: railway up --service frontend --ci --message "${GITHUB_REF_NAME}"

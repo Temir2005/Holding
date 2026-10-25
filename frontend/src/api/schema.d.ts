@@ -1245,6 +1245,57 @@ export interface components {
       type: 'about_text'
       data: components['schemas']['AboutTextDataRead']
     }
+    /** AirRouteRead */
+    AirRouteRead: {
+      /** From Key */
+      from_key: string
+      /** To Key */
+      to_key: string
+      /** Text */
+      text: string
+    }
+    /** AirRoutesDataRead */
+    AirRoutesDataRead: {
+      /** Eyebrow */
+      eyebrow?: string | null
+      /** Title */
+      title?: string | null
+      /** Intro */
+      intro?: string | null
+      map?: components['schemas']['MediaRead'] | null
+      bounds?: components['schemas']['MapBoundsRead'] | null
+      /** Attribution */
+      attribution: string
+      /** Speed Kmh */
+      speed_kmh: number
+      /**
+       * Points
+       * @default []
+       */
+      points: components['schemas']['MapPointRead'][]
+      /**
+       * Routes
+       * @default []
+       */
+      routes: components['schemas']['AirRouteRead'][]
+    }
+    /** AirRoutesSection */
+    AirRoutesSection: {
+      /**
+       * Id
+       * Format: uuid
+       */
+      id: string
+      /** Anchor */
+      anchor: string | null
+      tone: components['schemas']['Tone']
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      type: 'air_routes'
+      data: components['schemas']['AirRoutesDataRead']
+    }
     /** AuditActor */
     AuditActor: {
       /**
@@ -1289,6 +1340,7 @@ export interface components {
       title?: string | null
       /** Intro */
       intro?: string | null
+      media?: components['schemas']['MediaRead'] | null
       /**
        * Items
        * @default []
@@ -1516,6 +1568,7 @@ export interface components {
       consent_text: string
       /** Success Text */
       success_text: string
+      background?: components['schemas']['MediaRead'] | null
     }
     /** ContactFormSection */
     ContactFormSection: {
@@ -1581,6 +1634,10 @@ export interface components {
       name: string
       /** Note */
       note: string | null
+      /** Lat */
+      lat?: number | null
+      /** Lon */
+      lon?: number | null
     }
     /** Кнопка */
     Cta: {
@@ -1882,6 +1939,52 @@ export interface components {
       /** Label */
       label: string
     }
+    /** FinishRead */
+    FinishRead: {
+      /** Label */
+      label: string
+      /** Caption */
+      caption: string
+      /**
+       * Finish
+       * @enum {string}
+       */
+      finish: 'matte' | 'gloss' | 'texture'
+      /** Color */
+      color: string
+      media: components['schemas']['MediaRead'] | null
+    }
+    /** FinishesDataRead */
+    FinishesDataRead: {
+      /** Eyebrow */
+      eyebrow?: string | null
+      /** Title */
+      title?: string | null
+      /** Intro */
+      intro?: string | null
+      /**
+       * Items
+       * @default []
+       */
+      items: components['schemas']['FinishRead'][]
+    }
+    /** FinishesSection */
+    FinishesSection: {
+      /**
+       * Id
+       * Format: uuid
+       */
+      id: string
+      /** Anchor */
+      anchor: string | null
+      tone: components['schemas']['Tone']
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      type: 'finishes'
+      data: components['schemas']['FinishesDataRead']
+    }
     /**
      * FocalPoint
      * @description The point that stays in frame when the image is cropped, 0..1 from the left / top.
@@ -1934,6 +2037,14 @@ export interface components {
       title?: string | null
       /** Intro */
       intro?: string | null
+      /** Origin */
+      origin?: string | null
+      /** Origin Lat */
+      origin_lat?: number | null
+      /** Origin Lon */
+      origin_lon?: number | null
+      map?: components['schemas']['MediaRead'] | null
+      bounds?: components['schemas']['MapBoundsRead'] | null
       /**
        * Countries
        * @default []
@@ -1981,6 +2092,13 @@ export interface components {
       subtitle?: string | null
       background?: components['schemas']['MediaRead'] | null
       video?: components['schemas']['MediaRead'] | null
+      overlay?: components['schemas']['MediaRead'] | null
+      /**
+       * Theme
+       * @default holding
+       * @enum {string}
+       */
+      theme: 'holding' | 'smart_panels' | 'aaag'
       /**
        * Ctas
        * @default []
@@ -2139,6 +2257,38 @@ export interface components {
       email: string
       /** Password */
       password: string
+    }
+    /** MapBoundsRead */
+    MapBoundsRead: {
+      /** West */
+      west: number
+      /** East */
+      east: number
+      /** South */
+      south: number
+      /** North */
+      north: number
+    }
+    /** MapPinRead */
+    MapPinRead: {
+      project?: components['schemas']['ProjectCard'] | null
+      /** Lat */
+      lat: number
+      /** Lon */
+      lon: number
+      /** Note */
+      note?: string | null
+    }
+    /** MapPointRead */
+    MapPointRead: {
+      /** Key */
+      key: string
+      /** Name */
+      name: string
+      /** Lat */
+      lat: number
+      /** Lon */
+      lon: number
     }
     /** MediaAdminRead */
     MediaAdminRead: {
@@ -2607,6 +2757,9 @@ export interface components {
         | components['schemas']['VideoSection']
         | components['schemas']['VacanciesSection']
         | components['schemas']['GeographySection']
+        | components['schemas']['FinishesSection']
+        | components['schemas']['AirRoutesSection']
+        | components['schemas']['ProjectsMapSection']
       )[]
     }
     /** PageSeo */
@@ -3228,6 +3381,48 @@ export interface components {
       /** Is Published */
       is_published?: boolean | null
     }
+    /** ProjectsMapDataRead */
+    ProjectsMapDataRead: {
+      /** Eyebrow */
+      eyebrow?: string | null
+      /** Title */
+      title?: string | null
+      /** Intro */
+      intro?: string | null
+      map?: components['schemas']['MediaRead'] | null
+      bounds?: components['schemas']['MapBoundsRead'] | null
+      /** Attribution */
+      attribution: string
+      /**
+       * Landmarks
+       * @default []
+       */
+      landmarks: components['schemas']['MapPointRead'][]
+      /**
+       * Pins
+       * @default []
+       */
+      pins: components['schemas']['MapPinRead'][]
+      /** Note */
+      note?: string | null
+    }
+    /** ProjectsMapSection */
+    ProjectsMapSection: {
+      /**
+       * Id
+       * Format: uuid
+       */
+      id: string
+      /** Anchor */
+      anchor: string | null
+      tone: components['schemas']['Tone']
+      /**
+       * @description discriminator enum property added by openapi-typescript
+       * @enum {string}
+       */
+      type: 'projects_map'
+      data: components['schemas']['ProjectsMapDataRead']
+    }
     /** ProjectsShowcaseDataRead */
     ProjectsShowcaseDataRead: {
       /** Eyebrow */
@@ -3553,6 +3748,9 @@ export interface components {
       | 'video'
       | 'vacancies'
       | 'geography'
+      | 'finishes'
+      | 'air_routes'
+      | 'projects_map'
     /** SectionTypeInfo */
     SectionTypeInfo: {
       /** Type */

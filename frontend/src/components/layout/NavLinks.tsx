@@ -1,64 +1,51 @@
-import type { ReactNode } from 'react'
-import { NavLink, type NavLinkProps } from 'react-router-dom'
+import { NavLink } from 'react-router-dom'
 import type { NavItem } from '@/api/types'
-import { cn } from '@/lib/cn'
 import { pagePath, useLocale } from '@/lib/locale'
 import { usePrefetchIntent } from '@/lib/prefetch'
 
-type Props = {
-  items: NavItem[]
-  className?: string
-  linkClassName?: string
-  onNavigate?: () => void
-  /** Content before each label (the sheet number in the menu and the footer register). */
-  renderPrefix?: (index: number) => ReactNode
-}
-
-/** Navigation from the CMS settings. The current page is marked with the red line underneath. */
-export function NavLinks({ items, className, linkClassName, onNavigate, renderPrefix }: Props) {
+/** Navigation from the CMS settings: pages, anchors or external links. */
+export function NavLinks({ items, onNavigate }: { items: NavItem[]; onNavigate?: () => void }) {
   const locale = useLocale()
   return (
-    <ul className={className}>
-      {items.map((item, i) => (
-        <li key={`${item.label}-${item.page_slug ?? item.anchor ?? item.url}`}>
-          {item.page_slug ? (
-            <PageLink
-              to={pagePath(locale, item.page_slug) + (item.anchor ? `#${item.anchor}` : '')}
-              end={item.page_slug === 'home'}
-              onClick={onNavigate}
-              className={({ isActive }) =>
-                cn(
-                  linkClassName,
-                  'transition-colors duration-1',
-                  isActive
-                    ? 'text-fg shadow-[inset_0_-1px_0_rgb(var(--trace))]'
-                    : 'nav-pen text-fg-mute hover:text-fg',
-                )
-              }
-            >
-              {renderPrefix?.(i)}
-              <span>{item.label}</span>
-            </PageLink>
-          ) : (
-            <a
-              href={item.url ?? `#${item.anchor ?? ''}`}
-              onClick={onNavigate}
-              className={cn(
-                linkClassName,
-                'text-fg-mute transition-colors duration-1 hover:text-fg',
-              )}
-            >
-              {renderPrefix?.(i)}
-              <span>{item.label}</span>
-            </a>
-          )}
-        </li>
-      ))}
-    </ul>
+    <>
+      {items.map((item) =>
+        item.page_slug ? (
+          <PageLink
+            key={`${item.label}-${item.page_slug}`}
+            to={pagePath(locale, item.page_slug) + (item.anchor ? `#${item.anchor}` : '')}
+            end={item.page_slug === 'home'}
+            onClick={onNavigate}
+          >
+            {item.label}
+          </PageLink>
+        ) : (
+          <a
+            key={`${item.label}-${item.anchor ?? item.url}`}
+            href={item.url ?? `#${item.anchor ?? ''}`}
+            onClick={onNavigate}
+          >
+            {item.label}
+          </a>
+        ),
+      )}
+    </>
   )
 }
 
-/** NavLink with the page-change transition and the warm-up on intent, as SiteLink. */
-function PageLink({ to, ...rest }: NavLinkProps & { to: string }) {
-  return <NavLink to={to} viewTransition {...usePrefetchIntent(to)} {...rest} />
+function PageLink({
+  to,
+  end,
+  onClick,
+  children,
+}: {
+  to: string
+  end: boolean
+  onClick?: () => void
+  children: string
+}) {
+  return (
+    <NavLink to={to} end={end} viewTransition onClick={onClick} {...usePrefetchIntent(to)}>
+      {children}
+    </NavLink>
+  )
 }

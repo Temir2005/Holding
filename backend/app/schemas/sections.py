@@ -80,6 +80,9 @@ class SectionType(StrEnum):
     video = "video"
     vacancies = "vacancies"
     geography = "geography"
+    finishes = "finishes"
+    air_routes = "air_routes"
+    projects_map = "projects_map"
 
 
 class Tone(StrEnum):
@@ -169,7 +172,11 @@ class SwatchRead(BaseModel):
 
 
 # The admin refuses more; the public API shows at most this many (see services.pages).
-HERO_MAX_STATS = 3
+HERO_MAX_STATS = 4
+
+# The look of a whole page: the holding's palette or a division's. Set on the page's hero.
+PageTheme = Literal["holding", "smart_panels", "aaag"]
+THEME_LABELS = {"holding": "Холдинг MegaSmart", "smart_panels": "Smart Panels", "aaag": "AAAG"}
 
 
 class HeroData(SectionData):
@@ -180,6 +187,17 @@ class HeroData(SectionData):
     video_media_id: Annotated[uuid.UUID | None, _media("video", VIDEO)] = field(
         "Фоновое видео", default=None
     )
+    overlay_media_id: Annotated[uuid.UUID | None, _media("overlay", PICTURE)] = field(
+        "Изображение поверх фона",
+        description="Например, аэротакси на прозрачном фоне: влетает в кадр при загрузке",
+        default=None,
+    )
+    theme: PageTheme = field(
+        "Оформление страницы",
+        description="Цвета всей страницы: холдинг или направление",
+        labels=THEME_LABELS,
+        default="holding",
+    )
     ctas: list[Cta] = field("Кнопки", default_factory=list)
     swatches: list[Swatch] = field(
         "Образцы панелей",
@@ -188,7 +206,7 @@ class HeroData(SectionData):
     )
     stat_ids: Annotated[list[uuid.UUID], Ref(RefKind.stat, "stats")] = field(
         "Цифры рядом с заголовком",
-        description="0–3 цифры. Пусто — hero без цифр",
+        description="0–4 цифры. Пусто — hero без цифр",
         default_factory=list,
     )
 
@@ -197,6 +215,8 @@ class HeroDataRead(SectionDataRead):
     subtitle: str | None = None
     background: MediaRead | None = None
     video: MediaRead | None = None
+    overlay: MediaRead | None = None
+    theme: PageTheme = "holding"
     ctas: list[CtaRead] = []
     swatches: list[SwatchRead] = []
     stats: list[StatRead] = []
@@ -305,6 +325,9 @@ class ProjectListDataRead(SectionDataRead):
 
 class CapabilitiesData(SectionData):
     intro: L | None = field("Вступление", widget="localized-textarea", default=None)
+    media_id: Annotated[uuid.UUID | None, _media("media", PICTURE)] = field(
+        "Иллюстрация", description="Крупно над пунктами, например чертёж", default=None
+    )
     items: list[IconItem] = field("Пункты", default_factory=list)
     columns: Literal[2, 3, 4] = field(
         "Колонок", labels={2: "Две", 3: "Три", 4: "Четыре"}, default=3
@@ -313,6 +336,7 @@ class CapabilitiesData(SectionData):
 
 class CapabilitiesDataRead(SectionDataRead):
     intro: str | None = None
+    media: MediaRead | None = None
     items: list[IconItemRead] = []
     columns: Literal[2, 3, 4]
 
@@ -500,6 +524,9 @@ class ContactFormData(SectionData):
     )
     consent_text: L = field("Согласие на обработку данных", widget="localized-textarea")
     success_text: L = field("Сообщение после отправки", widget="localized-textarea")
+    background_media_id: Annotated[uuid.UUID | None, _media("background", PHOTO)] = field(
+        "Фоновое фото", default=None
+    )
 
 
 class ContactFormDataRead(SectionDataRead):
@@ -508,6 +535,7 @@ class ContactFormDataRead(SectionDataRead):
     default_type: LeadType
     consent_text: str
     success_text: str
+    background: MediaRead | None = None
 
 
 class MediaGalleryData(SectionData):
@@ -565,28 +593,192 @@ class VacanciesDataRead(SectionDataRead):
     empty_text: str | None = None
 
 
+class MapBounds(Stored):
+    """Geographic edges of the map image (Web Mercator), so points land where they belong."""
+
+    model_config = ConfigDict(title="Границы карты")
+
+    west: float = field("Запад (долгота)")
+    east: float = field("Восток (долгота)")
+    south: float = field("Юг (широта)")
+    north: float = field("Север (широта)")
+
+
+class MapBoundsRead(BaseModel):
+    west: float
+    east: float
+    south: float
+    north: float
+
+
 class Country(Stored):
     model_config = ConfigDict(title="Страна")
 
     code: str = field("Код страны (2 буквы)", min_length=2, max_length=2)
     name: L = field("Название", widget="localized-text")
     note: L | None = field("Пояснение", widget="localized-text", default=None)
+    lat: float | None = field("Широта точки на карте", default=None)
+    lon: float | None = field("Долгота точки на карте", default=None)
 
 
 class CountryRead(BaseModel):
     code: str
     name: str
     note: str | None
+    lat: float | None = None
+    lon: float | None = None
 
 
 class GeographyData(SectionData):
     intro: L | None = field("Вступление", widget="localized-textarea", default=None)
+    origin: L | None = field(
+        "Откуда отгрузка", widget="localized-text", description="Например, Шымкент", default=None
+    )
+    origin_lat: float | None = field("Широта точки отгрузки", default=None)
+    origin_lon: float | None = field("Долгота точки отгрузки", default=None)
+    map_media_id: Annotated[uuid.UUID | None, _media("map", PHOTO)] = field(
+        "Карта", description="Изображение карты в проекции Web Mercator", default=None
+    )
+    bounds: MapBounds | None = field("Границы карты", default=None)
     countries: list[Country] = field("Страны", default_factory=list)
 
 
 class GeographyDataRead(SectionDataRead):
     intro: str | None = None
+    origin: str | None = None
+    origin_lat: float | None = None
+    origin_lon: float | None = None
+    map: MediaRead | None = None
+    bounds: MapBoundsRead | None = None
     countries: list[CountryRead] = []
+
+
+class Finish(Stored):
+    model_config = ConfigDict(title="Покрытие")
+
+    label: L = field("Название", widget="localized-text", description="Например, Глянец")
+    caption: L = field("Подпись", widget="localized-text", description="Код и цвет")
+    finish: Literal["matte", "gloss", "texture"] = field(
+        "Тип", labels={"matte": "Матовое", "gloss": "Глянец", "texture": "Текстура"}
+    )
+    color: HexColor = field("Цвет образца")
+    media_id: Annotated[uuid.UUID | None, _media("media", PHOTO)] = field(
+        "Фото",
+        description="Один и тот же кадр во всех покрытиях: меняются только фасады",
+        default=None,
+    )
+
+
+class FinishRead(BaseModel):
+    label: str
+    caption: str
+    finish: Literal["matte", "gloss", "texture"]
+    color: str
+    media: MediaRead | None
+
+
+class FinishesData(SectionData):
+    intro: L | None = field("Вступление", widget="localized-textarea", default=None)
+    items: list[Finish] = field("Покрытия", default_factory=list)
+
+
+class FinishesDataRead(SectionDataRead):
+    intro: str | None = None
+    items: list[FinishRead] = []
+
+
+class MapPoint(Stored):
+    model_config = ConfigDict(title="Точка")
+
+    key: str = field("Ключ", description="Латиница, на него ссылаются маршруты", max_length=32)
+    name: L = field("Название", widget="localized-text")
+    lat: float = field("Широта")
+    lon: float = field("Долгота")
+
+
+class MapPointRead(BaseModel):
+    key: str
+    name: str
+    lat: float
+    lon: float
+
+
+class AirRoute(Stored):
+    model_config = ConfigDict(title="Маршрут")
+
+    from_key: str = field("Откуда (ключ точки)", max_length=32)
+    to_key: str = field("Куда (ключ точки)", max_length=32)
+    text: L = field("Описание", widget="localized-text")
+
+
+class AirRouteRead(BaseModel):
+    from_key: str
+    to_key: str
+    text: str
+
+
+class AirRoutesData(SectionData):
+    intro: L | None = field("Вступление", widget="localized-textarea", default=None)
+    map_media_id: Annotated[uuid.UUID | None, _media("map", PHOTO)] = field(
+        "Карта", description="Изображение карты в проекции Web Mercator", default=None
+    )
+    bounds: MapBounds | None = field("Границы карты", default=None)
+    attribution: str = field(
+        "Атрибуция карты", default="© OpenStreetMap contributors", max_length=200
+    )
+    speed_kmh: int = field("Крейсерская скорость, км/ч", description="Для расчёта времени", ge=1)
+    points: list[MapPoint] = field("Точки", default_factory=list)
+    routes: list[AirRoute] = field("Маршруты", default_factory=list)
+
+
+class AirRoutesDataRead(SectionDataRead):
+    intro: str | None = None
+    map: MediaRead | None = None
+    bounds: MapBoundsRead | None = None
+    attribution: str
+    speed_kmh: int
+    points: list[MapPointRead] = []
+    routes: list[AirRouteRead] = []
+
+
+class MapPin(Stored):
+    model_config = ConfigDict(title="Проект на карте")
+
+    project_id: Annotated[uuid.UUID, Ref(RefKind.project, "project")] = field("Проект")
+    lat: float = field("Широта")
+    lon: float = field("Долгота")
+    note: L | None = field("Подпись", widget="localized-text", default=None)
+
+
+class MapPinRead(BaseModel):
+    project: ProjectCard | None = None
+    lat: float
+    lon: float
+    note: str | None = None
+
+
+class ProjectsMapData(SectionData):
+    intro: L | None = field("Вступление", widget="localized-textarea", default=None)
+    map_media_id: Annotated[uuid.UUID | None, _media("map", PHOTO)] = field(
+        "Карта", description="Изображение карты в проекции Web Mercator", default=None
+    )
+    bounds: MapBounds | None = field("Границы карты", default=None)
+    attribution: str = field(
+        "Атрибуция карты", default="© OpenStreetMap contributors", max_length=200
+    )
+    landmarks: list[MapPoint] = field("Ориентиры", default_factory=list)
+    pins: list[MapPin] = field("Проекты", default_factory=list)
+    note: L | None = field("Примечание под картой", widget="localized-text", default=None)
+
+
+class ProjectsMapDataRead(SectionDataRead):
+    intro: str | None = None
+    map: MediaRead | None = None
+    bounds: MapBoundsRead | None = None
+    attribution: str
+    landmarks: list[MapPointRead] = []
+    pins: list[MapPinRead] = []
+    note: str | None = None
 
 
 # ---------------------------------------------------------------------------
@@ -710,6 +902,21 @@ class GeographySection(SectionBase):
     data: GeographyDataRead
 
 
+class FinishesSection(SectionBase):
+    type: Literal["finishes"]
+    data: FinishesDataRead
+
+
+class AirRoutesSection(SectionBase):
+    type: Literal["air_routes"]
+    data: AirRoutesDataRead
+
+
+class ProjectsMapSection(SectionBase):
+    type: Literal["projects_map"]
+    data: ProjectsMapDataRead
+
+
 SectionRead = Annotated[
     HeroSection
     | StatsSection
@@ -732,7 +939,10 @@ SectionRead = Annotated[
     | MediaGallerySection
     | VideoSection
     | VacanciesSection
-    | GeographySection,
+    | GeographySection
+    | FinishesSection
+    | AirRoutesSection
+    | ProjectsMapSection,
     Field(discriminator="type"),
 ]
 
@@ -877,6 +1087,24 @@ SECTION_SCHEMAS: dict[SectionType, SectionSchema] = {
         stored=GeographyData,
         read=GeographySection,
         label="География",
-        description="Страны поставок",
+        description="Карта поставок: дуги из точки отгрузки в страны",
+    ),
+    SectionType.finishes: SectionSchema(
+        stored=FinishesData,
+        read=FinishesSection,
+        label="Покрытия",
+        description="Один кадр в разных покрытиях с переключателем",
+    ),
+    SectionType.air_routes: SectionSchema(
+        stored=AirRoutesData,
+        read=AirRoutesSection,
+        label="Воздушные маршруты",
+        description="Карта с маршрутами и расчётом времени полёта",
+    ),
+    SectionType.projects_map: SectionSchema(
+        stored=ProjectsMapData,
+        read=ProjectsMapSection,
+        label="Карта проектов",
+        description="Карта с проектами и ориентирами",
     ),
 }

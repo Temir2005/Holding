@@ -1,8 +1,34 @@
 {
-  "nav": { "menu": "Menu", "close": "Close", "home": "Home", "skip": "Skip to content", "language": "Language" },
-  "sheet": {"sheet": "Sheet", "sheets": "Sheets", "language": "Language", "year": "Year", "register": "Sheet register", "contacts": "Contacts", "datum": "±0.000", "noNumber": "—"},
-  "common": { "more": "Learn more", "back": "Back", "all": "All", "visitSite": "Visit website", "close": "Close" },
-  "status": { "completed": "Completed", "in_progress": "Under construction", "planned": "Planned" },
+  "nav": {
+    "menu": "Menu",
+    "close": "Close",
+    "home": "Home",
+    "skip": "Skip to content",
+    "language": "Language",
+    "main": "Main navigation"
+  },
+  "sheet": {
+    "sheet": "Sheet",
+    "sheets": "Sheets",
+    "language": "Language",
+    "year": "Year",
+    "register": "Sheet register",
+    "contacts": "Contacts",
+    "datum": "±0.000",
+    "noNumber": "—"
+  },
+  "common": {
+    "more": "Learn more",
+    "back": "Back",
+    "all": "All",
+    "visitSite": "Visit website",
+    "close": "Close"
+  },
+  "status": {
+    "completed": "Completed",
+    "in_progress": "In progress",
+    "planned": "Planned"
+  },
   "project": {
     "tokenized": "Tokenized",
     "area": "Area",
@@ -14,11 +40,37 @@
     "backToProjects": "All projects",
     "sqm": "m²"
   },
-  "team": { "bio": "Biography", "allDivisions": "All divisions", "bioOf": "Biography: {{name}}", "linkedin": "LinkedIn", "colName": "Name", "colPosition": "Position", "colDivision": "Division", "empty": "The team list is coming soon" },
-  "vacancy": { "apply": "Apply", "full_time": "Full-time", "part_time": "Part-time", "contract": "Contract", "internship": "Internship", "colTitle": "Position", "colDivision": "Division", "colLocation": "Location", "colType": "Employment", "empty": "There are no open positions right now", "write": "Write to us" },
+  "team": {
+    "bio": "Biography",
+    "allDivisions": "All divisions",
+    "bioOf": "Biography: {{name}}",
+    "linkedin": "LinkedIn",
+    "colName": "Name",
+    "colPosition": "Position",
+    "colDivision": "Division",
+    "empty": "The team list is coming soon"
+  },
+  "vacancy": {
+    "apply": "Apply",
+    "full_time": "Full-time",
+    "part_time": "Part-time",
+    "contract": "Contract",
+    "internship": "Internship",
+    "colTitle": "Position",
+    "colDivision": "Division",
+    "colLocation": "Location",
+    "colType": "Employment",
+    "empty": "There are no open positions right now",
+    "write": "Write to us"
+  },
   "form": {
     "type": "Topic",
-    "types": { "investor": "Investment", "partner": "Partnership", "candidate": "Join the team", "client": "Order products" },
+    "types": {
+      "investor": "Investment",
+      "partner": "Partnership",
+      "candidate": "Join the team",
+      "client": "Order products"
+    },
     "name": "Name",
     "phone": "Phone",
     "email": "Email",
@@ -31,7 +83,13 @@
     "error": "The request was not sent. Check your connection and try again.",
     "again": "Send another"
   },
-  "contacts": { "address": "Address", "phone": "Phone", "email": "Email", "whatsapp": "WhatsApp", "hours": "Office hours" },
+  "contacts": {
+    "address": "Address",
+    "phone": "Phone",
+    "email": "Email",
+    "whatsapp": "WhatsApp",
+    "hours": "Office hours"
+  },
   "states": {
     "errorTitle": "The page did not load",
     "errorText": "The server did not respond. Check your connection and try again.",
@@ -39,22 +97,138 @@
     "notFoundTitle": "Page not found",
     "notFoundText": "The link may be outdated or the address may contain a typo."
   },
-  "a11y": { "playVideo": "Play video", "prev": "Previous", "next": "Next" },
-  "gallery": { "empty": "Photos are coming soon", "strip": "Photo strip" },
-  "video": { "title": "Video", "source": "Source: {{host}}", "empty": "The video is coming soon" },
-  "timeline": { "years_one": "{{n}} year", "years_other": "{{n}} years", "span": "{{from}}–{{to}} · {{length}}", "empty": "The timeline is being filled in" },
-  "quote": { "open": "“", "close": "”" },
-  "divisions": { "empty": "The list of divisions is being filled in" },
-  "showcase": { "no": "No.", "empty": "The register of projects is being updated", "area": "S = {{value}} {{unit}}" },
-  "clients": { "empty": "The list of partners is being updated" },
-  "clientsGrid": { "filter": "Industry", "shown": "Showing {{shown}} of {{total}}", "empty": "The client list is being updated" },
-  "testimonials": { "empty": "Testimonials are on their way" },
-  "geography": { "caption": "Schedule of deliveries", "origin": "Dispatch", "code": "Code", "country": "Country", "note": "Note", "empty": "The list of countries is being updated" },
-  "process": { "stage": "Stage", "empty": "The stages are being specified" },
-  "production": { "empty": "The description of the production is being prepared", "legend": "Legend of materials", "finish": { "matte": "matte finish", "gloss": "gloss finish", "texture": "textured finish" } },
-  "capabilities": { "empty": "The list is being filled in" },
-  "projectList": { "total": "Projects in the register", "shown": "Showing {{shown}} of {{total}}", "empty": "No projects match these filters", "reset": "Reset filters" },
-  "tokenization": { "steps": "Scheme", "step": "Step", "benefits": "Specification", "note": "Note", "projects": "Tokenized projects" },
-  "projectPage": { "about": "Description", "tags": "Tags", "spec": "Project specification", "tokenization": "Tokenization", "yes": "Yes", "register": "Project register", "loading": "Loading the project", "prev": "Previous project", "next": "Next project", "neighbors": "Neighbouring projects" },
-  "preview": { "banner": "Preview — this is not the published version", "expiredTitle": "The preview link has expired", "expiredText": "Open the preview from the admin again: the link is valid for 30 minutes." }
+  "a11y": {
+    "playVideo": "Play video",
+    "prev": "Previous",
+    "next": "Next"
+  },
+  "gallery": {
+    "empty": "Photos are coming soon",
+    "strip": "Photo strip"
+  },
+  "video": {
+    "title": "Video",
+    "source": "Source: {{host}}",
+    "empty": "The video is coming soon"
+  },
+  "timeline": {
+    "years_one": "{{n}} year",
+    "years_other": "{{n}} years",
+    "span": "{{from}}–{{to}} · {{length}}",
+    "empty": "The timeline is being filled in"
+  },
+  "quote": {
+    "open": "“",
+    "close": "”"
+  },
+  "divisions": {
+    "empty": "The list of divisions is being filled in"
+  },
+  "showcase": {
+    "no": "No.",
+    "empty": "The register of projects is being updated",
+    "area": "S = {{value}} {{unit}}"
+  },
+  "clients": {
+    "empty": "The list of partners is being updated"
+  },
+  "clientsGrid": {
+    "filter": "Industry",
+    "shown": "Showing {{shown}} of {{total}}",
+    "empty": "The client list is being updated"
+  },
+  "testimonials": {
+    "empty": "Testimonials are on their way"
+  },
+  "geography": {
+    "caption": "Schedule of deliveries",
+    "origin": "Dispatch",
+    "code": "Code",
+    "country": "Country",
+    "note": "Note",
+    "empty": "The list of countries is being updated"
+  },
+  "process": {
+    "stage": "Stage",
+    "empty": "The stages are being specified"
+  },
+  "production": {
+    "empty": "The description of the production is being prepared",
+    "legend": "Legend of materials",
+    "finish": {
+      "matte": "matte finish",
+      "gloss": "gloss finish",
+      "texture": "textured finish"
+    }
+  },
+  "capabilities": {
+    "empty": "The list is being filled in"
+  },
+  "projectList": {
+    "total": "Projects in the register",
+    "shown": "Showing {{shown}} of {{total}}",
+    "empty": "No projects match these filters",
+    "reset": "Reset filters"
+  },
+  "tokenization": {
+    "steps": "Scheme",
+    "step": "Step",
+    "benefits": "Specification",
+    "note": "Disclaimer",
+    "projects": "Tokenized projects",
+    "share": "Investor share",
+    "progress": "Project progress"
+  },
+  "projectPage": {
+    "about": "Description",
+    "tags": "Tags",
+    "spec": "Project specification",
+    "tokenization": "Tokenization",
+    "yes": "Yes",
+    "register": "Project register",
+    "loading": "Loading the project",
+    "prev": "Previous project",
+    "next": "Next project",
+    "neighbors": "Neighbouring projects"
+  },
+  "preview": {
+    "banner": "Preview — this is not the published version",
+    "expiredTitle": "The preview link has expired",
+    "expiredText": "Open the preview from the admin again: the link is valid for 30 minutes."
+  },
+  "footer": {
+    "sections": "Sections",
+    "contacts": "Contacts",
+    "socials": "Social media"
+  },
+  "ui": {
+    "dueIn": "due {{year}}",
+    "tokenized": "Tokenized",
+    "toDivision": "Division page",
+    "filter": "Project filter",
+    "withTokenization": "Tokenized",
+    "statusMany": {
+      "in_progress": "In progress",
+      "completed": "Completed",
+      "planned": "Planned"
+    },
+    "shownProjects_one": "{{count}} project shown",
+    "shownProjects_other": "{{count}} projects shown",
+    "shownClients_one": "{{count}} company",
+    "shownClients_other": "{{count}} companies",
+    "allClients": "All clients",
+    "holding": "Holding",
+    "finish": "Finish",
+    "routes": "Routes",
+    "minutes_one": "{{count}} min",
+    "minutes_other": "{{count}} min",
+    "km_one": "{{count}} km",
+    "km_other": "{{count}} km",
+    "estimatedTime": "estimated time",
+    "straight": "straight line",
+    "breadcrumbs": "Breadcrumbs",
+    "tbd": "to be confirmed",
+    "tokenizedNote": "The project takes part in the tokenization programme. Terms will be published after legal approval.",
+    "howItWorks": "How it works"
+  }
 }

@@ -1,11 +1,9 @@
-import { type FormEvent, type ReactNode, useEffect, useId, useRef, useState } from 'react'
+import { type FormEvent, useEffect, useId, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useLocation } from 'react-router-dom'
 import { useCreateLead } from '@/api/queries'
 import type { LeadType } from '@/api/types'
-import { DimArrow } from '@/components/ui/DimArrow'
-import { buttonClass } from '@/lib/button'
-import { cn } from '@/lib/cn'
+import { Arrow } from '@/components/site/kit'
 import { useLocale } from '@/lib/locale'
 
 type Props = {
@@ -17,17 +15,7 @@ type Props = {
 
 type Errors = Partial<Record<'name' | 'contact', string>>
 
-/**
- * Fields of a drawing form: no boxes, a hairline baseline that turns into a 2px pen stroke on
- * focus (the focus indicator) and the accent colour on error. 48px+ tall for touch.
- */
-const fieldClass = cn(
-  'block min-h-12 w-full rounded-none border-0 border-b border-line-strong bg-transparent px-0 py-3',
-  'text-lead text-fg placeholder:text-fg-mute/70 transition-[border-color,box-shadow] duration-1',
-  'hover:border-fg focus:border-trace focus:shadow-[inset_0_-1px_0_rgb(var(--trace))] focus:outline-none',
-  'aria-[invalid=true]:border-accent aria-[invalid=true]:shadow-[inset_0_-1px_0_rgb(var(--accent))]',
-)
-
+/** Lead form: a white card on the section photo. Saves a lead through the public API. */
 export function LeadForm({ leadTypes, defaultType, consentText, successText }: Props) {
   const { t } = useTranslation()
   const locale = useLocale()
@@ -37,14 +25,24 @@ export function LeadForm({ leadTypes, defaultType, consentText, successText }: P
   const [type, setType] = useState<LeadType>(defaultType)
   const [errors, setErrors] = useState<Errors>({})
   const successRef = useRef<HTMLDivElement>(null)
-  // height of the form at submit: the confirmation keeps it, so the footer does not jump up
-  // when the answer arrives (a shift that late after the click would count as CLS)
+  // the confirmation keeps the form's height, so the page below does not jump
   const formHeight = useRef(0)
 
-  // The form is replaced by the confirmation: move focus there so keyboard users are not lost.
   useEffect(() => {
     if (mutation.isSuccess) successRef.current?.focus()
   }, [mutation.isSuccess])
+
+  // a vacancy's "apply" button preselects the candidate topic and fills the message
+  useEffect(() => {
+    const onApply = (e: Event) => {
+      const title = (e as CustomEvent<string>).detail
+      if (leadTypes.includes('candidate')) setType('candidate')
+      const field = document.getElementById(`${uid}-message`)
+      if (field instanceof HTMLTextAreaElement && title) field.value = title
+    }
+    window.addEventListener('lead:apply', onApply)
+    return () => window.removeEventListener('lead:apply', onApply)
+  }, [leadTypes, uid])
 
   function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -59,7 +57,6 @@ export function LeadForm({ leadTypes, defaultType, consentText, successText }: P
     if (!phone && !email) next.contact = t('form.contactRequired')
     setErrors(next)
     if (Object.keys(next).length) {
-      // aria-invalid is not rendered yet at this point: focus the first bad field by name.
       const first = e.currentTarget.elements.namedItem(next.name ? 'name' : 'phone')
       if (first instanceof HTMLElement) first.focus()
       return
@@ -84,204 +81,107 @@ export function LeadForm({ leadTypes, defaultType, consentText, successText }: P
         ref={successRef}
         role="status"
         tabIndex={-1}
+        className="form"
         style={{ minHeight: formHeight.current || undefined }}
-        className="flex flex-col items-start justify-center gap-8 border-t border-fg py-8 focus:outline-none"
       >
-        {/* the square is stamped, then the text is drawn in (transform and clip only) */}
-        <p className="flex items-start gap-4 text-subtitle font-medium">
-          <span
-            aria-hidden="true"
-            className="mt-[0.4em] h-3 w-3 flex-none animate-[stamp-in_var(--dur-3)_var(--ease-out)_both] bg-trace motion-reduce:animate-none"
-          />
-          <span className="animate-[draw-in_var(--dur-4)_var(--ease-out)_120ms_both] motion-reduce:animate-[fade-in_var(--dur-2)_linear_both]">
-            {successText}
-          </span>
-        </p>
-        <button type="button" className={buttonClass('secondary')} onClick={() => mutation.reset()}>
-          {t('form.again')}
-        </button>
+        <div className="form__ok">
+          <p>{successText}</p>
+          <button type="button" className="btn btn--ink" onClick={() => mutation.reset()}>
+            {t('form.again')}
+          </button>
+        </div>
       </div>
     )
   }
 
   const id = (name: string) => `${uid}-${name}`
-  const contactError = errors.contact ? `${uid}-contact-error` : undefined
+  const contactError = errors.contact ? id('contact-error') : undefined
 
   return (
-    <form noValidate onSubmit={onSubmit} className="flex flex-col gap-8 border-t border-fg pt-5">
+    <form noValidate onSubmit={onSubmit} className="form">
       {leadTypes.length > 1 && (
-        <fieldset>
-          <legend className="mono-label mb-3">{t('form.type')}</legend>
-          {/* Segments: hairline cells that close every row (the last row stretches). */}
-          <div className="flex flex-wrap border-l border-t border-line">
-            {leadTypes.map((lt) => {
-              const on = type === lt
-              return (
-                <label
-                  key={lt}
-                  className={cn(
-                    'relative flex min-h-14 flex-1 basis-[9rem] cursor-pointer items-center gap-3 border-b border-r border-line px-3 sm:basis-[10.5rem] sm:px-4',
-                    'font-mono text-caption font-medium uppercase transition-colors duration-1',
-                    'has-[:focus-visible]:z-10 has-[:focus-visible]:outline has-[:focus-visible]:outline-2 has-[:focus-visible]:-outline-offset-2 has-[:focus-visible]:outline-[rgb(var(--accent-ink))]',
-                    on
-                      ? 'bg-surface-2 text-fg'
-                      : 'text-fg-mute hover:text-fg active:bg-surface-2/60',
-                  )}
-                >
-                  <input
-                    type="radio"
-                    name="type"
-                    value={lt}
-                    checked={on}
-                    onChange={() => setType(lt)}
-                    className="sr-only"
-                  />
-                  {/* the legend square of the drawing: empty, or filled with the line colour */}
-                  <span
-                    aria-hidden="true"
-                    className={cn(
-                      'h-2.5 w-2.5 flex-none border transition-colors duration-1',
-                      on
-                        ? 'animate-[stamp-in_var(--dur-2)_var(--ease-out)] border-trace bg-trace motion-reduce:animate-none'
-                        : 'border-current',
-                    )}
-                  />
-                  {t(`form.types.${lt}`)}
-                </label>
-              )
-            })}
-          </div>
+        <fieldset className="seg" aria-label={t('form.type')}>
+          {leadTypes.map((lt) => (
+            <label key={lt}>
+              <input
+                type="radio"
+                name="type"
+                value={lt}
+                checked={type === lt}
+                onChange={() => setType(lt)}
+              />
+              <span>{t(`form.types.${lt}`)}</span>
+            </label>
+          ))}
         </fieldset>
       )}
-
-      <Field id={id('name')} label={t('form.name')} error={errors.name}>
+      <label className="f" htmlFor={id('name')}>
+        {t('form.name')}
         <input
           id={id('name')}
           name="name"
           autoComplete="name"
           required
           aria-invalid={!!errors.name}
-          aria-describedby={errors.name ? `${id('name')}-error` : undefined}
-          className={fieldClass}
+          aria-describedby={errors.name ? id('name-error') : undefined}
         />
-      </Field>
-
-      <div className="flex flex-col gap-3">
-        <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 sm:gap-x-gap">
-          <Field id={id('phone')} label={t('form.phone')}>
-            <input
-              id={id('phone')}
-              name="phone"
-              type="tel"
-              autoComplete="tel"
-              inputMode="tel"
-              aria-invalid={!!errors.contact}
-              aria-describedby={contactError}
-              className={cn(fieldClass, 'tabular')}
-            />
-          </Field>
-          <Field id={id('email')} label={t('form.email')}>
-            <input
-              id={id('email')}
-              name="email"
-              type="email"
-              autoComplete="email"
-              aria-invalid={!!errors.contact}
-              aria-describedby={contactError}
-              className={fieldClass}
-            />
-          </Field>
-        </div>
-        {errors.contact && <ErrorText id={contactError}>{errors.contact}</ErrorText>}
+      </label>
+      {errors.name && (
+        <p id={id('name-error')} role="alert" className="err">
+          {errors.name}
+        </p>
+      )}
+      <div className="two">
+        <label className="f" htmlFor={id('phone')}>
+          {t('form.phone')}
+          <input
+            id={id('phone')}
+            name="phone"
+            type="tel"
+            autoComplete="tel"
+            inputMode="tel"
+            aria-invalid={!!errors.contact}
+            aria-describedby={contactError}
+          />
+        </label>
+        <label className="f" htmlFor={id('email')}>
+          {t('form.email')}
+          <input
+            id={id('email')}
+            name="email"
+            type="email"
+            autoComplete="email"
+            aria-invalid={!!errors.contact}
+            aria-describedby={contactError}
+          />
+        </label>
       </div>
-
-      <Field id={id('message')} label={t('form.message')} hint={t('form.optional')}>
-        <textarea
-          id={id('message')}
-          name="message"
-          rows={3}
-          className={cn(fieldClass, 'resize-y')}
-        />
-      </Field>
-
-      {/* Honeypot: invisible to people, tempting to bots. */}
+      {errors.contact && (
+        <p id={contactError} role="alert" className="err">
+          {errors.contact}
+        </p>
+      )}
+      <label className="f" htmlFor={id('message')}>
+        {t('form.message')}
+        <textarea id={id('message')} name="message" rows={3} />
+      </label>
+      {/* honeypot: invisible to people, tempting to bots */}
       <div aria-hidden="true" className="absolute -left-[9999px] h-px w-px overflow-hidden">
         <label>
           Website
           <input name="website" tabIndex={-1} autoComplete="off" />
         </label>
       </div>
-
-      <div className="flex flex-col gap-5">
-        <p className="max-w-[60ch] text-[0.8125rem] leading-relaxed text-fg-mute">{consentText}</p>
-        {mutation.isError && <ErrorText>{t('form.error')}</ErrorText>}
-        <button
-          type="submit"
-          disabled={mutation.isPending}
-          className={buttonClass(
-            'primary',
-            // sending is not «disabled»: the button keeps its colour while the pen runs
-            cn(
-              'relative w-full sm:w-auto sm:self-start',
-              mutation.isPending && 'cursor-progress disabled:opacity-100',
-            ),
-          )}
-        >
-          <span>{mutation.isPending ? t('form.sending') : t('form.submit')}</span>
-          <DimArrow />
-          {/* while sending, the pen runs along the bottom edge (the text says it as well) */}
-          {mutation.isPending && (
-            <span
-              aria-hidden="true"
-              className="absolute inset-x-0 bottom-0 h-0.5 origin-left animate-[pen-run_1.2s_var(--ease-in-out)_infinite] bg-trace motion-reduce:animate-none"
-            />
-          )}
-        </button>
-        <p aria-live="polite" className="sr-only">
-          {mutation.isPending ? t('form.sending') : ''}
+      {mutation.isError && (
+        <p role="alert" className="err">
+          {t('form.error')}
         </p>
-      </div>
-    </form>
-  )
-}
-
-type FieldProps = { id: string; label: string; hint?: string; error?: string; children: ReactNode }
-
-function Field({ id, label, hint, error, children }: FieldProps) {
-  return (
-    <div className="flex flex-col">
-      <label htmlFor={id} className="mono-label flex justify-between gap-4">
-        <span>{label}</span>
-        {hint && <span className="normal-case tracking-normal">{hint}</span>}
-      </label>
-      {children}
-      {error && (
-        <ErrorText id={`${id}-error`} className="mt-3">
-          {error}
-        </ErrorText>
       )}
-    </div>
-  )
-}
-
-/** Error under a field: announced at once, marked with a square so it does not rely on colour. */
-function ErrorText({
-  id,
-  children,
-  className,
-}: {
-  id?: string
-  children: ReactNode
-  className?: string
-}) {
-  return (
-    <p
-      id={id}
-      role="alert"
-      className={cn('flex items-start gap-2 text-sm text-accent-ink', className)}
-    >
-      <span aria-hidden="true" className="mt-[0.45em] h-2 w-2 flex-none bg-current" />
-      {children}
-    </p>
+      <button type="submit" className="btn btn--accent" disabled={mutation.isPending}>
+        {mutation.isPending ? t('form.sending') : t('form.submit')}
+        {!mutation.isPending && <Arrow />}
+      </button>
+      <small>{consentText}</small>
+    </form>
   )
 }

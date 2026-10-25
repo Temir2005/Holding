@@ -2,7 +2,6 @@ import { matchPath } from 'react-router-dom'
 import { pageQuery, projectQuery } from '@/api/queries'
 import { whenIdle } from '@/lib/idle'
 import { isLocale, type Locale } from '@/lib/locale'
-import { loadProjectRest } from '@/pages/project/rest'
 import { preloadSections } from '@/sections/registry'
 import { queryClient } from './queryClient'
 
@@ -23,9 +22,8 @@ export function prefetchPage(slug: string, locale: Locale, soon = false) {
   })
 }
 
-/** The project data and the chunk of the sheets below its first screen (`soon`: see above). */
-export function prefetchProject(slug: string, locale: Locale, soon = false) {
-  void (soon ? Promise.resolve() : whenIdle()).then(() => loadProjectRest.preload()).catch(noop)
+/** The project data. */
+export function prefetchProject(slug: string, locale: Locale) {
   return queryClient.prefetchQuery(projectQuery(slug, locale))
 }
 
@@ -36,6 +34,6 @@ export function prefetchPath(to: string) {
   const page = matchPath('/:locale/:slug?', pathname)?.params
   const locale = (project ?? page)?.locale
   if (!isLocale(locale)) return
-  if (project) void prefetchProject(project.slug ?? '', locale, true)
+  if (project) void prefetchProject(project.slug ?? '', locale)
   else void prefetchPage(page?.slug ?? 'home', locale, true)
 }

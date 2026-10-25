@@ -1,67 +1,160 @@
-import { useRef } from 'react'
-import { useTranslation } from 'react-i18next'
-import { usePinnedSteps } from '@/components/motion/usePinnedSteps'
-import type { TraceBranches } from '@/components/trace/paths'
-import { Container } from '@/components/ui/Container'
-import { DimensionLine } from '@/components/ui/DimensionLine'
-import { Section } from '@/components/ui/Section'
-import { SectionHeader } from '@/components/ui/SectionHeader'
-import { Scene } from './process/Scene'
-import { DIVISION_ANCHOR, StepList } from './process/StepList'
-import { pad2 } from './sectionNumber'
-import { headingId, type SectionProps } from './types'
+import { type CSSProperties, useEffect, useRef, useState } from 'react'
+import { Arrow, CmsLink, Eyebrow, Sec } from '@/components/site/kit'
+import { reduceMotion } from '@/components/site/hooks'
+import { SmartImage } from '@/components/ui/SmartImage'
+import type { SectionProps } from './types'
 
-/** List mode: the line branches off the margin into the callout of every division stage. */
-const divisionBranches: TraceBranches = (box) =>
-  (box.anchors[DIVISION_ANCHOR] ?? [])
-    .filter((p) => p.x > box.x)
-    .map((p) => ({ d: `M ${box.x} ${p.y} H ${p.x}`, at: p.y }))
+const DIV_COLOR: Record<string, string> = {
+  'smart-panels': '#E31E24',
+  aaag: '#5A47B8',
+  development: '#F0843E',
+}
 
 /**
- * «Полный цикл»: the signature moment of the site.
- * - With motion and 2+ stages: a pinned scene (process/Scene), the active stage follows the
- *   scroll position only.
- * - Reduced motion or a single stage: every stage open in a list on the line (process/StepList).
- * - No stages: the header and one line of the empty state; nothing without a header.
+ * The full cycle: the block pins to the screen and scrolling walks the track from step to step;
+ * text and photo change with the step. A step that belongs to another division is drawn in its
+ * colour and links to it. On phones it is a plain list.
  */
 export function ProcessStepsSection({ section }: SectionProps<'process_steps'>) {
-  const { data } = section
-  const { t } = useTranslation()
-  const steps = data.steps
-  const n = steps.length
-  const sceneRef = useRef<HTMLDivElement>(null)
-  const { pinned, active, progress } = usePinnedSteps(sceneRef, n)
-  const hasHeader = Boolean(data.title || data.eyebrow || data.intro)
-  if (!n && !hasHeader) return null
-  const id = headingId(section.id)
-  const range = n > 1 ? <DimensionLine label={`${pad2(1)} — ${pad2(n)}`} /> : undefined
+  const d = section.data
+  const n = d.steps.length
+  const root = useRef<HTMLDivElement>(null)
+  const fill = useRef<HTMLSpanElement>(null)
+  const [cur, setCur] = useState(0)
+
+  useEffect(() => {
+    const el = root.current
+    if (!el || !n) return
+    let raf = 0
+    const update = () => {
+      raf = 0
+      const r = el.getBoundingClientRect()
+      const span = r.height - window.innerHeight
+      const p = span > 0 ? Math.min(1, Math.max(0, -r.top / span)) : 0
+      fill.current?.style.setProperty('--p', String(reduceMotion() ? (cur + 1) / n : p))
+      setCur(Math.min(n - 1, Math.floor(p * n + 0.02)))
+    }
+    const on = () => {
+      if (!raf) raf = requestAnimationFrame(update)
+    }
+    update()
+    window.addEventListener('scroll', on, { passive: true })
+    window.addEventListener('resize', on)
+    return () => {
+      cancelAnimationFrame(raf)
+      window.removeEventListener('scroll', on)
+      window.removeEventListener('resize', on)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [n])
+
+  if (!n) return null
+  const jump = (i: number) => {
+    const el = root.current
+    if (!el) return
+    const span = el.offsetHeight - window.innerHeight
+    window.scrollTo({
+      top: el.offsetTop + (span * (i + 0.5)) / n,
+      behavior: reduceMotion() ? 'auto' : 'smooth',
+    })
+  }
 
   return (
-    <Section
+    <Sec
       tone={section.tone}
       anchor={section.anchor}
-      labelledBy={data.title ? id : undefined}
-      branches={pinned ? undefined : divisionBranches}
-      bleed
+      bare
+      className="cyc"
+      style={{ '--n': n } as CSSProperties}
     >
-      <Container>
-        <SectionHeader
-          id={id}
-          eyebrow={data.eyebrow}
-          title={data.title}
-          intro={data.intro}
-          aside={data.intro ? undefined : range}
-        />
-      </Container>
-      {pinned ? (
-        <Scene steps={steps} sceneRef={sceneRef} active={active} progress={progress} />
-      ) : (
-        <Container>
-          <div ref={sceneRef}>
-            {n ? <StepList steps={steps} /> : <p className="mono-label">{t('process.empty')}</p>}
+      <div ref={root} style={{ height: '100%' }}>
+        <div className="cyc__pin">
+          <div className="wrap" style={{ width: '100%' }}>
+            <Eyebrow>{d.eyebrow}</Eyebrow>
+            {d.title && <h2 className="h2">{d.title}</h2>}
+            <div className="track" style={{ '--n': n } as CSSProperties}>
+              <div className="track__line" aria-hidden="true">
+                <span className="track__fill" ref={fill} />
+              </div>
+              {d.steps.map((s, i) => (
+                <button
+                  key={i}
+                  className={[
+                    'node',
+                    i <= cur && 'done',
+                    i === cur && 'cur',
+                    s.division && 'node--div',
+                  ]
+                    .filter(Boolean)
+                    .join(' ')}
+                  style={
+                    s.division
+                      ? ({ '--div': DIV_COLOR[s.division.slug] ?? 'var(--bar)' } as CSSProperties)
+                      : undefined
+                  }
+                  aria-current={i === cur ? 'step' : undefined}
+                  onClick={() => jump(i)}
+                >
+                  <i aria-hidden="true" />
+                  {s.title}
+                </button>
+              ))}
+            </div>
+            <div className="cyc__body">
+              <div className="steps-txt">
+                {d.steps.map((s, i) => (
+                  <div
+                    key={i}
+                    className={i === cur ? 'step-txt on' : 'step-txt'}
+                    aria-hidden={i !== cur}
+                  >
+                    <b>{String(i + 1).padStart(2, '0')}</b>
+                    <h3 className="h3">{s.title}</h3>
+                    <p>{s.text}</p>
+                    {s.division?.page_slug && (
+                      <CmsLink
+                        href={s.division.page_slug}
+                        className="btn"
+                        {...(i !== cur ? { tabIndex: -1 } : {})}
+                      >
+                        {s.division.name}
+                        <Arrow />
+                      </CmsLink>
+                    )}
+                  </div>
+                ))}
+              </div>
+              <div className="shots" aria-hidden="true">
+                {d.steps.map((s, i) => (
+                  <div key={i} className={i === cur ? 'shot on' : 'shot'}>
+                    <SmartImage media={s.media} fill sizes="(max-width: 860px) 100vw, 55vw" />
+                  </div>
+                ))}
+              </div>
+            </div>
+            <ol className="cyc__list">
+              {d.steps.map((s, i) => (
+                <li key={i}>
+                  {s.media && (
+                    <div className="ph">
+                      <SmartImage media={s.media} fill sizes="100vw" />
+                    </div>
+                  )}
+                  <b className="muted">{String(i + 1).padStart(2, '0')}</b>
+                  <h3 className="h3">{s.title}</h3>
+                  <p>{s.text}</p>
+                  {s.division?.page_slug && (
+                    <CmsLink href={s.division.page_slug} className="btn btn--accent">
+                      {s.division.name}
+                      <Arrow />
+                    </CmsLink>
+                  )}
+                </li>
+              ))}
+            </ol>
           </div>
-        </Container>
-      )}
-    </Section>
+        </div>
+      </div>
+    </Sec>
   )
 }

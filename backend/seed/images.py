@@ -56,6 +56,23 @@ def _finish(img: Image.Image, quality: int = 82) -> Rendered:
     return Rendered(buf.getvalue(), "image/jpeg", img.width, img.height, _hex(dominant[:3]))
 
 
+ASSETS_DIR = Path(__file__).parent / "assets"
+EXT_MIME = {".webp": "image/webp", ".png": "image/png", ".jpg": "image/jpeg"}
+
+
+def asset(name: str) -> Rendered:
+    """A prepared image from seed/assets, kept byte for byte (WebP keeps its alpha channel)."""
+    path = next(
+        ASSETS_DIR / f"{name}{ext}" for ext in EXT_MIME if (ASSETS_DIR / f"{name}{ext}").is_file()
+    )
+    body = path.read_bytes()
+    with Image.open(path) as source:
+        img = source.convert("RGBA")
+    dominant = img.convert("RGB").resize((1, 1), Image.Resampling.BOX).getpixel((0, 0))
+    assert isinstance(dominant, tuple)
+    return Rendered(body, EXT_MIME[path.suffix], img.width, img.height, _hex(dominant[:3]))
+
+
 def photo(path: Path) -> Rendered:
     """A real photo from disk. A JPEG is kept byte for byte; size and color come from the file."""
     body = path.read_bytes()
@@ -250,3 +267,32 @@ def logo_svg(name: str, seed: str) -> Rendered:
         f'font-weight="700" fill="{color}">{name}</text></svg>'
     )
     return Rendered(svg.encode(), "image/svg+xml", w, h, color)
+
+
+# Placeholder client marks: simple shapes in the client's colour, no lettering.
+MARKS = [
+    '<circle cx="16" cy="16" r="13"/>',
+    '<rect x="5" y="5" width="22" height="22" rx="3" transform="rotate(45 16 16)"/>',
+    '<rect x="3" y="6" width="8" height="20" rx="2"/>'
+    '<rect x="13" y="2" width="8" height="24" rx="2"/>'
+    '<rect x="23" y="10" width="6" height="16" rx="2"/>',
+    '<path d="M16 3 29 27H3z"/>',
+    '<path d="M16 3a13 13 0 1 0 0 26 13 13 0 0 0 0-26zm0 7a6 6 0 1 1 0 12 6 6 0 0 1 0-12z" '
+    'fill-rule="evenodd"/>',
+    '<path d="M3 27C3 13 13 3 27 3v8C17 11 11 17 11 27z"/>',
+    "".join(
+        f'<circle cx="{x}" cy="{y}" r="4"/>'
+        for x in (6, 16, 26)
+        for y in (6, 16, 26)
+        if (x + y) % 20
+    ),
+]
+
+
+def logo_mark(shape: int, color: str) -> Rendered:
+    """A square SVG mark for a placeholder client logo."""
+    svg = (
+        '<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 32 32">'
+        f'<g fill="{color}">{MARKS[shape % len(MARKS)]}</g></svg>'
+    )
+    return Rendered(svg.encode(), "image/svg+xml", 64, 64, color)

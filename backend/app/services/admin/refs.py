@@ -15,6 +15,7 @@ import uuid
 from collections import defaultdict
 from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass, field
+from decimal import Decimal
 from typing import Any
 
 from pydantic import BaseModel
@@ -398,7 +399,7 @@ class RefService:
                     is_published=published,
                 )
             case RefKind.stat:
-                value = f"{row.prefix or ''}{row.value.normalize():f}{ru(row.suffix)}"
+                value = f"{row.prefix or ''}{Decimal(row.value).normalize():f}{ru(row.suffix)}"
                 return RefCard(
                     id=row.id,
                     kind=kind,

@@ -64,6 +64,9 @@ export const sectionRegistry: SectionRegistry = {
   video: lazySection(() => import('./VideoSection').then((m) => m.VideoSection)),
   vacancies: lazySection(() => import('./VacanciesSection').then((m) => m.VacanciesSection)),
   geography: lazySection(() => import('./GeographySection').then((m) => m.GeographySection)),
+  finishes: lazySection(() => import('./FinishesSection').then((m) => m.FinishesSection)),
+  air_routes: lazySection(() => import('./AirRoutesSection').then((m) => m.AirRoutesSection)),
+  projects_map: lazySection(() => import('./ProjectsMapSection').then((m) => m.ProjectsMapSection)),
 }
 
 /** The renderer of a section type, widened once (TS cannot link a union `type` to its entry). */

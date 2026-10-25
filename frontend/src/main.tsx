@@ -1,6 +1,7 @@
-// Site fonts: Geologica and IBM Plex Mono, instanced and subset by design/tools/build-fonts.sh
-// (all Kazakh letters verified by design/tools/cmap.cjs). Licences: OFL-*.txt next to them.
-import './assets/fonts/fonts.css'
+// Site font: Montserrat, self-hosted; its cyrillic-ext subset covers every Kazakh letter.
+import '@fontsource/montserrat/400.css'
+import '@fontsource/montserrat/500.css'
+import '@fontsource/montserrat/600.css'
 // Admin fonts. The site never uses these families, so browsers do not download their files on
 // the site; only the @font-face rules ship. TODO: move into the admin chunk with its next stage.
 import '@fontsource-variable/jetbrains-mono'

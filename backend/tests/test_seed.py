@@ -151,17 +151,14 @@ async def test_empty_database_in_production_is_seeded(
     assert storage.objects, "images uploaded"
 
 
-async def test_seed_swatches_live_in_the_production_block(
+async def test_seed_finishes_show_one_frame_per_coat(
     client: AsyncClient, session: AsyncSession, storage: InMemoryStorage
 ) -> None:
+    """The finish switcher: every coat has its own photo of the same kitchen and a colour."""
     await run_seed(session, storage, get_settings())
-
-    def blocks(page: dict[str, Any], kind: str) -> list[dict[str, Any]]:
-        return [s["data"] for s in page["sections"] if s["type"] == kind]
-
-    home = (await client.get("/api/v1/pages/home")).json()
     panels = (await client.get("/api/v1/pages/smart-panels")).json()
-    assert [h["swatches"] for h in blocks(home, "hero") + blocks(panels, "hero")] == [[], []]
-    (production,) = blocks(panels, "production")
-    codes = [s["code"] for s in production["swatches"]]
-    assert codes and len(codes) == len(set(codes))
+    (finishes,) = [s["data"] for s in panels["sections"] if s["type"] == "finishes"]
+    items = finishes["items"]
+    assert [i["finish"] for i in items] == ["matte", "gloss", "texture"]
+    assert all(i["media"] and i["color"].startswith("#") for i in items)
+    assert len({i["media"]["id"] for i in items}) == len(items)

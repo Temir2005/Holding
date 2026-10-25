@@ -1,68 +1,52 @@
+import type { CSSProperties } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import type { TraceBranches } from '@/components/trace/paths'
-import { Reveal } from '@/components/ui/Reveal'
-import { Section } from '@/components/ui/Section'
-import { SectionHeader } from '@/components/ui/SectionHeader'
-import { cn } from '@/lib/cn'
-import { Facts } from './production/Facts'
-import { Gallery } from './production/Gallery'
-import { LEGEND_ANCHOR, Legend } from './production/Legend'
-import { headingId, type SectionProps } from './types'
+import { Eyebrow, Sec } from '@/components/site/kit'
+import { SmartImage } from '@/components/ui/SmartImage'
+import type { SectionProps } from './types'
 
-/** A station tick from the line to the legend caption, drawn as the pen passes it. */
-const legendTick: TraceBranches = (box) =>
-  (box.anchors[LEGEND_ANCHOR] ?? []).map((p) => ({
-    d: `M ${box.x} ${p.y} H ${p.x - 12}`,
-    at: p.y,
-  }))
-
-/**
- * The plant as a sheet of its own: the text and the facts as a chain of dimensions, the shots
- * on a contact sheet with a rhythm of proportions, then the legend of materials (sample, code,
- * name). Every part collapses when it has no data; with nothing but a heading, one line says
- * the description is coming.
- */
+/** Production: a full-bleed photo that opens from a card to the whole screen, with figures. */
 export function ProductionSection({ section }: SectionProps<'production'>) {
-  const { data } = section
   const { t } = useTranslation()
-  const { facts, gallery, swatches } = data
-  const body = data.body.trim()
-  const hasHeader = Boolean(data.title || data.eyebrow)
-  const hasContent = Boolean(body || facts.length || gallery.length || swatches.length)
-  if (!hasContent && !hasHeader) return null
-  const id = headingId(section.id)
-
+  const d = section.data
+  const [cur, setCur] = useState(0)
+  const photo = d.gallery[cur] ?? null
   return (
-    <Section
-      tone={section.tone}
-      anchor={section.anchor}
-      labelledBy={data.title ? id : undefined}
-      branches={swatches.length ? legendTick : undefined}
-    >
-      <SectionHeader id={id} eyebrow={data.eyebrow} title={data.title} />
-      {!hasContent && <p className="mono-label">{t('production.empty')}</p>}
-
-      <div className="flex flex-col gap-[clamp(56px,7vw,112px)]">
-        {(body || facts.length > 0) && (
-          <div className="grid grid-cols-12 gap-x-gap gap-y-12">
-            {body && (
-              <Reveal className={cn('col-span-12', facts.length > 0 && 'lg:col-span-5')}>
-                <p className="max-w-[40ch] text-lead text-fg-mute">{body}</p>
-              </Reveal>
-            )}
-            {facts.length > 0 && (
-              <Facts
-                facts={facts}
-                wide={!body}
-                className={cn('col-span-12', body && 'lg:col-span-6 lg:col-start-7')}
-              />
-            )}
+    <Sec tone="dark" anchor={section.anchor} bare className="bleed" label={d.title}>
+      <div className="bleed__bg">
+        <SmartImage key={photo?.id} media={photo} fill sizes="100vw" />
+      </div>
+      <div className="wrap">
+        <div className="bleed__txt">
+          <Eyebrow>{d.eyebrow}</Eyebrow>
+          {d.title && <h2 className="h2">{d.title}</h2>}
+          <p className="lead">{d.body}</p>
+          {d.gallery.length > 1 && (
+            <div className="thumbs" role="group" aria-label={t('gallery.strip')}>
+              {d.gallery.map((m, i) => (
+                <button
+                  key={m.id}
+                  aria-pressed={i === cur}
+                  aria-label={m.alt}
+                  onClick={() => setCur(i)}
+                >
+                  <SmartImage media={m} fill sizes="96px" />
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+        {d.facts.length > 0 && (
+          <div className="facts" style={{ '--n': d.facts.length } as CSSProperties}>
+            {d.facts.map((f) => (
+              <div key={f.label} className="fact rv">
+                <b>{f.value}</b>
+                <span>{f.label}</span>
+              </div>
+            ))}
           </div>
         )}
-
-        {gallery.length > 0 && <Gallery items={gallery} />}
-        {swatches.length > 0 && <Legend swatches={swatches} />}
       </div>
-    </Section>
+    </Sec>
   )
 }

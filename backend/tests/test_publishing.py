@@ -476,7 +476,7 @@ async def test_seeds_publish_revision_one(
     await session.commit()
     home = await client.get(f"{PUBLIC}/home")
     assert home.status_code == 200
-    assert len(home.json()["sections"]) == 9
+    assert len(home.json()["sections"]) == 7
     numbers = list(await session.scalars(select(PageRevision.number)))
     pages = list(await session.scalars(select(Page.slug)))
     assert numbers == [1] * len(pages)

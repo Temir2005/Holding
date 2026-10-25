@@ -1,52 +1,100 @@
-import { useTranslation } from 'react-i18next'
-import { useSettings } from '@/api/queries'
-import { Section } from '@/components/ui/Section'
-import { SectionHeader } from '@/components/ui/SectionHeader'
-import { useLocale } from '@/lib/locale'
-import { LanesStart, Origin, Schedule } from './geography/Schedule'
-import { supplyRoutes } from './geography/routes'
-import { headingId, type SectionProps } from './types'
+import { useEffect, useRef, useState } from 'react'
+import { Head, Sec } from '@/components/site/kit'
+import { reduceMotion, useInView } from '@/components/site/hooks'
+import { MapFrame } from '@/components/site/MapFrame'
+import type { SectionProps } from './types'
 
-/**
- * Geography as a schedule of deliveries, not a map: a table of countries (ISO code, name, note)
- * and, from the dispatch point (the address in the site settings), schematic routes that branch
- * off the line in the margin and fan out to every row, each drawn as the pen reaches it.
- * No real map, no distances: only what the CMS says.
- */
+/** Supply map: arcs from the warehouse to each country draw one after another. */
 export function GeographySection({ section }: SectionProps<'geography'>) {
-  const { data } = section
-  const { t } = useTranslation()
-  const locale = useLocale()
-  const address = useSettings(locale).data?.contacts.address
-  const { countries } = data
-  if (!countries.length && !data.title) return null
+  const d = section.data
+  const [ref, seen] = useInView<HTMLDivElement>('0px 0px -25% 0px')
+  const [lit, setLit] = useState(0)
+  const arcs = useRef<(SVGPathElement | null)[]>([])
+  const placed = d.countries.filter((c) => c.lat != null && c.lon != null)
+  const canDraw = d.bounds && d.origin_lat != null && d.origin_lon != null
+
+  useEffect(() => {
+    if (!seen) return
+    if (reduceMotion()) {
+      setLit(placed.length)
+      return
+    }
+    const timers: number[] = []
+    arcs.current.forEach((path, i) => {
+      if (!path) return
+      const len = path.getTotalLength()
+      path.style.strokeDasharray = String(len)
+      path.animate([{ strokeDashoffset: len }, { strokeDashoffset: 0 }], {
+        duration: 900,
+        delay: 300 + i * 450,
+        easing: 'cubic-bezier(.77,0,.175,1)',
+        fill: 'backwards',
+      })
+      timers.push(window.setTimeout(() => setLit(i + 1), 300 + i * 450 + 900))
+    })
+    return () => timers.forEach(clearTimeout)
+  }, [seen, placed.length])
 
   return (
-    <Section
-      tone={section.tone}
-      anchor={section.anchor}
-      labelledBy={data.title ? headingId(section.id) : undefined}
-      branches={countries.length ? supplyRoutes : undefined}
-    >
-      <SectionHeader
-        id={headingId(section.id)}
-        eyebrow={data.eyebrow}
-        title={data.title}
-        intro={data.intro}
-      />
-      {!countries.length ? (
-        <div className="plate grid min-h-32 place-items-center border-y border-line p-6">
-          <p className="mono-label text-center">{t('geography.empty')}</p>
+    <Sec tone="dark" anchor={section.anchor}>
+      <div className="wrap geo__grid">
+        <div>
+          <Head eyebrow={d.eyebrow} title={d.title} lead={d.intro} className="" />
+          <ul className="geo__list">
+            {d.countries.map((c) => {
+              const i = placed.indexOf(c)
+              return (
+                <li key={c.code} className={i > -1 && i < lit ? 'lit' : undefined}>
+                  <i aria-hidden="true" />
+                  {c.name}
+                  {c.note && <span className="muted"> · {c.note}</span>}
+                </li>
+              )
+            })}
+          </ul>
         </div>
-      ) : (
-        <div className="grid grid-cols-12 gap-x-gap gap-y-6">
-          <Origin address={address} className="col-span-12 lg:col-span-3 lg:row-start-1" />
-          <LanesStart className="hidden lg:col-start-4 lg:row-start-1 lg:block" />
-          <div className="col-span-12 pl-12 lg:col-span-6 lg:col-start-7 lg:row-start-1 lg:pl-0">
-            <Schedule countries={countries} />
-          </div>
+        <div ref={ref}>
+          {canDraw && d.bounds && (
+            <MapFrame map={d.map} bounds={d.bounds} className="geo__map" label={d.title ?? ''}>
+              {(at) => {
+                const [ox, oy] = at(d.origin_lat ?? 0, d.origin_lon ?? 0)
+                return (
+                  <>
+                    {placed.map((c, i) => {
+                      const [x, y] = at(c.lat ?? 0, c.lon ?? 0)
+                      const mx = (ox + x) / 2
+                      const my = Math.min(oy, y) - Math.abs(x - ox) * 0.25 - 20
+                      return (
+                        <g key={c.code}>
+                          <path
+                            ref={(el) => (arcs.current[i] = el)}
+                            className="arc"
+                            d={`M${ox} ${oy} Q${mx} ${my} ${x} ${y}`}
+                          />
+                          <circle
+                            cx={x}
+                            cy={y}
+                            r={i < lit ? 7 : 5}
+                            fill={i < lit ? 'var(--bar)' : 'rgba(255,255,255,.5)'}
+                            style={{ transition: 'r .3s, fill .3s' }}
+                          />
+                          <text className="lbl" x={x + 12} y={y + 5}>
+                            {c.name}
+                          </text>
+                        </g>
+                      )
+                    })}
+                    <circle cx={ox} cy={oy} r={9} fill="#fff" stroke="var(--bar)" strokeWidth={4} />
+                    <text className="lbl" x={ox + 14} y={oy + 24}>
+                      {d.origin}
+                    </text>
+                  </>
+                )
+              }}
+            </MapFrame>
+          )}
         </div>
-      )}
-    </Section>
+      </div>
+    </Sec>
   )
 }

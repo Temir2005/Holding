@@ -1,8 +1,34 @@
 {
-  "nav": { "menu": "Меню", "close": "Закрыть", "home": "На главную", "skip": "Перейти к содержимому", "language": "Язык" },
-  "sheet": {"sheet": "Лист", "sheets": "Листов", "language": "Язык", "year": "Год", "register": "Ведомость листов", "contacts": "Контакты", "datum": "±0,000", "noNumber": "—"},
-  "common": { "more": "Подробнее", "back": "Назад", "all": "Все", "visitSite": "Перейти на сайт", "close": "Закрыть" },
-  "status": { "completed": "Реализован", "in_progress": "Строится", "planned": "В планах" },
+  "nav": {
+    "menu": "Меню",
+    "close": "Закрыть",
+    "home": "На главную",
+    "skip": "Перейти к содержимому",
+    "language": "Язык",
+    "main": "Основная навигация"
+  },
+  "sheet": {
+    "sheet": "Лист",
+    "sheets": "Листов",
+    "language": "Язык",
+    "year": "Год",
+    "register": "Ведомость листов",
+    "contacts": "Контакты",
+    "datum": "±0,000",
+    "noNumber": "—"
+  },
+  "common": {
+    "more": "Подробнее",
+    "back": "Назад",
+    "all": "Все",
+    "visitSite": "Перейти на сайт",
+    "close": "Закрыть"
+  },
+  "status": {
+    "completed": "Реализован",
+    "in_progress": "В работе",
+    "planned": "В планах"
+  },
   "project": {
     "tokenized": "Токенизирован",
     "area": "Площадь",
@@ -14,11 +40,37 @@
     "backToProjects": "Все проекты",
     "sqm": "м²"
   },
-  "team": { "bio": "Биография", "allDivisions": "Все направления", "bioOf": "Биография: {{name}}", "linkedin": "LinkedIn", "colName": "Имя", "colPosition": "Должность", "colDivision": "Направление", "empty": "Состав команды скоро появится" },
-  "vacancy": { "apply": "Откликнуться", "full_time": "Полная занятость", "part_time": "Частичная занятость", "contract": "Контракт", "internship": "Стажировка", "colTitle": "Вакансия", "colDivision": "Направление", "colLocation": "Локация", "colType": "Занятость", "empty": "Сейчас открытых вакансий нет", "write": "Написать нам" },
+  "team": {
+    "bio": "Биография",
+    "allDivisions": "Все направления",
+    "bioOf": "Биография: {{name}}",
+    "linkedin": "LinkedIn",
+    "colName": "Имя",
+    "colPosition": "Должность",
+    "colDivision": "Направление",
+    "empty": "Состав команды скоро появится"
+  },
+  "vacancy": {
+    "apply": "Откликнуться",
+    "full_time": "Полная занятость",
+    "part_time": "Частичная занятость",
+    "contract": "Контракт",
+    "internship": "Стажировка",
+    "colTitle": "Вакансия",
+    "colDivision": "Направление",
+    "colLocation": "Локация",
+    "colType": "Занятость",
+    "empty": "Сейчас открытых вакансий нет",
+    "write": "Написать нам"
+  },
   "form": {
     "type": "Тема обращения",
-    "types": { "investor": "Инвестиции", "partner": "Партнёрство", "candidate": "Работа в команде", "client": "Заказ продукции" },
+    "types": {
+      "investor": "Инвестиции",
+      "partner": "Партнёрство",
+      "candidate": "Работа в команде",
+      "client": "Заказ продукции"
+    },
     "name": "Имя",
     "phone": "Телефон",
     "email": "Email",
@@ -31,7 +83,13 @@
     "error": "Не удалось отправить заявку. Проверьте подключение и попробуйте ещё раз.",
     "again": "Отправить ещё одну"
   },
-  "contacts": { "address": "Адрес", "phone": "Телефон", "email": "Email", "whatsapp": "WhatsApp", "hours": "Часы работы" },
+  "contacts": {
+    "address": "Адрес",
+    "phone": "Телефон",
+    "email": "Email",
+    "whatsapp": "WhatsApp",
+    "hours": "Часы работы"
+  },
   "states": {
     "errorTitle": "Не удалось загрузить страницу",
     "errorText": "Сервер не ответил. Проверьте подключение и попробуйте ещё раз.",
@@ -39,22 +97,148 @@
     "notFoundTitle": "Страница не найдена",
     "notFoundText": "Возможно, ссылка устарела или в адресе опечатка."
   },
-  "a11y": { "playVideo": "Воспроизвести видео", "prev": "Назад", "next": "Вперёд" },
-  "gallery": { "empty": "Фотографии скоро появятся", "strip": "Лента фотографий" },
-  "video": { "title": "Видео", "source": "Источник: {{host}}", "empty": "Видео скоро появится" },
-  "timeline": { "years_one": "{{n}} год", "years_few": "{{n}} года", "years_many": "{{n}} лет", "years_other": "{{n}} года", "span": "{{from}}–{{to}} · {{length}}", "empty": "Хронология пополняется" },
-  "quote": { "open": "«", "close": "»" },
-  "divisions": { "empty": "Список направлений пополняется" },
-  "showcase": { "no": "№", "empty": "Реестр объектов пополняется", "area": "S = {{value}} {{unit}}" },
-  "clients": { "empty": "Список партнёров пополняется" },
-  "clientsGrid": { "filter": "Отрасль", "shown": "Показано {{shown}} из {{total}}", "empty": "Список клиентов пополняется" },
-  "testimonials": { "empty": "Отзывы пополняются" },
-  "geography": { "caption": "Ведомость поставок", "origin": "Отгрузка", "code": "Код", "country": "Страна", "note": "Примечание", "empty": "Список стран пополняется" },
-  "process": { "stage": "Этап", "empty": "Этапы цикла уточняются" },
-  "production": { "empty": "Описание производства готовится", "legend": "Условные обозначения материалов", "finish": { "matte": "матовое покрытие", "gloss": "глянцевое покрытие", "texture": "текстурное покрытие" } },
-  "capabilities": { "empty": "Список пополняется" },
-  "projectList": { "total": "Объектов в реестре", "shown": "Показано {{shown}} из {{total}}", "empty": "Нет объектов с такими параметрами", "reset": "Сбросить фильтр" },
-  "tokenization": { "steps": "Схема", "step": "Шаг", "benefits": "Спецификация", "note": "Примечание", "projects": "Объекты с токенизацией" },
-  "projectPage": { "about": "Описание", "tags": "Теги", "spec": "Спецификация объекта", "tokenization": "Токенизация", "yes": "Да", "register": "Реестр объектов", "loading": "Загружаем объект", "prev": "Предыдущий объект", "next": "Следующий объект", "neighbors": "Соседние объекты" },
-  "preview": { "banner": "Предпросмотр — это не опубликованная версия", "expiredTitle": "Ссылка на предпросмотр устарела", "expiredText": "Откройте предпросмотр из админки заново: ссылка действует 30 минут." }
+  "a11y": {
+    "playVideo": "Воспроизвести видео",
+    "prev": "Назад",
+    "next": "Вперёд"
+  },
+  "gallery": {
+    "empty": "Фотографии скоро появятся",
+    "strip": "Лента фотографий"
+  },
+  "video": {
+    "title": "Видео",
+    "source": "Источник: {{host}}",
+    "empty": "Видео скоро появится"
+  },
+  "timeline": {
+    "years_one": "{{n}} год",
+    "years_few": "{{n}} года",
+    "years_many": "{{n}} лет",
+    "years_other": "{{n}} года",
+    "span": "{{from}}–{{to}} · {{length}}",
+    "empty": "Хронология пополняется"
+  },
+  "quote": {
+    "open": "«",
+    "close": "»"
+  },
+  "divisions": {
+    "empty": "Список направлений пополняется"
+  },
+  "showcase": {
+    "no": "№",
+    "empty": "Реестр объектов пополняется",
+    "area": "S = {{value}} {{unit}}"
+  },
+  "clients": {
+    "empty": "Список партнёров пополняется"
+  },
+  "clientsGrid": {
+    "filter": "Отрасль",
+    "shown": "Показано {{shown}} из {{total}}",
+    "empty": "Список клиентов пополняется"
+  },
+  "testimonials": {
+    "empty": "Отзывы пополняются"
+  },
+  "geography": {
+    "caption": "Ведомость поставок",
+    "origin": "Отгрузка",
+    "code": "Код",
+    "country": "Страна",
+    "note": "Примечание",
+    "empty": "Список стран пополняется"
+  },
+  "process": {
+    "stage": "Этап",
+    "empty": "Этапы цикла уточняются"
+  },
+  "production": {
+    "empty": "Описание производства готовится",
+    "legend": "Условные обозначения материалов",
+    "finish": {
+      "matte": "матовое покрытие",
+      "gloss": "глянцевое покрытие",
+      "texture": "текстурное покрытие"
+    }
+  },
+  "capabilities": {
+    "empty": "Список пополняется"
+  },
+  "projectList": {
+    "total": "Объектов в реестре",
+    "shown": "Показано {{shown}} из {{total}}",
+    "empty": "Нет объектов с такими параметрами",
+    "reset": "Сбросить фильтр"
+  },
+  "tokenization": {
+    "steps": "Схема",
+    "step": "Шаг",
+    "benefits": "Спецификация",
+    "note": "Дисклеймер",
+    "projects": "Объекты с токенизацией",
+    "share": "Доля инвестора",
+    "progress": "Ход проекта"
+  },
+  "projectPage": {
+    "about": "Описание",
+    "tags": "Теги",
+    "spec": "Спецификация объекта",
+    "tokenization": "Токенизация",
+    "yes": "Да",
+    "register": "Реестр объектов",
+    "loading": "Загружаем объект",
+    "prev": "Предыдущий объект",
+    "next": "Следующий объект",
+    "neighbors": "Соседние объекты"
+  },
+  "preview": {
+    "banner": "Предпросмотр — это не опубликованная версия",
+    "expiredTitle": "Ссылка на предпросмотр устарела",
+    "expiredText": "Откройте предпросмотр из админки заново: ссылка действует 30 минут."
+  },
+  "footer": {
+    "sections": "Разделы",
+    "contacts": "Контакты",
+    "socials": "Соцсети"
+  },
+  "ui": {
+    "dueIn": "сдача в {{year}}",
+    "tokenized": "Токенизация",
+    "toDivision": "На страницу направления",
+    "filter": "Фильтр объектов",
+    "withTokenization": "С токенизацией",
+    "statusMany": {
+      "in_progress": "В работе",
+      "completed": "Реализованы",
+      "planned": "В планах"
+    },
+    "shownProjects_one": "Показан {{count}} объект",
+    "shownProjects_few": "Показано {{count}} объекта",
+    "shownProjects_many": "Показано {{count}} объектов",
+    "shownProjects_other": "Показано {{count}} объекта",
+    "shownClients_one": "{{count}} компания",
+    "shownClients_few": "{{count}} компании",
+    "shownClients_many": "{{count}} компаний",
+    "shownClients_other": "{{count}} компании",
+    "allClients": "Все клиенты",
+    "holding": "Холдинг",
+    "finish": "Покрытие",
+    "routes": "Маршруты",
+    "minutes_one": "{{count}} мин",
+    "minutes_few": "{{count}} мин",
+    "minutes_many": "{{count}} мин",
+    "minutes_other": "{{count}} мин",
+    "km_one": "{{count}} км",
+    "km_few": "{{count}} км",
+    "km_many": "{{count}} км",
+    "km_other": "{{count}} км",
+    "estimatedTime": "расчётное время",
+    "straight": "по прямой",
+    "breadcrumbs": "Навигационная цепочка",
+    "tbd": "уточняется",
+    "tokenizedNote": "Проект участвует в программе токенизации. Условия будут опубликованы после юридического согласования.",
+    "howItWorks": "Как это работает"
+  }
 }

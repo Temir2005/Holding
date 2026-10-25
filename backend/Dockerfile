@@ -10,6 +10,8 @@ WORKDIR /app
 COPY pyproject.toml uv.lock ./
 RUN uv sync --frozen --no-install-project
 COPY . .
-# "::" listens on IPv4 and IPv6 (Railway private networking uses IPv6).
+# An empty host binds every interface on both IPv4 and IPv6: Railway's private network
+# (backend.railway.internal) may resolve to IPv6, the healthcheck may come over IPv4.
+# "::" alone would be IPv6-only, because asyncio sets IPV6_V6ONLY on that socket.
 # Proxy headers: the app runs behind the platform load balancer, so trust X-Forwarded-*.
-CMD ["sh", "-c", "uvicorn app.main:app --host :: --port ${PORT:-8000} --proxy-headers --forwarded-allow-ips='*'"]
+CMD ["sh", "-c", "exec uvicorn app.main:app --host '' --port ${PORT:-8000} --proxy-headers --forwarded-allow-ips='*'"]
