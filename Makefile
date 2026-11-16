@@ -11,7 +11,7 @@ up: env
 	$(COMPOSE) up -d --build
 	@echo "site:     http://localhost:5173"
 	@echo "api docs: http://localhost:8000/docs"
-	@echo "minio:    http://localhost:9001"
+	@port=$${MINIO_CONSOLE_HOST_PORT:-$$(sed -n 's/^MINIO_CONSOLE_HOST_PORT=//p' .env | tail -n 1)}; echo "minio:    http://localhost:$${port:-9011}"
 
 down:
 	$(COMPOSE) down

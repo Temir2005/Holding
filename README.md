@@ -23,7 +23,7 @@ docker compose -f infra/docker-compose.yml --env-file .env exec backend python -
 | Сайт | http://localhost:5173 |
 | Админка (вход под созданным администратором) | http://localhost:5173/admin |
 | API и документация | http://localhost:8000/docs |
-| MinIO (картинки), логин из `.env` | http://localhost:9001 |
+| MinIO (картинки), логин из `.env` | http://localhost:9011 (порт меняется в `MINIO_CONSOLE_HOST_PORT`) |
 
 `make seed` наполняет только пустую базу: если контент уже есть, он ничего не меняет, правки редакторов в безопасности. Вернуть стартовый контент в dev — `make seed-force` (перезапишет правки в стартовых записях и удалит добавленные блоки на стартовых страницах).
 
