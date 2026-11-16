@@ -15,7 +15,7 @@ from fastapi import FastAPI, Request, Response
 
 PRIVATE_PREFIXES = ("/api/v1/admin", "/api/v1/preview")
 PUBLIC_PREFIX = "/api/v1/"
-SKIP = ("/api/v1/health",)
+SKIP = ("/api/v1/health", "/api/v1/files/")
 REVALIDATE = "public, max-age=0, must-revalidate"
 
 

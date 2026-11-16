@@ -5,6 +5,8 @@
 """
 
 import json
+import logging
+from collections.abc import AsyncIterator
 from dataclasses import dataclass
 from functools import lru_cache
 from typing import Any, Protocol
@@ -15,11 +17,16 @@ from botocore.exceptions import ClientError
 
 from app.core.config import Settings, get_settings
 
+logger = logging.getLogger(__name__)
+
+CHUNK_SIZE = 64 * 1024
+
 
 @dataclass(frozen=True)
 class ObjectInfo:
     size: int
     content_type: str | None
+    etag: str | None = None
 
 
 class Storage(Protocol):
@@ -31,6 +38,7 @@ class Storage(Protocol):
     async def head(self, key: str) -> ObjectInfo | None: ...
     async def read(self, key: str) -> bytes: ...
     async def read_range(self, key: str, start: int, end: int) -> bytes: ...
+    def stream(self, key: str) -> AsyncIterator[bytes]: ...
     async def delete(self, *keys: str) -> None: ...
     async def ensure_public_bucket(self) -> None: ...
     async def ping(self) -> bool: ...
@@ -94,7 +102,11 @@ class StorageService:
                 if exc.response.get("Error", {}).get("Code") in ("404", "NoSuchKey", "NotFound"):
                     return None
                 raise
-        return ObjectInfo(size=int(meta["ContentLength"]), content_type=meta.get("ContentType"))
+        return ObjectInfo(
+            size=int(meta["ContentLength"]),
+            content_type=meta.get("ContentType"),
+            etag=meta.get("ETag"),
+        )
 
     async def read(self, key: str) -> bytes:
         async with self._client() as s3:
@@ -109,6 +121,13 @@ class StorageService:
             body: bytes = await obj["Body"].read()
             return body
 
+    async def stream(self, key: str) -> AsyncIterator[bytes]:
+        """The object body in chunks; the S3 connection lives as long as the iteration."""
+        async with self._client() as s3:
+            obj = await s3.get_object(Bucket=self.bucket, Key=key)
+            async for chunk in obj["Body"].iter_chunks(CHUNK_SIZE):
+                yield chunk
+
     async def delete(self, *keys: str) -> None:
         if not keys:
             return
@@ -119,7 +138,10 @@ class StorageService:
             )
 
     async def ensure_public_bucket(self) -> None:
-        """Create the bucket if needed and allow anonymous reads (images are public)."""
+        """Create the bucket if needed and allow anonymous reads (images are public).
+
+        A provider without bucket policies is tolerated: the backend serves the files.
+        """
         policy = {
             "Version": "2012-10-17",
             "Statement": [
@@ -136,7 +158,15 @@ class StorageService:
                 await s3.head_bucket(Bucket=self.bucket)
             except Exception:
                 await s3.create_bucket(Bucket=self.bucket)
-            await s3.put_bucket_policy(Bucket=self.bucket, Policy=json.dumps(policy))
+            try:
+                await s3.put_bucket_policy(Bucket=self.bucket, Policy=json.dumps(policy))
+            except ClientError as exc:
+                if exc.response.get("Error", {}).get("Code") != "NotImplemented":
+                    raise
+                # Private buckets (Railway) have no policies; media goes through /api/v1/files.
+                logger.warning(
+                    "Bucket policy is not supported by the provider (bucket=%s)", self.bucket
+                )
 
     async def ping(self) -> bool:
         try:

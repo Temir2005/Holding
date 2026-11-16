@@ -1,3 +1,6 @@
+import hashlib
+from collections.abc import AsyncIterator
+
 from app.storage.service import ObjectInfo
 
 
@@ -21,7 +24,15 @@ class InMemoryStorage:
 
     async def head(self, key: str) -> ObjectInfo | None:
         found = self.objects.get(key)
-        return ObjectInfo(size=len(found[0]), content_type=found[1]) if found else None
+        return (
+            ObjectInfo(
+                size=len(found[0]),
+                content_type=found[1],
+                etag='"' + hashlib.md5(found[0], usedforsecurity=False).hexdigest() + '"',
+            )
+            if found
+            else None
+        )
 
     async def read(self, key: str) -> bytes:
         body = self.objects[key][0]
@@ -32,6 +43,12 @@ class InMemoryStorage:
         chunk = self.objects[key][0][start : end + 1]
         self.bytes_read += len(chunk)
         return chunk
+
+    async def stream(self, key: str) -> AsyncIterator[bytes]:
+        body = self.objects[key][0]
+        self.bytes_read += len(body)
+        for start in range(0, len(body), 4096):
+            yield body[start : start + 4096]
 
     async def delete(self, *keys: str) -> None:
         for key in keys:
