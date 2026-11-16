@@ -69,6 +69,11 @@
 .tone-light .eyebrow {
   color: var(--on-light-2);
 }
+.tone-accent .eyebrow,
+.tone-accent .lead,
+.tone-accent .muted {
+  color: var(--accent-sub);
+}
 .h1 {
   font-size: clamp(38px, 5.4vw, 84px);
   font-weight: 500;
@@ -368,8 +373,8 @@
   background: #fff;
 }
 .tone-accent {
-  background: var(--accent);
-  color: var(--accent-ink);
+  background: var(--accent-bg);
+  color: var(--accent-fg);
 }
 .sec-head {
   display: flex;
@@ -898,8 +903,9 @@
   margin-left: -1px;
   background: var(--line-light);
 }
-.tone-dark .tl__rail {
-  background: var(--line-dark);
+.tone-dark .tl__rail,
+.tone-accent .tl__rail {
+  background: var(--accent-line);
 }
 .tl__fill {
   position: absolute;
@@ -914,7 +920,7 @@
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 0 96px;
   align-items: center;
-  padding: 40px 0;
+  padding: 48px 0;
 }
 .ev__dot {
   position: absolute;
@@ -928,11 +934,38 @@
   border: 2px solid #c9ccd1;
   transition:
     background-color 0.3s ease,
-    border-color 0.3s ease;
+    border-color 0.3s ease,
+    transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.tone-dark .ev__dot {
+  background: var(--ink);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+.ev__dot::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  border: 2px solid var(--bar);
+  opacity: 0;
 }
 .ev.passed .ev__dot {
   background: var(--bar);
   border-color: var(--bar);
+  transform: scale(1.25);
+}
+.ev.passed .ev__dot::after {
+  animation: ping 1.1s var(--ease-out) both;
+}
+@keyframes ping {
+  from {
+    opacity: 0.8;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(3.2);
+  }
 }
 .ev__text {
   max-width: 440px;
@@ -951,27 +984,87 @@
   text-align: right;
 }
 .ev__year {
-  font-size: clamp(48px, 5vw, 80px);
+  font-size: clamp(56px, 6vw, 96px);
   font-weight: 500;
   letter-spacing: -0.04em;
   line-height: 1;
   font-variant-numeric: tabular-nums;
 }
+.tone-dark .ev__year {
+  color: var(--bar);
+}
 .ev__title {
-  margin: 12px 0 8px;
+  margin: 14px 0 8px;
 }
 .ev__text p {
   color: var(--on-light-2);
 }
+.tone-dark .ev__text p,
+.tone-accent .ev__text p {
+  color: var(--accent-sub);
+}
+/* digits roll up one after another */
+.yr {
+  display: inline-flex;
+}
+.yr > span {
+  display: inline-block;
+  overflow: hidden;
+  padding-bottom: 0.04em;
+}
+.yr > span > span {
+  display: inline-block;
+}
+.ev .yr > span > span {
+  transform: translateY(105%);
+  transition: transform 0.9s var(--ease-out) calc(var(--k) * 0.07s + 0.05s);
+}
+.ev.in .yr > span > span {
+  transform: none;
+}
+.ev__title,
+.ev__text p {
+  opacity: 0;
+  transform: translateY(18px);
+  transition:
+    opacity 0.8s var(--ease-out) 0.25s,
+    transform 0.9s var(--ease-out) 0.25s;
+}
+.ev__text p {
+  transition-delay: 0.35s;
+}
+.ev.in .ev__title,
+.ev.in .ev__text p {
+  opacity: 1;
+  transform: none;
+}
+/* the photo slides in from its own side and settles */
 .ev__media {
+  --from: inset(0 100% 0 0 round 16px);
+  --shift: -64px;
   border-radius: 16px;
   overflow: hidden;
   aspect-ratio: 3/2;
-  clip-path: inset(12% 0 0 0 round 16px);
-  transition: clip-path 1s var(--ease-out);
+  clip-path: var(--from);
+  transform: translateX(var(--shift));
+  transition:
+    clip-path 1.3s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 1.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.ev:nth-child(even of .ev) .ev__media {
+  --from: inset(0 0 0 100% round 16px);
+  --shift: 64px;
+}
+.ev__media > div {
+  transform: scale(1.18);
+  transition: transform 1.7s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .ev.in .ev__media {
   clip-path: inset(0 round 16px);
+  transform: none;
+}
+.ev.in .ev__media > div {
+  transform: none;
 }
 @media (max-width: 860px) {
   .tl__rail {
@@ -995,86 +1088,310 @@
   }
   .ev__media {
     order: 2;
+    --from: inset(100% 0 0 0 round 16px) !important;
+    --shift: 0px !important;
   }
 }
-/* roadmap: events without photos, a horizontal line that fills on reveal */
+
+/* ---------- roadmap: a craft flies the route up to this year ---------- */
 .road {
+  --c: var(--bar);
+  --ease-fly: cubic-bezier(0.65, 0, 0.35, 1);
   position: relative;
-  display: grid;
-  grid-template-columns: repeat(var(--n, 4), minmax(0, 1fr));
-  gap: 24px;
-  padding-top: 40px;
+  padding-top: 52px;
 }
-.road::before,
-.road::after {
-  content: '';
+.tone-accent .road {
+  --c: var(--accent-mark);
+}
+.road__line {
   position: absolute;
   left: 0;
   right: 0;
-  top: 7px;
+  top: 15px;
   height: 2px;
-  background: var(--line-light);
+  background: repeating-linear-gradient(
+    90deg,
+    color-mix(in srgb, currentColor 32%, transparent) 0 8px,
+    transparent 8px 16px
+  );
 }
-.road::after {
-  background: var(--bar);
-  transform: scaleX(0);
+.road__fill {
+  position: absolute;
+  inset: 0;
+  background: var(--c);
   transform-origin: left;
-  transition: transform 1.6s var(--ease-in-out) 0.2s;
+  transform: scaleX(var(--to, 1));
 }
-.in .road::after {
-  transform: scaleX(1);
+.road__craft {
+  position: absolute;
+  top: 50%;
+  left: calc(var(--to, 1) * 100%);
+  width: 14px;
+  height: 14px;
+  margin: -7px 0 0 -7px;
+  border-radius: 50%;
+  background: var(--c);
+  box-shadow: 0 0 22px 6px color-mix(in srgb, var(--c) 45%, transparent);
 }
-.road__it {
-  position: relative;
-}
-.road__it::before {
+/* the trail behind the craft, only while it flies */
+.road__craft::before {
   content: '';
   position: absolute;
-  top: -40px;
+  right: 50%;
+  top: 50%;
+  width: 140px;
+  height: 3px;
+  margin-top: -1.5px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, transparent, var(--c));
+  opacity: 0;
+}
+.road__craft::after {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 50%;
+  border: 2px solid var(--c);
+  opacity: 0;
+}
+.road__list {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(var(--n, 4), minmax(0, 1fr));
+  gap: 24px;
+}
+.road__it {
+  --d: 0s;
+  position: relative;
+  padding-right: 16px;
+}
+.road__dot {
+  position: absolute;
+  top: -44px;
   left: 0;
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background: #fff;
-  border: 2px solid var(--bar);
+  background: var(--c);
 }
-.road__it b {
+.road__it.ahead .road__dot {
+  top: -41px;
+  left: 3px;
+  width: 10px;
+  height: 10px;
+  background: color-mix(in srgb, currentColor 45%, transparent);
+}
+.road__dot::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 2px solid var(--c);
+  opacity: 0;
+}
+.road__year {
   display: block;
-  font-size: clamp(36px, 3.6vw, 56px);
+  font-size: clamp(44px, 4.4vw, 72px);
   font-weight: 500;
   letter-spacing: -0.04em;
   line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.road__it.ahead .road__year {
+  opacity: 0.55;
 }
 .road__it h3 {
-  margin: 12px 0 8px;
+  margin: 14px 0 8px;
 }
 .road__it p {
   color: var(--on-light-2);
 }
+.tone-dark .road__it p,
+.tone-accent .road__it p {
+  color: var(--accent-sub);
+}
+/* armed (motion allowed): everything waits for the flight */
+.road.arm .road__fill {
+  transform: scaleX(0);
+}
+.road.arm .road__craft {
+  left: 0;
+  opacity: 0;
+}
+.road.arm .road__dot {
+  transform: scale(0);
+}
+.road.arm .yr > span > span {
+  transform: translateY(105%);
+}
+.road.arm .road__it h3,
+.road.arm .road__it p {
+  opacity: 0;
+}
+.road.go .road__fill {
+  animation: road-fill var(--fly) var(--ease-fly) 0.1s both;
+}
+.road.go .road__craft {
+  animation: road-fly var(--fly) var(--ease-fly) 0.1s both;
+}
+.road.go .road__craft::before {
+  animation: road-trail var(--fly) linear 0.1s both;
+}
+.road.go .road__craft::after {
+  animation: ping 2.2s var(--ease-out) calc(var(--fly) + 0.1s) infinite;
+}
+.road.go .road__dot {
+  animation: road-pop 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) calc(var(--d) + 0.1s) both;
+}
+.road.go .road__it:not(.ahead) .road__dot::after {
+  animation: ping 1.1s var(--ease-out) calc(var(--d) + 0.1s) both;
+}
+.road.go .yr > span > span {
+  animation: road-up 0.9s var(--ease-out) calc(var(--d) + var(--k) * 0.07s + 0.12s) both;
+}
+.road.go .road__it h3 {
+  animation: road-rise 0.8s var(--ease-out) calc(var(--d) + 0.3s) both;
+}
+.road.go .road__it p {
+  animation: road-rise 0.8s var(--ease-out) calc(var(--d) + 0.4s) both;
+}
+@keyframes road-fill {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(var(--to, 1));
+  }
+}
+@keyframes road-fly {
+  0% {
+    left: 0;
+    opacity: 0;
+  }
+  8% {
+    opacity: 1;
+  }
+  100% {
+    left: calc(var(--to, 1) * 100%);
+    opacity: 1;
+  }
+}
+@keyframes road-trail {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  20%,
+  75% {
+    opacity: 1;
+  }
+}
+@keyframes road-pop {
+  from {
+    transform: scale(0);
+  }
+  to {
+    transform: none;
+  }
+}
+@keyframes road-up {
+  from {
+    transform: translateY(105%);
+  }
+  to {
+    transform: none;
+  }
+}
+@keyframes road-rise {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
 @media (max-width: 860px) {
   .road {
-    grid-template-columns: 1fr;
-    padding: 0 0 0 36px;
+    padding: 0 0 0 40px;
   }
-  .road::before,
-  .road::after {
+  .road__line {
     left: 7px;
     right: auto;
-    top: 0;
+    top: 12px;
     bottom: 0;
     width: 2px;
     height: auto;
+    background: repeating-linear-gradient(
+      180deg,
+      color-mix(in srgb, currentColor 32%, transparent) 0 8px,
+      transparent 8px 16px
+    );
   }
-  .road::after {
-    transform: scaleY(0);
+  .road__fill {
     transform-origin: top;
+    transform: scaleY(var(--to, 1));
   }
-  .in .road::after {
-    transform: scaleY(1);
+  .road__craft {
+    left: 50%;
+    top: calc(var(--to, 1) * 100%);
   }
-  .road__it::before {
+  .road__craft::before {
+    right: auto;
+    left: 50%;
+    top: auto;
+    bottom: 50%;
+    width: 3px;
+    height: 100px;
+    margin: 0 0 0 -1.5px;
+    background: linear-gradient(180deg, transparent, var(--c));
+  }
+  .road__list {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+  .road__dot {
     top: 4px;
-    left: -36px;
+    left: -40px;
+  }
+  .road__it.ahead .road__dot {
+    top: 7px;
+    left: -37px;
+  }
+  .road.arm .road__fill {
+    transform: scaleY(0);
+  }
+  .road.arm .road__craft {
+    left: 50%;
+    top: 0;
+  }
+  .road.go .road__fill {
+    animation-name: road-fill-y;
+  }
+  .road.go .road__craft {
+    animation-name: road-fly-y;
+  }
+  @keyframes road-fill-y {
+    from {
+      transform: scaleY(0);
+    }
+    to {
+      transform: scaleY(var(--to, 1));
+    }
+  }
+  @keyframes road-fly-y {
+    0% {
+      top: 0;
+      opacity: 0;
+    }
+    8% {
+      opacity: 1;
+    }
+    100% {
+      top: calc(var(--to, 1) * 100%);
+      opacity: 1;
+    }
   }
 }
 
@@ -1110,6 +1427,12 @@
 .sign span {
   color: var(--on-dark-2);
   font-size: 15px;
+}
+.tone-light .sign span {
+  color: var(--on-light-2);
+}
+.tone-accent .sign span {
+  color: var(--accent-sub);
 }
 @media (max-width: 860px) {
   .founder {
@@ -1492,184 +1815,256 @@
   }
 }
 
-/* ---------- full cycle: pinned, scroll walks the track ---------- */
+/* ---------- full cycle: pinned; the step list rides up, the photo panel follows ---------- */
 .cyc {
+  --mark: currentColor;
+  padding-bottom: 0;
+}
+.cyc.tone-accent {
+  --mark: var(--accent-mark);
+}
+.cyc .sec-head {
+  margin-bottom: clamp(16px, 3vw, 40px);
+}
+.cyc__stage {
   position: relative;
-  height: calc(var(--n, 5) * 100svh + 20svh);
-  padding: 0;
+  height: calc(100svh + (var(--n, 5) - 1) * 42svh);
 }
 .cyc__pin {
   position: sticky;
-  top: 0;
-  height: 100svh;
+  top: var(--header-h);
+  height: calc(100svh - var(--header-h));
+  display: grid;
+  grid-template-columns: minmax(0, 9fr) minmax(0, 13fr);
+  gap: clamp(32px, 4.5vw, 72px);
+  padding-top: 16px;
+  padding-bottom: 40px;
+}
+.cyc__steps {
+  position: relative;
+  height: 100%;
+  overflow: hidden;
+  -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 8%, #000 92%, transparent 100%);
+  mask-image: linear-gradient(180deg, transparent 0, #000 8%, #000 92%, transparent 100%);
+}
+.cyc__steps ol {
+  list-style: none;
+  transition: transform 0.45s var(--ease-out);
+  will-change: transform;
+}
+.cyc__step {
+  --pad: clamp(24px, 4.5vh, 44px);
+  position: relative;
+  padding: var(--pad) 0 var(--pad) 28px;
+  border-top: 1px solid color-mix(in srgb, currentColor 20%, transparent);
+  opacity: 0.3;
+  transition: opacity 0.5s ease;
+}
+.cyc__step:first-child {
+  border-top: 0;
+}
+.cyc__step.on {
+  opacity: 1;
+}
+.cyc__step::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: var(--pad);
+  bottom: var(--pad);
+  width: 3px;
+  border-radius: 2px;
+  background: var(--mark);
+  transform: scaleY(0);
+  transform-origin: 50% 0;
+  transition: transform 0.6s var(--ease-out);
+}
+.cyc__step.on::before {
+  transform: none;
+}
+.cyc__n {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.cyc__tag {
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--div);
+  color: #fff;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.cyc__h {
+  font-size: clamp(26px, 2.5vw, 40px);
+  font-weight: 500;
+  line-height: 1.1;
+  letter-spacing: -0.025em;
+}
+.cyc__step p {
+  margin-top: 12px;
+  max-width: 30em;
+  opacity: 0.85;
+}
+.cyc__btn {
+  margin-top: 20px;
+}
+.cyc__ph {
+  display: none;
+}
+.cyc__panel {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: calc(var(--header-h) + 24px) 0 32px;
-  overflow: hidden;
-}
-.cyc .h2 {
-  margin: 12px 0 28px;
-}
-.track {
-  position: relative;
-  display: grid;
-  grid-template-columns: repeat(var(--n, 5), minmax(0, 1fr));
-  margin-bottom: clamp(24px, 4vh, 48px);
-}
-.track__line {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 9px;
-  height: 2px;
-  background: var(--line-dark);
-}
-.track__fill {
-  position: absolute;
-  inset: 0;
-  background: var(--bar);
-  transform-origin: left;
-  transform: scaleX(var(--p, 0));
-}
-.node {
-  position: relative;
-  display: grid;
-  justify-items: start;
-  gap: 10px;
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--on-dark-2);
-  text-align: left;
-}
-.node i {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  background: var(--ink);
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  transition:
-    background-color 0.3s ease,
-    border-color 0.3s ease,
-    transform 0.3s var(--ease-out);
-}
-.node.done i {
-  background: var(--bar);
-  border-color: var(--bar);
-}
-.node.cur {
-  color: #fff;
-}
-.node.cur i {
-  transform: scale(1.25);
-}
-.node--div.done i {
-  background: var(--div);
-  border-color: var(--div);
-}
-.cyc__body {
-  display: grid;
-  grid-template-columns: 5fr 7fr;
-  gap: clamp(24px, 5vw, 80px);
-  align-items: center;
+  gap: 18px;
   min-height: 0;
 }
-.steps-txt {
+.cyc__shots {
   position: relative;
-  min-height: 260px;
-}
-.step-txt {
-  position: absolute;
-  inset: 0 0 auto;
-  opacity: 0;
-  transform: translateY(16px);
-  transition:
-    opacity 0.4s ease,
-    transform 0.5s var(--ease-out);
-  pointer-events: none;
-}
-.step-txt.on {
-  opacity: 1;
-  transform: none;
-  pointer-events: auto;
-}
-.step-txt b {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--on-dark-2);
-}
-.step-txt h3 {
-  margin: 8px 0 12px;
-  font-size: clamp(26px, 2.6vw, 40px);
-}
-.step-txt p {
-  color: var(--on-dark-2);
-  max-width: 30em;
-}
-.step-txt .btn {
-  margin-top: 20px;
-  background: var(--div);
-  color: #fff;
-}
-.shots {
-  position: relative;
-  aspect-ratio: 16/10;
-  max-height: 52svh;
   width: 100%;
-  border-radius: 20px;
+  max-height: calc(100% - 64px);
+  aspect-ratio: 3/2;
+  border-radius: clamp(16px, 1.6vw, 24px);
   overflow: hidden;
-  background: #111;
+  background: rgba(0, 0, 0, 0.12);
+  box-shadow: 0 40px 80px -40px rgba(28, 31, 36, 0.6);
 }
-.shot {
-  position: absolute;
-  inset: 0;
-  clip-path: inset(0 0 0 100%);
-  transition: clip-path 0.8s var(--ease-in-out);
+/* photos sit in a row and slide sideways; inside each frame the photo lags behind (parallax) */
+.cyc__track {
+  display: flex;
+  gap: 16px;
+  height: 100%;
+  transform: translateX(calc(var(--cur, 0) * (-100% - 16px)));
+  transition: transform 0.9s var(--ease-in-out);
 }
-.shot.on {
-  clip-path: inset(0);
-  z-index: 1;
+.cyc__shot {
+  position: relative;
+  flex: 0 0 100%;
+  overflow: hidden;
+  border-radius: inherit;
+}
+.cyc__shot > div {
+  transform: translateX(calc(var(--o, 0) * -30%)) scale(1.06);
+  transition: transform 0.9s var(--ease-in-out);
+}
+.cyc__foot {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.cyc__roll {
+  height: 1em;
+  overflow: hidden;
+  font-size: 30px;
+  line-height: 1;
+}
+.cyc__roll > span {
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.7s var(--ease-out);
+}
+.cyc__roll b {
+  height: 1em;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+.cyc__bar {
+  flex: 1;
+  height: 2px;
+  margin-left: 14px;
+  background: color-mix(in srgb, currentColor 20%, transparent);
+}
+.cyc__bar i {
+  display: block;
+  height: 100%;
+  background: var(--mark);
+  transform-origin: left;
+  transition: transform 0.7s var(--ease-out);
 }
 @media (max-width: 860px) {
   .cyc {
+    padding-bottom: var(--section-y);
+  }
+  .cyc__stage {
     height: auto;
   }
   .cyc__pin {
     position: static;
-    height: auto;
-    padding: var(--section-y) 0;
-  }
-  .track {
-    display: none;
-  }
-  .cyc__body {
     display: block;
+    height: auto;
+    padding-top: 8px;
+    padding-bottom: 0;
   }
-  .steps-txt,
-  .shots {
+  .cyc__steps {
+    height: auto;
+    overflow: visible;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+  .cyc__steps ol {
+    display: grid;
+    gap: 48px;
+    transform: none !important;
+  }
+  .cyc__step,
+  .cyc__step:first-child {
+    padding: 0;
+    border: 0;
+    opacity: 1;
+  }
+  .cyc__step::before,
+  .cyc__panel {
     display: none;
   }
-}
-.cyc__list {
-  display: none;
-  list-style: none;
-}
-@media (max-width: 860px) {
-  .cyc__list {
-    display: grid;
-    gap: 32px;
+  .cyc__step > :not(.cyc__ph) {
+    opacity: 0;
+    transition:
+      opacity 0.7s var(--ease-out),
+      transform 0.8s var(--ease-out);
   }
-  .cyc__list li {
-    display: grid;
-    gap: 12px;
+  .cyc__step > :not(.cyc__ph, .btn) {
+    transform: translateY(18px);
   }
-  .cyc__list .ph {
+  .cyc__step.seen > :not(.cyc__ph) {
+    opacity: 1;
+  }
+  .cyc__step.seen > :not(.cyc__ph, .btn) {
+    transform: none;
+  }
+  .cyc__step.seen > :nth-child(2) {
+    transition-delay: 0.06s;
+  }
+  .cyc__step.seen > :nth-child(3),
+  .cyc__step.seen > .btn {
+    transition-delay: 0.12s;
+  }
+  .cyc__ph {
+    display: block;
+    position: relative;
+    aspect-ratio: 4/3;
+    margin-top: 20px;
     border-radius: 16px;
     overflow: hidden;
-    aspect-ratio: 16/10;
+    clip-path: inset(100% 0 0 0 round 16px);
+    transition: clip-path 1s var(--ease-in-out) 0.15s;
   }
-  .cyc__list p {
-    color: var(--on-dark-2);
+  .cyc__ph > div {
+    transform: scale(1.2);
+    transition: transform 1.4s var(--ease-out) 0.15s;
+  }
+  .cyc__step.seen .cyc__ph {
+    clip-path: inset(0 round 16px);
+  }
+  .cyc__step.seen .cyc__ph > div {
+    transform: none;
   }
 }
 
@@ -1697,6 +2092,12 @@
 }
 .tone-dark .why__it {
   border-top-color: var(--line-dark);
+}
+.tone-accent .why__it {
+  border-top-color: var(--accent-mark);
+}
+.tone-accent .why__it p {
+  color: var(--accent-sub);
 }
 .tone-dark .why__it p {
   color: var(--on-dark-2);
@@ -2084,8 +2485,8 @@
 }
 .pmap__map {
   aspect-ratio: var(--ar);
-  height: min(84svh, 820px);
-  justify-self: end;
+  height: min(62svh, 580px);
+  justify-self: center;
 }
 .pin {
   cursor: pointer;
@@ -2144,9 +2545,9 @@
     grid-template-columns: 1fr;
   }
   .pmap__map {
-    height: auto;
-    width: 100%;
-    justify-self: stretch;
+    height: min(64svh, 520px);
+    max-width: 100%;
+    justify-self: center;
   }
 }
 
@@ -2872,11 +3273,7 @@
 .cta .lead {
   margin-top: 16px;
 }
-.tone-accent .lead {
-  color: inherit;
-  opacity: 0.85;
-}
-.tone-accent .btn--accent {
+body[data-theme='aaag'] .tone-accent .btn--accent {
   background: var(--ink);
   color: #fff;
 }
@@ -3176,9 +3573,23 @@
     transform: none;
   }
   .hero__bg > div,
-  .hero__overlay {
-    transform: none;
-    opacity: 1;
+  .hero__overlay,
+  .cyc__shot > div,
+  .cyc__ph > div,
+  .cyc__step > * {
+    transform: none !important;
+    opacity: 1 !important;
+  }
+  .cyc__ph {
+    clip-path: none !important;
+  }
+  .yr > span > span,
+  .ev__title,
+  .ev__text p,
+  .ev__media,
+  .ev__media > div {
+    transform: none !important;
+    opacity: 1 !important;
   }
   .ev__media,
   .founder__ph,

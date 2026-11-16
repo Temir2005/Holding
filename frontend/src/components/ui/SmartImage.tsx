@@ -14,6 +14,11 @@ type Props = {
    * without the fade-in. Never wrap it in a reveal animation either.
    */
   priority?: boolean
+  /**
+   * Load right away at normal priority: for images that sit off screen inside a clipped track
+   * (a slider) and would otherwise start loading only when they slide in.
+   */
+  eager?: boolean
   /** Fill the parent box; the parent sets both width and height. */
   fill?: boolean
   /** Crop to the aspect ratio set by an `aspect-*` class in className instead of the media's own. */
@@ -32,6 +37,7 @@ export function SmartImage({
   className,
   imgClassName,
   priority,
+  eager,
   fill,
   crop,
   fit = 'cover',
@@ -63,7 +69,7 @@ export function SmartImage({
         width={media.width}
         height={media.height}
         sizes={sizes}
-        loading={priority ? 'eager' : 'lazy'}
+        loading={priority || eager ? 'eager' : 'lazy'}
         // React 18 does not know `fetchPriority`; the lowercase attribute passes through as is.
         {...{ fetchpriority: priority ? 'high' : 'auto' }}
         decoding={priority ? 'sync' : 'async'}

@@ -642,6 +642,7 @@ async def seed_all(s: Seeder) -> None:
             },
             {
                 "type": "quote",
+                "tone": "accent",
                 "anchor": "founder",
                 "eyebrow": L("Основатель"),
                 "text": L(
@@ -658,7 +659,7 @@ async def seed_all(s: Seeder) -> None:
                 "featured": True,
                 "link": cta("Все проекты", "projects", "secondary"),
             },
-            {"type": "clients_marquee", "tone": "light", "eyebrow": L("Клиенты и партнёры")},
+            {"type": "clients_marquee", "tone": "dark", "eyebrow": L("Клиенты и партнёры")},
             contact_form(
                 "Обсудим участие в проектах",
                 "Расскажем о текущих объектах, сроках и формате участия. "
@@ -694,6 +695,7 @@ async def seed_all(s: Seeder) -> None:
             },
             {
                 "type": "process_steps",
+                "tone": "accent",
                 "eyebrow": L("Полный цикл"),
                 "title": L("Пять этапов без подрядчиков между ними"),
                 "steps": [
@@ -769,7 +771,7 @@ async def seed_all(s: Seeder) -> None:
             {
                 "type": "project_list",
                 "anchor": "portfolio",
-                "tone": "light",
+                "tone": "dark",
                 "eyebrow": L("Портфолио"),
                 "title": L("Объекты"),
                 "show_filter": True,
@@ -1012,6 +1014,7 @@ async def seed_all(s: Seeder) -> None:
             },
             {
                 "type": "capabilities",
+                "tone": "light",
                 "eyebrow": L("Технология"),
                 "title": L("Электрический вертикальный взлёт"),
                 "intro": L(
@@ -1047,7 +1050,7 @@ async def seed_all(s: Seeder) -> None:
             },
             {
                 "type": "timeline",
-                "tone": "light",
+                "tone": "accent",
                 "eyebrow": L("Этапы запуска"),
                 "title": L("От исследований до коммерческих рейсов"),
                 "event_ids": ids(roadmap_ids),
@@ -1195,7 +1198,7 @@ async def seed_all(s: Seeder) -> None:
             },
             {
                 "type": "capabilities",
-                "tone": "light",
+                "tone": "accent",
                 "eyebrow": L("Культура"),
                 "title": L("Что для нас важно"),
                 "intro": L("Ценности команды — плейсхолдер, будут уточнены с HR."),
@@ -1216,7 +1219,7 @@ async def seed_all(s: Seeder) -> None:
             },
             {
                 "type": "team_grid",
-                "tone": "light",
+                "tone": "dark",
                 "mode": "rest",
                 "eyebrow": L("Специалисты"),
                 "title": L("Команда"),

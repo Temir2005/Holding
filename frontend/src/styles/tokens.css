@@ -17,6 +17,12 @@
   --accent-hover: #f49a60;
   --focus: #f0843e;
   --bar: #f0843e;
+  /* accent sections: a soft tint of the brand colour, the colour itself only in marks */
+  --accent-bg: #fce9dc;
+  --accent-fg: #1c1f24;
+  --accent-sub: #4b4e53;
+  --accent-line: rgba(28, 31, 36, 0.14);
+  --accent-mark: #f0843e;
 
   --on-dark: #fff;
   --on-dark-2: rgba(255, 255, 255, 0.74);
@@ -63,6 +69,8 @@ body[data-theme='smart_panels'] {
   --accent-hover: #c8161c;
   --focus: #ff5a5f;
   --bar: #e31e24;
+  --accent-bg: #fbe8e8;
+  --accent-mark: #e31e24;
 }
 
 body[data-theme='aaag'] {
@@ -73,6 +81,12 @@ body[data-theme='aaag'] {
   --accent-hover: #4a3a8c;
   --focus: #8f7ee8;
   --bar: #5a47b8;
+  /* AAAG's indigo is deep enough to carry a whole section */
+  --accent-bg: #3b2e73;
+  --accent-fg: #fff;
+  --accent-sub: rgba(255, 255, 255, 0.74);
+  --accent-line: rgba(255, 255, 255, 0.14);
+  --accent-mark: #fff;
 }
 
 @media (max-width: 1100px) {
